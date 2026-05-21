@@ -12,27 +12,29 @@ timings until a full same-harness rerun is approved.
 - Historical baseline:
   `/Users/nagaet/freesasa-zig/benchmarks/results/batch/128/ecoli_t10`
 - New output directory:
-  `/Users/nagaet/ghq/github.com/N283T/zsasa-benchmarks/results/batch/zsasa_v0_6_0_ecoli_t10`
+  `/Users/nagaet/ghq/github.com/N283T/zsasa-benchmarks/results/batch/zsasa_v0_6_0_ecoli_scaling`
 - `source_kind`: `zsasa_v0.6.0_refresh`
 - Comparator policy: do not rerun FreeSASA, RustSASA, Lahuta, or
   `freesasa_batch` for the first archive/preprint refresh.
 
-## Settings to match the existing `ecoli_t10` report
+## Settings for the refreshed scaling run
 
 | Setting | Value |
 | --- | --- |
 | Tools | `zig`, `zig_bitmask` |
 | Precision | `f64`, `f32` |
-| Threads | `10` |
+| Threads | `1,2,4,8,10` |
 | Points | `128` |
 | Warmup | `3` |
-| Runs | `10` |
+| Runs | `3` |
 | Hyperfine prepare | `sync` |
 
-The historical `ecoli_t10` configuration used the same thread count, point
-count, warmup, run count, and prepare command. The only intentional difference
-is that the input path below uses the local absolute AFDB path instead of the
-old repository-relative dataset path.
+The refreshed run extends the historical `ecoli_t10` headline comparison to a
+small scaling series (`1,2,4,8,10`) while keeping the same point count, warmup,
+and prepare command. The run count is `3` for the scaling refresh, matching the
+older scaling run convention rather than the `ecoli_t10` headline run count. The
+input path below uses the local absolute AFDB path instead of the old
+repository-relative dataset path.
 
 ## Pre-flight checks
 
@@ -58,17 +60,17 @@ Optionally confirm the command plan without running benchmark timings:
 cd /Users/nagaet/freesasa-zig
 ./benchmarks/scripts/bench_batch.py \
   --input /Users/nagaet/pdb/afdb/UP000000625_83333_ECOLI_v6/pdb \
-  --name zsasa_v0_6_0_ecoli_t10 \
+  --name zsasa_v0_6_0_ecoli_scaling \
   --tool zig \
   --tool zig_bitmask \
-  --threads 10 \
-  --runs 10 \
+  --threads 1,2,4,8,10 \
+  --runs 3 \
   --warmup 3 \
   --n-points 128 \
   --precision f64 \
   --precision f32 \
   --prepare sync \
-  --output /Users/nagaet/ghq/github.com/N283T/zsasa-benchmarks/results/batch/zsasa_v0_6_0_ecoli_t10 \
+  --output /Users/nagaet/ghq/github.com/N283T/zsasa-benchmarks/results/batch/zsasa_v0_6_0_ecoli_scaling \
   --dry-run
 ```
 
@@ -81,17 +83,17 @@ interference is important:
 cd /Users/nagaet/freesasa-zig
 ./benchmarks/scripts/bench_batch.py \
   --input /Users/nagaet/pdb/afdb/UP000000625_83333_ECOLI_v6/pdb \
-  --name zsasa_v0_6_0_ecoli_t10 \
+  --name zsasa_v0_6_0_ecoli_scaling \
   --tool zig \
   --tool zig_bitmask \
-  --threads 10 \
-  --runs 10 \
+  --threads 1,2,4,8,10 \
+  --runs 3 \
   --warmup 3 \
   --n-points 128 \
   --precision f64 \
   --precision f32 \
   --prepare sync \
-  --output /Users/nagaet/ghq/github.com/N283T/zsasa-benchmarks/results/batch/zsasa_v0_6_0_ecoli_t10
+  --output /Users/nagaet/ghq/github.com/N283T/zsasa-benchmarks/results/batch/zsasa_v0_6_0_ecoli_scaling
 ```
 
 The script rebuilds `zsasa` with `zig build --release=fast` before running
@@ -111,12 +113,7 @@ expected tag/commit before starting the benchmark.
 
 ## Expected generated files
 
-The refresh should create:
-
-- `config.json`
-- `bench_zsasa_f64_10t.json`
-- `bench_zsasa_f32_10t.json`
-- `bench_zsasa_f64_bitmask_10t.json`
-- `bench_zsasa_f32_bitmask_10t.json`
+The refresh should create `config.json` plus 20 hyperfine JSON files: standard
+and bitmask results for f64 and f32 at 1, 2, 4, 8, and 10 threads.
 
 These are generated artifacts and should stay ignored until archive staging.

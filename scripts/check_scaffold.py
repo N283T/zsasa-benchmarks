@@ -22,6 +22,7 @@ REQUIRED_FILES = [
     "docs/migration-plan.md",
     "docs/zsasa-only-validation-refresh.md",
     "docs/batch-rerun-plan.md",
+    "docs/batch-rerun-log.md",
     "docs/database.md",
     "docs/validation-rerun-log.md",
     "schemas/benchmark.sql",
@@ -106,8 +107,8 @@ def main() -> None:
         fail("batch manifest must identify the zsasa v0.6.0 refresh source kind")
     if refresh.get("tools") != ["zig", "zig_bitmask"]:
         fail("batch manifest must restrict the first refresh to zsasa tools")
-    if refresh.get("threads") != [10] or refresh.get("n_points") != 128:
-        fail("batch manifest must match the historical ecoli_t10 settings")
+    if refresh.get("threads") != [1, 2, 4, 8, 10] or refresh.get("n_points") != 128:
+        fail("batch manifest must describe the refreshed E. coli scaling settings")
 
     batch_plan = ROOT.joinpath("docs/batch-rerun-plan.md").read_text(encoding="utf-8")
     for phrase in [
@@ -119,6 +120,16 @@ def main() -> None:
     ]:
         if phrase not in batch_plan:
             fail(f"batch rerun plan missing phrase: {phrase}")
+
+    batch_log = ROOT.joinpath("docs/batch-rerun-log.md").read_text(encoding="utf-8")
+    for phrase in [
+        "bench_zsasa_f64_2t.json",
+        "normalized by hand",
+        "2,984",
+        "Comparator tools were not rerun",
+    ]:
+        if phrase not in batch_log:
+            fail(f"batch rerun log missing phrase: {phrase}")
 
     print("benchmark scaffold checks passed")
 

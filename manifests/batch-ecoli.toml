@@ -20,10 +20,10 @@ rerun_comparators = false
 source_kind = "zsasa_v0.6.0_refresh"
 tools = ["zig", "zig_bitmask"]
 n_points = 128
-threads = [10]
-runs = 10
+threads = [1, 2, 4, 8, 10]
+runs = 3
 warmup = 3
 prepare = "sync"
 
 [planned_refresh.output]
-default_dir = "results/batch/zsasa_v0_6_0_ecoli_t10"
+default_dir = "results/batch/zsasa_v0_6_0_ecoli_scaling"
