@@ -15,6 +15,7 @@ REQUIRED_FILES = [
     "config/tool-versions.toml",
     "manifests/validation-ecoli.toml",
     "manifests/batch-ecoli.toml",
+    "manifests/batch-human.toml",
     "manifests/single-file-sample.toml",
     "manifests/trajectory.toml",
     "docs/benchmark-policy.md",
@@ -23,6 +24,7 @@ REQUIRED_FILES = [
     "docs/zsasa-only-validation-refresh.md",
     "docs/batch-rerun-plan.md",
     "docs/batch-rerun-log.md",
+    "docs/batch-human-rerun-log.md",
     "docs/database.md",
     "docs/validation-rerun-log.md",
     "schemas/benchmark.sql",
@@ -130,6 +132,26 @@ def main() -> None:
     ]:
         if phrase not in batch_log:
             fail(f"batch rerun log missing phrase: {phrase}")
+
+    human_manifest = read_toml(ROOT.joinpath("manifests/batch-human.toml"))
+    human_dataset = human_manifest.get("dataset", {})
+    if human_dataset.get("expected_count") != 23586:
+        fail("human batch manifest must describe the 23,586-structure dataset")
+    human_refresh = human_manifest.get("refresh", {})
+    if human_refresh.get("threads") != [10] or human_refresh.get("runs") != 10:
+        fail("human batch manifest must describe the completed t10 refresh")
+    if human_refresh.get("tools") != ["zig", "zig_bitmask"]:
+        fail("human batch manifest must restrict the refresh to zsasa tools")
+
+    human_log = ROOT.joinpath("docs/batch-human-rerun-log.md").read_text(encoding="utf-8")
+    for phrase in [
+        "23,586 PDB files",
+        "Comparator tools were not rerun",
+        "1,667",
+        "thermal or background-state effects",
+    ]:
+        if phrase not in human_log:
+            fail(f"human batch rerun log missing phrase: {phrase}")
 
     print("benchmark scaffold checks passed")
 
