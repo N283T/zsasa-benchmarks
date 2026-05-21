@@ -23,6 +23,7 @@ python scripts/report_existing_assets.py --zsasa-repo /Users/nagaet/freesasa-zig
 uv run python scripts/refresh_validation.py --manifest manifests/validation-ecoli.toml --dry-run
 python scripts/run_single_file_subset.py
 python scripts/export_single_file_subset_summary.py
+scripts/plot_figures.py
 ```
 
 `refresh_validation.py` defaults to dry-run behavior. It prints the `zsasa` commands that would be run and does not execute benchmarks unless `--execute` is passed.
