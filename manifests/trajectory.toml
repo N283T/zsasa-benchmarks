@@ -1,8 +1,8 @@
-id = "trajectory-zsasa-v0.6.0-t10-refresh"
+id = "trajectory-zsasa-v0.6.0-refresh"
 status = "planning"
 
 [policy]
-first_archive = "rerun zsasa CLI t10 only; reuse historical Python/comparator trajectory timings until a full rerun is explicitly approved"
+first_archive = "rerun zsasa CLI plus zsasa Python wrappers; reuse historical external comparator trajectory timings until a full rerun is explicitly approved"
 
 [[datasets]]
 id = "5wvo_C_analysis"
@@ -11,6 +11,8 @@ pdb = "/Users/nagaet/freesasa-zig/benchmarks/md_data/5wvo_C_analysis/5wvo_C.pdb"
 atoms = 3858
 frames = 1001
 historical_results_dir = "/Users/nagaet/freesasa-zig/benchmarks/results/md/100/5wvo_C_analysis"
+refresh_threads = [10]
+refresh_output_dir = "results/md/zsasa_v0_6_0_refresh/5wvo_C_analysis"
 
 [[datasets]]
 id = "6sup_A_analysis"
@@ -19,6 +21,8 @@ pdb = "/Users/nagaet/freesasa-zig/benchmarks/md_data/6sup_A_analysis/6sup_A.pdb"
 atoms = 33377
 frames = 1001
 historical_results_dir = "/Users/nagaet/freesasa-zig/benchmarks/results/md/100/6sup_A_analysis"
+refresh_threads = [10]
+refresh_output_dir = "results/md/zsasa_v0_6_0_refresh/6sup_A_analysis"
 
 [[datasets]]
 id = "5vz0_A_protein"
@@ -27,21 +31,30 @@ pdb = "/Users/nagaet/freesasa-zig/benchmarks/md_data/5vz0_A_protein/5vz0_A.pdb"
 atoms = 17910
 frames = 10001
 historical_results_dir = "/Users/nagaet/freesasa-zig/benchmarks/results/md/100/5vz0_A_protein"
+refresh_threads = [10]
+refresh_output_dir = "results/md/zsasa_v0_6_0_refresh/5vz0_A_protein"
 
 [refresh]
 source_kind = "zsasa_v0.6.0_refresh"
-rerun_zsasa_cli_only = true
-rerun_python_wrappers = false
-rerun_comparators = false
-tools = ["zig", "zig_bitmask"]
+rerun_zsasa_cli = true
+rerun_zsasa_python_wrappers = true
+rerun_external_comparators = false
+tools = [
+  "zig",
+  "zig_bitmask",
+  "zsasa_mdtraj",
+  "zsasa_mdtraj_bitmask",
+  "zsasa_mdanalysis",
+  "zsasa_mdanalysis_bitmask",
+]
+external_comparators_not_rerun = ["mdtraj", "mdsasa_bolt"]
 n_points = 100
-threads = [10]
 runs = 3
 warmup = 1
 stride = 1
-precisions = ["f64", "f32"]
+cli_precisions = ["f64", "f32"]
 prepare = "sync"
 timeout_seconds = 1200
 
 [refresh.output]
-base_dir = "results/md/zsasa_v0_6_0_t10"
+base_dir = "results/md/zsasa_v0_6_0_refresh"

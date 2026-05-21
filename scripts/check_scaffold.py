@@ -164,15 +164,29 @@ def main() -> None:
         "5vz0_A_protein",
     }:
         fail("trajectory manifest has unexpected dataset ids")
+    if any(dataset.get("refresh_threads") != [10] for dataset in trajectory_datasets):
+        fail("trajectory manifest must describe t10-only refresh threads for all datasets")
     trajectory_refresh = trajectory_manifest.get("refresh", {})
-    if trajectory_refresh.get("tools") != ["zig", "zig_bitmask"]:
-        fail("trajectory refresh must be restricted to zsasa CLI tools")
-    if trajectory_refresh.get("threads") != [10] or trajectory_refresh.get("n_points") != 100:
+    expected_trajectory_tools = [
+        "zig",
+        "zig_bitmask",
+        "zsasa_mdtraj",
+        "zsasa_mdtraj_bitmask",
+        "zsasa_mdanalysis",
+        "zsasa_mdanalysis_bitmask",
+    ]
+    if trajectory_refresh.get("tools") != expected_trajectory_tools:
+        fail("trajectory refresh must include zsasa CLI and Python wrapper tools")
+    if trajectory_refresh.get("external_comparators_not_rerun") != ["mdtraj", "mdsasa_bolt"]:
+        fail("trajectory refresh must leave external comparators as historical baselines")
+    if trajectory_refresh.get("n_points") != 100:
         fail("trajectory refresh must describe the t10 100-point rerun")
 
     trajectory_plan = ROOT.joinpath("docs/trajectory-rerun-plan.md").read_text(encoding="utf-8")
     for phrase in [
         "Do not rerun",
+        "zsasa_mdtraj_bitmask",
+        "All three datasets are rerun at 10 threads only",
         "5vz0_A_protein",
         "--tool zig_bitmask",
         "Remove `--dry-run`",
