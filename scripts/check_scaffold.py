@@ -25,6 +25,7 @@ REQUIRED_FILES = [
     "docs/batch-rerun-plan.md",
     "docs/batch-rerun-log.md",
     "docs/batch-human-rerun-log.md",
+    "docs/trajectory-rerun-plan.md",
     "docs/database.md",
     "docs/validation-rerun-log.md",
     "schemas/benchmark.sql",
@@ -152,6 +153,32 @@ def main() -> None:
     ]:
         if phrase not in human_log:
             fail(f"human batch rerun log missing phrase: {phrase}")
+
+    trajectory_manifest = read_toml(ROOT.joinpath("manifests/trajectory.toml"))
+    trajectory_datasets = trajectory_manifest.get("datasets", [])
+    if len(trajectory_datasets) != 3:
+        fail("trajectory manifest must describe the three benchmark datasets")
+    if {dataset.get("id") for dataset in trajectory_datasets} != {
+        "5wvo_C_analysis",
+        "6sup_A_analysis",
+        "5vz0_A_protein",
+    }:
+        fail("trajectory manifest has unexpected dataset ids")
+    trajectory_refresh = trajectory_manifest.get("refresh", {})
+    if trajectory_refresh.get("tools") != ["zig", "zig_bitmask"]:
+        fail("trajectory refresh must be restricted to zsasa CLI tools")
+    if trajectory_refresh.get("threads") != [10] or trajectory_refresh.get("n_points") != 100:
+        fail("trajectory refresh must describe the t10 100-point rerun")
+
+    trajectory_plan = ROOT.joinpath("docs/trajectory-rerun-plan.md").read_text(encoding="utf-8")
+    for phrase in [
+        "Do not rerun",
+        "5vz0_A_protein",
+        "--tool zig_bitmask",
+        "Remove `--dry-run`",
+    ]:
+        if phrase not in trajectory_plan:
+            fail(f"trajectory rerun plan missing phrase: {phrase}")
 
     print("benchmark scaffold checks passed")
 
