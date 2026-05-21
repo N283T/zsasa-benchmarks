@@ -166,8 +166,8 @@ def main() -> None:
         fail("trajectory manifest has unexpected dataset ids")
     if any(dataset.get("refresh_threads") != [10] for dataset in trajectory_datasets):
         fail("trajectory manifest must describe t10-only refresh threads for all datasets")
-    trajectory_refresh = trajectory_manifest.get("refresh", {})
-    expected_trajectory_tools = [
+    dataset_tools = {dataset.get("id"): dataset.get("refresh_tools") for dataset in trajectory_datasets}
+    expected_cli_and_wrappers = [
         "zig",
         "zig_bitmask",
         "zsasa_mdtraj",
@@ -175,8 +175,17 @@ def main() -> None:
         "zsasa_mdanalysis",
         "zsasa_mdanalysis_bitmask",
     ]
-    if trajectory_refresh.get("tools") != expected_trajectory_tools:
-        fail("trajectory refresh must include zsasa CLI and Python wrapper tools")
+    if dataset_tools.get("5wvo_C_analysis") != expected_cli_and_wrappers:
+        fail("5wvo trajectory refresh must include zsasa CLI and Python wrappers")
+    if dataset_tools.get("6sup_A_analysis") != expected_cli_and_wrappers:
+        fail("6sup trajectory refresh must include zsasa CLI and Python wrappers")
+    if dataset_tools.get("5vz0_A_protein") != ["zig", "zig_bitmask"]:
+        fail("5vz0 trajectory refresh must be CLI-only")
+    trajectory_refresh = trajectory_manifest.get("refresh", {})
+    if trajectory_refresh.get("default_tools") != expected_cli_and_wrappers:
+        fail("trajectory refresh default tools must include zsasa CLI and Python wrappers")
+    if trajectory_refresh.get("large_trajectory_tools") != ["zig", "zig_bitmask"]:
+        fail("trajectory refresh must define CLI-only tools for 5vz0")
     if trajectory_refresh.get("external_comparators_not_rerun") != ["mdtraj", "mdsasa_bolt"]:
         fail("trajectory refresh must leave external comparators as historical baselines")
     if trajectory_refresh.get("n_points") != 100:
@@ -186,7 +195,7 @@ def main() -> None:
     for phrase in [
         "Do not rerun",
         "zsasa_mdtraj_bitmask",
-        "All three datasets are rerun at 10 threads only",
+        "5vz0_A_protein` dataset is CLI only",
         "5vz0_A_protein",
         "--tool zig_bitmask",
         "Remove `--dry-run`",

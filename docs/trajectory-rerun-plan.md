@@ -7,7 +7,7 @@ rerun is approved.
 
 ## Scope
 
-Rerun the `zsasa` implementations:
+Rerun the `zsasa` implementations for `5wvo_C_analysis` and `6sup_A_analysis`:
 
 - `zig` (`zsasa traj`, standard CLI path)
 - `zig_bitmask` (`zsasa traj --use-bitmask`, CLI path)
@@ -16,14 +16,17 @@ Rerun the `zsasa` implementations:
 - `zsasa_mdanalysis` (zsasa Python binding with MDAnalysis trajectory loading)
 - `zsasa_mdanalysis_bitmask`
 
+For `5vz0_A_protein`, rerun CLI only (`zig`, `zig_bitmask`) because the 10K-frame Python-wrapper runs are heavier and are not needed for the first refresh.
+
 Do not rerun the external comparators for the first archive/preprint refresh:
 
 - `mdtraj`
 - `mdsasa_bolt`
 
 All three datasets are rerun at 10 threads only. This refresh targets headline
-trajectory-throughput and memory numbers while avoiding expensive 1-thread runs,
-especially for the 10K-frame `5vz0_A_protein` dataset.
+trajectory-throughput and memory numbers while avoiding expensive 1-thread runs.
+The two 1K-frame datasets include zsasa Python wrappers; the 10K-frame
+`5vz0_A_protein` dataset is CLI only.
 
 ## Datasets
 
@@ -31,13 +34,13 @@ especially for the 10K-frame `5vz0_A_protein` dataset.
 | --- | ---: | ---: | --- | --- | --- |
 | `5wvo_C_analysis` | 3,858 | 1,001 | `10` | `/Users/nagaet/freesasa-zig/benchmarks/md_data/5wvo_C_analysis/5wvo_C_R1.xtc` | `/Users/nagaet/freesasa-zig/benchmarks/md_data/5wvo_C_analysis/5wvo_C.pdb` |
 | `6sup_A_analysis` | 33,377 | 1,001 | `10` | `/Users/nagaet/freesasa-zig/benchmarks/md_data/6sup_A_analysis/6sup_A_R1.xtc` | `/Users/nagaet/freesasa-zig/benchmarks/md_data/6sup_A_analysis/6sup_A.pdb` |
-| `5vz0_A_protein` | 17,910 | 10,001 | `10` | `/Users/nagaet/freesasa-zig/benchmarks/md_data/5vz0_A_protein/5vz0_A_prod_R1_fit.xtc` | `/Users/nagaet/freesasa-zig/benchmarks/md_data/5vz0_A_protein/5vz0_A.pdb` |
+| `5vz0_A_protein` | 17,910 | 10,001 | `10`, CLI only | `/Users/nagaet/freesasa-zig/benchmarks/md_data/5vz0_A_protein/5vz0_A_prod_R1_fit.xtc` | `/Users/nagaet/freesasa-zig/benchmarks/md_data/5vz0_A_protein/5vz0_A.pdb` |
 
 ## Settings
 
 | Setting | Value |
 | --- | --- |
-| Tools | `zig`, `zig_bitmask`, `zsasa_mdtraj`, `zsasa_mdtraj_bitmask`, `zsasa_mdanalysis`, `zsasa_mdanalysis_bitmask` |
+| Tools | `zig`, `zig_bitmask`; plus `zsasa_mdtraj`, `zsasa_mdtraj_bitmask`, `zsasa_mdanalysis`, `zsasa_mdanalysis_bitmask` for 5wvo and 6sup only |
 | CLI precision | `f64`, `f32` |
 | Python wrapper precision | binding default |
 | Points | `100` |
@@ -126,10 +129,6 @@ cd /Users/nagaet/freesasa-zig
   --name zsasa_v0_6_0_5vz0_A_refresh \
   --tool zig \
   --tool zig_bitmask \
-  --tool zsasa_mdtraj \
-  --tool zsasa_mdtraj_bitmask \
-  --tool zsasa_mdanalysis \
-  --tool zsasa_mdanalysis_bitmask \
   --threads 10 \
   --runs 3 \
   --warmup 1 \
@@ -150,7 +149,7 @@ interactive workload and background interference is important.
 
 ## Expected generated files
 
-Each output directory should contain `config.json` plus 10-thread results:
+The `5wvo_C_analysis` and `6sup_A_analysis` output directories should contain `config.json` plus 10-thread results:
 
 - CLI: `bench_zig_f64_*t.json`, `bench_zig_f32_*t.json`,
   `bench_zig_f64_bitmask_*t.json`, `bench_zig_f32_bitmask_*t.json`
@@ -158,4 +157,4 @@ Each output directory should contain `config.json` plus 10-thread results:
   `bench_zsasa_mdtraj_bitmask_*t.json`, `bench_zsasa_mdanalysis_*t.json`,
   `bench_zsasa_mdanalysis_bitmask_*t.json`
 
-Only the `10t` versions are expected. These generated artifacts should stay ignored until archive staging.
+The `5vz0_A_protein` output directory should contain only `config.json` plus the four CLI `10t` JSON files. These generated artifacts should stay ignored until archive staging.
