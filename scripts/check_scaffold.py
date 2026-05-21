@@ -14,6 +14,7 @@ REQUIRED_FILES = [
     "pyproject.toml",
     "config/tool-versions.toml",
     "manifests/validation-ecoli.toml",
+    "manifests/validation-md-5wvo.toml",
     "manifests/batch-ecoli.toml",
     "manifests/batch-human.toml",
     "manifests/single-file-sample.toml",
@@ -27,6 +28,7 @@ REQUIRED_FILES = [
     "docs/batch-human-rerun-log.md",
     "docs/trajectory-rerun-plan.md",
     "docs/trajectory-rerun-log.md",
+    "docs/trajectory-validation-rerun-log.md",
     "docs/database.md",
     "docs/validation-rerun-log.md",
     "schemas/benchmark.sql",
@@ -37,6 +39,7 @@ REQUIRED_FILES = [
     "scripts/export_validation_summary.py",
     "scripts/report_existing_assets.py",
     "scripts/refresh_validation.py",
+    "scripts/refresh_validation_md.py",
     "scripts/smoke_db.py",
     "tests/fixtures/validation/validation-fixture.toml",
     "tests/fixtures/validation/sr/results_100.csv",
@@ -104,6 +107,16 @@ def main() -> None:
     for phrase in ["freesasa_batch", "zsasa 0.6.0", "4,370 PDB files", "Comparator tools were not rerun"]:
         if phrase not in rerun_log:
             fail(f"validation rerun log missing phrase: {phrase}")
+
+    md_validation_manifest = read_toml(ROOT.joinpath("manifests/validation-md-5wvo.toml"))
+    if md_validation_manifest.get("status") != "completed":
+        fail("MD validation manifest must record the completed refresh")
+    md_validation_dataset = md_validation_manifest.get("dataset", {})
+    if md_validation_dataset.get("frames") != 1001 or md_validation_dataset.get("atoms") != 3858:
+        fail("MD validation manifest must describe the 5wvo_C_analysis dataset")
+    md_validation_refresh = md_validation_manifest.get("refresh", {})
+    if md_validation_refresh.get("native_mdtraj_rerun") is not False:
+        fail("MD validation refresh must reuse the historical mdtraj reference")
 
     batch_manifest = read_toml(ROOT.joinpath("manifests/batch-ecoli.toml"))
     refresh = batch_manifest.get("planned_refresh", {})
@@ -215,6 +228,16 @@ def main() -> None:
     ]:
         if phrase not in trajectory_log:
             fail(f"trajectory rerun log missing phrase: {phrase}")
+
+    md_validation_log = ROOT.joinpath("docs/trajectory-validation-rerun-log.md").read_text(encoding="utf-8")
+    for phrase in [
+        "Native MDTraj rerun: no",
+        "0.999539",
+        "mdtraj.shrake_rupley` was not rerun",
+        "zsasa_cli_bitmask_f32",
+    ]:
+        if phrase not in md_validation_log:
+            fail(f"trajectory validation rerun log missing phrase: {phrase}")
 
     print("benchmark scaffold checks passed")
 
