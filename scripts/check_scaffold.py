@@ -21,6 +21,7 @@ REQUIRED_FILES = [
     "docs/existing-assets.md",
     "docs/migration-plan.md",
     "docs/zsasa-only-validation-refresh.md",
+    "docs/batch-rerun-plan.md",
     "docs/database.md",
     "docs/validation-rerun-log.md",
     "schemas/benchmark.sql",
@@ -98,6 +99,26 @@ def main() -> None:
     for phrase in ["freesasa_batch", "zsasa 0.6.0", "4,370 PDB files", "Comparator tools were not rerun"]:
         if phrase not in rerun_log:
             fail(f"validation rerun log missing phrase: {phrase}")
+
+    batch_manifest = read_toml(ROOT.joinpath("manifests/batch-ecoli.toml"))
+    refresh = batch_manifest.get("planned_refresh", {})
+    if refresh.get("source_kind") != "zsasa_v0.6.0_refresh":
+        fail("batch manifest must identify the zsasa v0.6.0 refresh source kind")
+    if refresh.get("tools") != ["zig", "zig_bitmask"]:
+        fail("batch manifest must restrict the first refresh to zsasa tools")
+    if refresh.get("threads") != [10] or refresh.get("n_points") != 128:
+        fail("batch manifest must match the historical ecoli_t10 settings")
+
+    batch_plan = ROOT.joinpath("docs/batch-rerun-plan.md").read_text(encoding="utf-8")
+    for phrase in [
+        "do not rerun FreeSASA",
+        "zsasa_v0.6.0_refresh",
+        "4,370 PDB files",
+        "Closing Codex",
+        "--tool zig_bitmask",
+    ]:
+        if phrase not in batch_plan:
+            fail(f"batch rerun plan missing phrase: {phrase}")
 
     print("benchmark scaffold checks passed")
 
