@@ -1,0 +1,3 @@
+structure,n_atoms,freesasa,zsasa_f64,zsasa_f32
+fixture_a,10,100.0,100.2,100.2
+fixture_b,20,200.0,200.4,200.4

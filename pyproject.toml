@@ -3,7 +3,9 @@ name = "zsasa-benchmarks"
 version = "0.1.0"
 description = "Benchmark harness for release-fixed zsasa manuscript evidence"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+  "duckdb==1.5.3",
+]
 
 [tool.ruff]
 line-length = 100

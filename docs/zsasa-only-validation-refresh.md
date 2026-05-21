@@ -13,11 +13,31 @@ The replacement workflow is:
 Dry run:
 
 ```bash
-python scripts/refresh_validation.py --manifest manifests/validation-ecoli.toml --dry-run
+uv run python scripts/refresh_validation.py --manifest manifests/validation-ecoli.toml --dry-run
 ```
 
 Actual execution requires explicit approval and then:
 
 ```bash
-python scripts/refresh_validation.py --manifest manifests/validation-ecoli.toml --execute
+uv run python scripts/refresh_validation.py --manifest manifests/validation-ecoli.toml --execute
+```
+
+
+After an approved `zsasa` refresh has written new CSVs, import the refreshed `zsasa` columns into DuckDB with explicit provenance:
+
+```bash
+uv run python scripts/import_validation_csv.py \
+  --manifest manifests/validation-ecoli.toml \
+  --baseline-dir results/validation/zsasa_v0_6_0_ecoli \
+  --tools zsasa \
+  --source-kind zsasa_v0.6.0_refresh
+```
+
+For the initial archive, import historical comparator baselines separately:
+
+```bash
+uv run python scripts/import_validation_csv.py \
+  --manifest manifests/validation-ecoli.toml \
+  --tools comparators \
+  --source-kind historical_baseline
 ```

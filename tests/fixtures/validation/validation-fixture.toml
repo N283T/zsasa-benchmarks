@@ -1,0 +1,34 @@
+id = "validation-fixture"
+description = "Tiny validation fixture for database smoke tests."
+
+[dataset]
+id = "fixture_validation"
+name = "Tiny validation fixture"
+expected_count = 2
+historical_path = "tests/fixtures/validation/input-placeholder"
+redistribution_status = "tracked fixture"
+role = ["validation"]
+
+[baseline]
+policy = "reuse comparator columns from fixture CSVs; replace zsasa columns in real runs"
+historical_results_dir = "tests/fixtures/validation"
+keep_columns = ["structure", "n_atoms", "freesasa", "rustsasa"]
+
+[output]
+default_dir = "results/validation/fixture"
+
+[[runs]]
+algorithm = "sr"
+points_flag = "--n-points"
+points = [100]
+baseline_subdir = "sr"
+baseline_files = ["results_100.csv"]
+variants = ["zsasa_f64", "zsasa_f32", "zsasa_bitmask_f64", "zsasa_bitmask_f32"]
+
+[[runs]]
+algorithm = "lr"
+points_flag = "--n-slices"
+points = [20]
+baseline_subdir = "lr"
+baseline_files = ["results_20.csv"]
+variants = ["zsasa_f64", "zsasa_f32"]

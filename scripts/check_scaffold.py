@@ -21,9 +21,19 @@ REQUIRED_FILES = [
     "docs/existing-assets.md",
     "docs/migration-plan.md",
     "docs/zsasa-only-validation-refresh.md",
+    "docs/database.md",
+    "schemas/benchmark.sql",
     "scripts/check_scaffold.py",
+    "scripts/db_common.py",
+    "scripts/init_db.py",
+    "scripts/import_validation_csv.py",
+    "scripts/export_validation_summary.py",
     "scripts/report_existing_assets.py",
     "scripts/refresh_validation.py",
+    "scripts/smoke_db.py",
+    "tests/fixtures/validation/validation-fixture.toml",
+    "tests/fixtures/validation/sr/results_100.csv",
+    "tests/fixtures/validation/lr/results_20.csv",
     "results/.gitkeep",
     "archives/.gitkeep",
 ]
@@ -65,6 +75,23 @@ def main() -> None:
         fail("validation manifest must include SR 100-point refresh")
     if not any(run.get("algorithm") == "lr" and 20 in run.get("points", []) for run in runs):
         fail("validation manifest must include LR 20-slice refresh")
+
+    schema = ROOT.joinpath("schemas/benchmark.sql").read_text(encoding="utf-8")
+    for table in [
+        "datasets",
+        "tools",
+        "benchmark_runs",
+        "validation_results",
+        "performance_results",
+        "artifacts",
+    ]:
+        if f"CREATE TABLE IF NOT EXISTS {table}" not in schema:
+            fail(f"benchmark schema missing table: {table}")
+
+    database_doc = ROOT.joinpath("docs/database.md").read_text(encoding="utf-8")
+    for phrase in ["historical_baseline", "zsasa_v0.6.0_refresh", "full_rerun"]:
+        if phrase not in database_doc:
+            fail(f"database docs missing source kind: {phrase}")
 
     print("benchmark scaffold checks passed")
 

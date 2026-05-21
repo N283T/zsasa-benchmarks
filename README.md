@@ -10,14 +10,16 @@ This repository is a clean benchmark workspace split out from the historical ben
 - Rerun `zsasa` from the fixed `v0.6.0` release for validation refreshes.
 - Do not rerun heavy speed benchmarks or comparator tools until the benchmark scope is explicitly approved.
 - Keep generated results out of git; archive final outputs separately after review.
+- Store generated/imported evidence in DuckDB, with explicit source provenance for historical baselines versus refreshed runs.
 
 ## Quick start
 
 ```bash
 nix develop
 python scripts/check_scaffold.py
+uv run python scripts/smoke_db.py
 python scripts/report_existing_assets.py --zsasa-repo /Users/nagaet/freesasa-zig
-python scripts/refresh_validation.py --manifest manifests/validation-ecoli.toml --dry-run
+uv run python scripts/refresh_validation.py --manifest manifests/validation-ecoli.toml --dry-run
 ```
 
 `refresh_validation.py` defaults to dry-run behavior. It prints the `zsasa` commands that would be run and does not execute benchmarks unless `--execute` is passed.
@@ -27,11 +29,38 @@ python scripts/refresh_validation.py --manifest manifests/validation-ecoli.toml 
 ```text
 config/      pinned tool/version policy
 manifests/   dataset and baseline manifests; no raw data
-scripts/     benchmark orchestration and scaffold checks
+schemas/     DuckDB schema for benchmark evidence
+scripts/     benchmark orchestration, DB import/export, and scaffold checks
 docs/        migration notes and benchmark policy
-results/     ignored generated benchmark outputs
+results/     ignored generated benchmark outputs and local DuckDB files
 archives/    ignored final archive staging area
 ```
+
+## DuckDB workflow
+
+Initialize a local ignored database:
+
+```bash
+uv run python scripts/init_db.py \
+  --manifest manifests/validation-ecoli.toml \
+  --manifest manifests/batch-ecoli.toml
+```
+
+Import historical validation CSVs without running tools:
+
+```bash
+uv run python scripts/import_validation_csv.py \
+  --manifest manifests/validation-ecoli.toml \
+  --tools comparators
+```
+
+Export validation summaries from the DB:
+
+```bash
+uv run python scripts/export_validation_summary.py
+```
+
+These commands read existing CSVs and write ignored DB/export artifacts; they do not run benchmarks.
 
 ## Historical source tree
 
