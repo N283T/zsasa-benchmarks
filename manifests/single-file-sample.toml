@@ -2,12 +2,29 @@
 # The historical 2,013-structure stratified sample belongs to single-file throughput, not validation.
 
 id = "single-file-stratified-sample"
-status = "defer"
+status = "planning"
 
 [dataset]
 historical_path = "/Users/nagaet/freesasa-zig/benchmarks/dataset/pdb"
 expected_count = 2013
 role = ["single-file-throughput"]
 
+[subset]
+selection = [
+  "af-o00175-f1-model_v6",
+  "af-a8mxt2-f1-model_v6",
+  "af-q6zuj8-f1-model_v6",
+  "af-q6zs30-f1-model_v6",
+  "9mih",
+  "3jc8",
+  "7qoi",
+  "9mog",
+  "9fqr",
+  "5vyc",
+  "8fon",
+  "8rbs",
+]
+selection_policy = "representative AFDB single-chain, PDB multi-chain cryo-EM scale, maximum structure, and parser/comparator outliers"
+
 [policy]
-first_archive = "do not rerun unless the manuscript keeps single-file speed claims in the main figure/table"
+first_archive = "rerun only zsasa variants on the curated subset; reuse historical FreeSASA/RustSASA baselines; keep full 2,013-structure benchmark historical"

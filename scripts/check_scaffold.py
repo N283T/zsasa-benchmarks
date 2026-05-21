@@ -29,6 +29,7 @@ REQUIRED_FILES = [
     "docs/trajectory-rerun-plan.md",
     "docs/trajectory-rerun-log.md",
     "docs/trajectory-validation-rerun-log.md",
+    "docs/single-file-subset-plan.md",
     "docs/database.md",
     "docs/validation-rerun-log.md",
     "schemas/benchmark.sql",
@@ -167,6 +168,26 @@ def main() -> None:
     ]:
         if phrase not in human_log:
             fail(f"human batch rerun log missing phrase: {phrase}")
+
+    single_manifest = read_toml(ROOT.joinpath("manifests/single-file-sample.toml"))
+    if single_manifest.get("status") != "planning":
+        fail("single-file manifest must record the curated subset planning status")
+    single_subset = single_manifest.get("subset", {}).get("selection", [])
+    if len(single_subset) != 12:
+        fail("single-file subset must contain 12 representative structures")
+    for required_structure in ["9fqr", "5vyc", "8fon", "8rbs", "af-q6zs30-f1-model_v6"]:
+        if required_structure not in single_subset:
+            fail(f"single-file subset missing required structure: {required_structure}")
+
+    single_plan = ROOT.joinpath("docs/single-file-subset-plan.md").read_text(encoding="utf-8")
+    for phrase in [
+        "maximum structure",
+        "RustSASA parse-time outlier maximum",
+        "FreeSASA total-runtime outlier",
+        "Lahuta is not part of this single-file historical set",
+    ]:
+        if phrase not in single_plan:
+            fail(f"single-file subset plan missing phrase: {phrase}")
 
     trajectory_manifest = read_toml(ROOT.joinpath("manifests/trajectory.toml"))
     if trajectory_manifest.get("status") != "completed":
