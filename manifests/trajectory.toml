@@ -1,0 +1,7 @@
+# Trajectory benchmark manifest placeholder.
+
+id = "trajectory-benchmark-placeholder"
+status = "defer"
+
+[policy]
+first_archive = "do not rerun unless trajectory support remains a manuscript-level benchmark claim"

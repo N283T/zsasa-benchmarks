@@ -1,0 +1,34 @@
+# Tool versions used to interpret existing benchmark outputs and plan release-fixed reruns.
+# Keep this file synchronized with final archived manifests.
+
+[zsasa]
+policy = "rerun for manuscript evidence"
+repository = "https://github.com/N283T/zsasa"
+tag = "v0.6.0"
+commit = "94fdc1ee0ba27063d7cfe69e915e8425474316e1"
+zig = "0.16.0"
+
+[freesasa]
+policy = "reuse existing comparator baseline for first archive/preprint"
+repository = "https://github.com/N283T/freesasa"
+upstream = "https://github.com/mittinatten/freesasa"
+version = "2.1.3"
+commit = "9c9f204fd990ba2f50f47be8d4b96a61355f7a10"
+
+[rustsasa]
+policy = "reuse existing comparator baseline for first archive/preprint"
+repository = "https://github.com/N283T/RustSASA"
+upstream = "https://github.com/maxall41/RustSASA"
+version = "0.9.2"
+commit = "530277785533d0336bbdb43b041fb7de2f7e23f3"
+
+[lahuta]
+policy = "reuse existing comparator baseline for first archive/preprint"
+repository = "https://github.com/bisejdiu/lahuta"
+version = "0.9.3-672-g4b5d6f9a"
+commit = "4b5d6f9ae2bc13bcf897b1df3483b9c1e3da1de9"
+
+[runner]
+python = "3.12"
+hyperfine = "1.20.0"
+uv = "0.11.14"

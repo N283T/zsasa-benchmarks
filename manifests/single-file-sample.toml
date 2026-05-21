@@ -1,0 +1,13 @@
+# Single-file benchmark manifest placeholder.
+# The historical 2,013-structure stratified sample belongs to single-file throughput, not validation.
+
+id = "single-file-stratified-sample"
+status = "defer"
+
+[dataset]
+historical_path = "/Users/nagaet/freesasa-zig/benchmarks/dataset/pdb"
+expected_count = 2013
+role = ["single-file-throughput"]
+
+[policy]
+first_archive = "do not rerun unless the manuscript keeps single-file speed claims in the main figure/table"

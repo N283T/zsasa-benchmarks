@@ -1,0 +1,24 @@
+# Generated benchmark outputs and archives
+/results/**
+!/results/.gitkeep
+/archives/**
+!/archives/.gitkeep
+
+# Local inputs and external tool checkouts
+/data/**
+/external/**
+/inputs/**
+
+# Python/Nix/build caches
+__pycache__/
+*.py[cod]
+.ruff_cache/
+.pytest_cache/
+.venv/
+.direnv/
+.DS_Store
+result
+result-*
+
+# Logs
+*.log

@@ -1,0 +1,13 @@
+[project]
+name = "zsasa-benchmarks"
+version = "0.1.0"
+description = "Benchmark harness for release-fixed zsasa manuscript evidence"
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.ruff]
+line-length = 100
+src = ["scripts"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]

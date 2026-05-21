@@ -1,0 +1,46 @@
+# E. coli validation refresh manifest.
+# This manifest reuses existing comparator baseline CSVs and reruns only zsasa.
+
+id = "validation-ecoli-zsasa-v0.6.0-refresh"
+description = "Refresh zsasa validation columns against existing E. coli comparator baselines."
+
+[dataset]
+id = "UP000000625_83333_ECOLI_v6_pdb"
+name = "AlphaFold E. coli K-12 proteome PDB set"
+expected_count = 4370
+historical_path = "/Users/nagaet/freesasa-zig/benchmarks/UP000000625_83333_ECOLI_v6/pdb"
+redistribution_status = "not copied; use local historical benchmark tree or reconstruct from public AlphaFold proteome source"
+role = ["validation", "approximation"]
+
+[baseline]
+policy = "reuse comparator columns from historical CSVs; replace zsasa columns with v0.6.0 rerun outputs"
+historical_results_dir = "/Users/nagaet/freesasa-zig/benchmarks/results/validation/ecoli"
+keep_columns = ["structure", "n_atoms", "freesasa", "rustsasa", "lahuta_bitmask"]
+
+[output]
+default_dir = "results/validation/zsasa_v0_6_0_ecoli"
+
+[[runs]]
+algorithm = "sr"
+points_flag = "--n-points"
+points = [100, 200, 500, 1000]
+baseline_subdir = "sr"
+baseline_files = ["results_100.csv", "results_200.csv", "results_500.csv", "results_1000.csv"]
+variants = ["zsasa_f64", "zsasa_f32", "zsasa_bitmask_f64", "zsasa_bitmask_f32"]
+
+[[runs]]
+algorithm = "sr"
+points_flag = "--n-points"
+points = [128]
+baseline_subdir = "sr"
+baseline_files = ["results_lahuta_128.csv"]
+variants = ["zsasa_f64", "zsasa_f32", "zsasa_bitmask_f64", "zsasa_bitmask_f32"]
+note = "Lahuta bitmask comparison uses the historical 128-point baseline CSV."
+
+[[runs]]
+algorithm = "lr"
+points_flag = "--n-slices"
+points = [20]
+baseline_subdir = "lr"
+baseline_files = ["results_20.csv"]
+variants = ["zsasa_f64", "zsasa_f32"]
