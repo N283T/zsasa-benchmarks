@@ -20,3 +20,8 @@ Historical source: `/Users/nagaet/freesasa-zig/benchmarks`.
 ## Current split decision
 
 This repository owns manifests, runner scripts, environment definitions, and future archive staging. Historical raw result migration is deferred.
+
+
+## FreeSASA batch wrapper provenance
+
+FreeSASA has no native directory batch mode. Historical FreeSASA comparator baselines in this project were generated with the tracked `freesasa_batch` wrapper around the FreeSASA C API, not by an upstream FreeSASA batch command. New infrastructure must preserve that provenance when importing or reporting FreeSASA-derived values.

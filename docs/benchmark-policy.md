@@ -33,3 +33,8 @@ New benchmark evidence should flow through DuckDB rather than ad-hoc CSV/JSON su
 4. Keep historical comparator provenance visible through `source_kind` and `source_path`.
 
 For the first archive/preprint, validation can combine historical comparator columns with refreshed `zsasa` columns because SASA values are deterministic. Performance comparisons that mix runs from different environments must be labeled as provisional until comparator reruns are complete.
+
+
+## FreeSASA batch wrapper provenance
+
+FreeSASA has no native directory batch mode. Historical FreeSASA comparator baselines in this project were generated with the tracked `freesasa_batch` wrapper around the FreeSASA C API, not by an upstream FreeSASA batch command. New infrastructure must preserve that provenance when importing or reporting FreeSASA-derived values.

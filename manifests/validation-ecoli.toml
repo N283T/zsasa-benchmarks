@@ -8,7 +8,7 @@ description = "Refresh zsasa validation columns against existing E. coli compara
 id = "UP000000625_83333_ECOLI_v6_pdb"
 name = "AlphaFold E. coli K-12 proteome PDB set"
 expected_count = 4370
-historical_path = "/Users/nagaet/freesasa-zig/benchmarks/UP000000625_83333_ECOLI_v6/pdb"
+historical_path = "/Users/nagaet/pdb/afdb/UP000000625_83333_ECOLI_v6/pdb"
 redistribution_status = "not copied; use local historical benchmark tree or reconstruct from public AlphaFold proteome source"
 role = ["validation", "approximation"]
 

@@ -14,6 +14,14 @@ repository = "https://github.com/N283T/freesasa"
 upstream = "https://github.com/mittinatten/freesasa"
 version = "2.1.3"
 commit = "9c9f204fd990ba2f50f47be8d4b96a61355f7a10"
+notes = "FreeSASA has no native directory batch mode; historical validation and batch baselines were produced through the tracked freesasa_batch wrapper."
+
+[freesasa_batch]
+policy = "reuse existing wrapper-generated baseline for first archive/preprint"
+repository = "https://github.com/N283T/zsasa/tree/main/benchmarks/external/freesasa_batch"
+source_path = "/Users/nagaet/freesasa-zig/benchmarks/external/freesasa_batch/freesasa_batch.cc"
+linked_tool = "freesasa"
+notes = "Custom batch wrapper around the FreeSASA C API used to generate per-file comparator baselines."
 
 [rustsasa]
 policy = "reuse existing comparator baseline for first archive/preprint"

@@ -22,6 +22,7 @@ REQUIRED_FILES = [
     "docs/migration-plan.md",
     "docs/zsasa-only-validation-refresh.md",
     "docs/database.md",
+    "docs/validation-rerun-log.md",
     "schemas/benchmark.sql",
     "scripts/check_scaffold.py",
     "scripts/db_common.py",
@@ -92,6 +93,11 @@ def main() -> None:
     for phrase in ["historical_baseline", "zsasa_v0.6.0_refresh", "full_rerun"]:
         if phrase not in database_doc:
             fail(f"database docs missing source kind: {phrase}")
+
+    rerun_log = ROOT.joinpath("docs/validation-rerun-log.md").read_text(encoding="utf-8")
+    for phrase in ["freesasa_batch", "zsasa 0.6.0", "4,370 PDB files", "Comparator tools were not rerun"]:
+        if phrase not in rerun_log:
+            fail(f"validation rerun log missing phrase: {phrase}")
 
     print("benchmark scaffold checks passed")
 

@@ -7,7 +7,7 @@ status = "planning"
 [dataset]
 id = "UP000000625_83333_ECOLI_v6_pdb"
 expected_count = 4370
-historical_path = "/Users/nagaet/freesasa-zig/benchmarks/UP000000625_83333_ECOLI_v6/pdb"
+historical_path = "/Users/nagaet/pdb/afdb/UP000000625_83333_ECOLI_v6/pdb"
 role = ["batch-throughput"]
 
 [historical_results]

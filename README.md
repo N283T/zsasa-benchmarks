@@ -7,6 +7,7 @@ This repository is a clean benchmark workspace split out from the historical ben
 ## Policy for the first archive/preprint
 
 - Reuse existing FreeSASA/RustSASA/Lahuta comparator outputs where they are already present and documented.
+- Treat FreeSASA comparator values as `freesasa_batch` wrapper outputs, because upstream FreeSASA has no native directory batch mode.
 - Rerun `zsasa` from the fixed `v0.6.0` release for validation refreshes.
 - Do not rerun heavy speed benchmarks or comparator tools until the benchmark scope is explicitly approved.
 - Keep generated results out of git; archive final outputs separately after review.
