@@ -1,5 +1,5 @@
 id = "trajectory-zsasa-v0.6.0-refresh"
-status = "planning"
+status = "completed"
 
 [policy]
 first_archive = "rerun zsasa CLI plus zsasa Python wrappers; reuse historical external comparator trajectory timings until a full rerun is explicitly approved"

@@ -26,6 +26,7 @@ REQUIRED_FILES = [
     "docs/batch-rerun-log.md",
     "docs/batch-human-rerun-log.md",
     "docs/trajectory-rerun-plan.md",
+    "docs/trajectory-rerun-log.md",
     "docs/database.md",
     "docs/validation-rerun-log.md",
     "schemas/benchmark.sql",
@@ -155,6 +156,8 @@ def main() -> None:
             fail(f"human batch rerun log missing phrase: {phrase}")
 
     trajectory_manifest = read_toml(ROOT.joinpath("manifests/trajectory.toml"))
+    if trajectory_manifest.get("status") != "completed":
+        fail("trajectory manifest must record the completed rerun")
     trajectory_datasets = trajectory_manifest.get("datasets", [])
     if len(trajectory_datasets) != 3:
         fail("trajectory manifest must describe the three benchmark datasets")
@@ -202,6 +205,16 @@ def main() -> None:
     ]:
         if phrase not in trajectory_plan:
             fail(f"trajectory rerun plan missing phrase: {phrase}")
+
+    trajectory_log = ROOT.joinpath("docs/trajectory-rerun-log.md").read_text(encoding="utf-8")
+    for phrase in [
+        "External comparators were not rerun",
+        "5vz0_A_protein` | 17,910 | 10,001 | CLI only",
+        "CLI bitmask f32 | 37.388",
+        "zsasa Python wrapper paths for the two 1K-frame datasets",
+    ]:
+        if phrase not in trajectory_log:
+            fail(f"trajectory rerun log missing phrase: {phrase}")
 
     print("benchmark scaffold checks passed")
 
