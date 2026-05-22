@@ -114,13 +114,15 @@ def build_records(
         xtc = resolve_repo_path(str(raw_dataset["xtc"]))
         pdb = resolve_repo_path(str(raw_dataset["pdb"]))
         for tool in tools_for_dataset(raw_dataset, settings):
-            output_base.joinpath("raw", dataset_id, tool).mkdir(parents=True, exist_ok=True)
+            raw_dir = output_base.joinpath("raw", dataset_id, tool)
+            raw_dir.mkdir(parents=True, exist_ok=True)
             native = mdtraj_runner_command(
                 tool=tool,
                 xtc=xtc,
                 pdb=pdb,
                 n_points=n_points,
                 stride=stride,
+                output=raw_dir.joinpath("results.json"),
             )
             name = f"{dataset_id}_{tool}_{n_points}p"
             records.append(

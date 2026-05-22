@@ -140,8 +140,9 @@ def mdtraj_runner_command(
     n_points: int,
     stride: int,
     python: Path | str | None = None,
+    output: Path | None = None,
 ) -> list[str]:
-    return [
+    cmd = [
         str(python or sys.executable),
         "-m",
         "scripts.benchlib.trajectory_tools",
@@ -156,3 +157,6 @@ def mdtraj_runner_command(
         "--stride",
         str(stride),
     ]
+    if output is not None:
+        cmd.extend(["--output", str(output)])
+    return cmd

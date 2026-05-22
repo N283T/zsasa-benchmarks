@@ -71,6 +71,8 @@ def build_records(
     for tool in [str(value) for value in settings["tools"]]:
         for n_points in [int(value) for value in settings["n_points"]]:
             name = f"{tool}_{n_points}p"
+            raw_dir = output_base.joinpath("raw", tool, f"{n_points}p")
+            raw_dir.mkdir(parents=True, exist_ok=True)
             records.append(
                 CommandRecord(
                     name=name,
@@ -80,10 +82,10 @@ def build_records(
                         pdb=pdb,
                         n_points=n_points,
                         stride=stride,
+                        output=raw_dir.joinpath("results.json"),
                     ),
                 )
             )
-            output_base.joinpath("raw", tool, f"{n_points}p").mkdir(parents=True, exist_ok=True)
     return records
 
 
