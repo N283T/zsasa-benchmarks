@@ -110,6 +110,16 @@ def main() -> None:
     if missing:
         fail("missing required files: " + ", ".join(missing))
 
+    forbidden_user_path = "/Users/" + "nagaet"
+    hardcoded_user_paths = [
+        path
+        for path in [*REQUIRED_FILES, *FULL_RERUN_MANIFESTS]
+        if ROOT.joinpath(path).is_file()
+        and forbidden_user_path in ROOT.joinpath(path).read_text(encoding="utf-8")
+    ]
+    if hardcoded_user_paths:
+        fail(f"hard-coded {forbidden_user_path} paths remain: " + ", ".join(hardcoded_user_paths))
+
     remaining_legacy = [path for path in REMOVED_LEGACY_FILES if ROOT.joinpath(path).exists()]
     if remaining_legacy:
         fail("legacy files should be removed: " + ", ".join(remaining_legacy))

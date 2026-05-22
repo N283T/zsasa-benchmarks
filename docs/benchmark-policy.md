@@ -12,6 +12,8 @@ ignored `results/` tree.
 3. Resolve Python trajectory backends from the uv environment pinned by `pyproject.toml` and `uv.lock`.
 4. Write generated outputs under `results/full_rerun/<run_id>/...`; review before staging archives.
 5. Keep raw generated results, local DB files, and external source/build trees out of git.
+6. Keep local data paths portable in manifests; use `$HOME/...`, repo-relative
+   paths, or `~/...` rather than machine-specific `/Users/<name>/...` paths.
 
 ## Setup and dry-run checks
 

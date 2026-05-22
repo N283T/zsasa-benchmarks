@@ -29,6 +29,9 @@ The native Phase 1 runner examples above are dry-runs. They print the commands a
 
 The `nix develop` shell provides the pinned `zsasa` CLI from `github:N283T/zsasa/v0.6.0` and exports `ZSASA_CLI` to that Nix-store binary so uv-installed Python console scripts cannot shadow the CLI benchmark target. Python trajectory backends and the `zsasa` Python package are pinned in `pyproject.toml`/`uv.lock`; do not import `zsasa` from a local source checkout for manuscript reruns. External comparator binaries are built under the ignored `external/` tree by `scripts/setup_external_tools.py` from pinned commits, then referenced through `external/bin/*`.
 
+Manifest data paths may use `$HOME/...`, `~/...`, or repository-relative paths.
+Runner path helpers expand those forms before execution.
+
 ## Repository layout
 
 ```text
