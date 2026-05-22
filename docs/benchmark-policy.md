@@ -13,6 +13,7 @@ ignored `results/` tree.
 4. Write generated outputs under `results/full_rerun/<run_id>/...`; review before staging archives.
 5. Keep raw generated results, local DB files, and external source/build trees out of git.
 6. Keep local data paths out of manifests. Put them in ignored `config/datasets.local.toml`; use `config/datasets.toml.example` as the tracked template.
+7. Use RustSASA JSON output for protein-level totals. Protein-level PDB output writes the total into atom B-factors, which can truncate large SASA values in fixed-width PDB fields.
 
 ## Setup and dry-run checks
 

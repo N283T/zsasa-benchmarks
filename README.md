@@ -8,6 +8,7 @@ This repository is a clean benchmark workspace for the `zsasa` manuscript. It in
 
 - Build all benchmark tools from pinned versions before collecting manuscript evidence.
 - Treat FreeSASA comparator values as `freesasa_batch` wrapper outputs, because upstream FreeSASA has no native directory batch mode.
+- Capture RustSASA protein-level outputs as JSON. Do not use protein-level PDB B-factors for totals, because the PDB B-factor field cannot represent large total SASA values reliably.
 - Use the fixed `zsasa` `v0.6.0` release for the current manuscript rerun.
 - Keep generated results out of git; archive final outputs separately after review.
 - Store generated evidence in DuckDB when result import/export is needed.

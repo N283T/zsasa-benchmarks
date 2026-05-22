@@ -266,7 +266,16 @@ def verify_tools(*, testdata: Path, dry_run: bool) -> None:
     commands = [
         [str(BIN.joinpath("freesasa")), str(pdb)],
         [str(BIN.joinpath("freesasa_batch")), str(testdata), str(tmp.joinpath("freesasa_batch"))],
-        [str(BIN.joinpath("rust-sasa")), str(pdb), str(tmp.joinpath("rustsasa_out"))],
+        [
+            str(BIN.joinpath("rust-sasa")),
+            str(pdb),
+            str(tmp.joinpath("rustsasa_out.json")),
+            "-f",
+            "json",
+            "-o",
+            "protein",
+            "--allow-vdw-fallback",
+        ],
         [
             str(BIN.joinpath("lahuta")),
             "sasa-sr",

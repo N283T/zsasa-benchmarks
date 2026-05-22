@@ -37,6 +37,8 @@ def test_run_batch_dry_run_outputs_native_hyperfine_commands() -> None:
     assert "--use-bitmask" in proc.stdout
     assert "lahuta" in proc.stdout
     assert "rustsasa" in proc.stdout
+    assert " -f json " in proc.stdout
+    assert " -f pdb " not in proc.stdout
 
 
 def test_run_batch_dry_run_prepares_output_directories() -> None:
