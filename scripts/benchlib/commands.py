@@ -141,6 +141,11 @@ def mdtraj_runner_command(
     stride: int,
     python: Path | str | None = None,
     output: Path | None = None,
+    threads: int | None = None,
+    precision: str | None = None,
+    classifier: str | None = None,
+    include_hydrogens: bool | None = None,
+    zsasa_binary: Path | None = None,
 ) -> list[str]:
     cmd = [
         str(python or sys.executable),
@@ -157,6 +162,16 @@ def mdtraj_runner_command(
         "--stride",
         str(stride),
     ]
+    if threads is not None:
+        cmd.extend(["--threads", str(threads)])
+    if precision is not None:
+        cmd.extend(["--precision", precision])
+    if classifier is not None:
+        cmd.extend(["--classifier", classifier])
+    if include_hydrogens is not None:
+        cmd.append("--include-hydrogens" if include_hydrogens else "--no-hydrogens")
+    if zsasa_binary is not None:
+        cmd.extend(["--zsasa-binary", str(zsasa_binary)])
     if output is not None:
         cmd.extend(["--output", str(output)])
     return cmd

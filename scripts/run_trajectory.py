@@ -27,6 +27,7 @@ from scripts.benchlib.runner import (  # noqa: E402
     write_command_log,
     write_config,
 )
+from scripts.benchlib.tools import load_tool_specs  # noqa: E402
 
 DEFAULT_RUN_ID = "v0_6_0_full"
 
@@ -35,6 +36,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", required=True, type=Path)
     parser.add_argument("--run-id", default=DEFAULT_RUN_ID)
+    parser.add_argument("--tool-versions", type=Path, default=Path("config/tool-versions.toml"))
     parser.add_argument(
         "--dry-run",
         action="store_true",
@@ -62,6 +64,7 @@ def full_rerun_settings(manifest: dict[str, Any]) -> dict[str, Any]:
             "runs",
             "warmup",
             "prepare",
+            "cli_precisions",
         ]
         for key in inherited_keys:
             if key in refresh:
@@ -84,12 +87,24 @@ def full_rerun_settings(manifest: dict[str, Any]) -> dict[str, Any]:
     full_rerun.setdefault("large_trajectory_tools", ["zig", "zig_bitmask", "mdsasa_bolt"])
     full_rerun.setdefault("n_points", 100)
     full_rerun.setdefault("stride", 1)
+    full_rerun.setdefault("threads", [10])
+    full_rerun.setdefault("cli_precisions", ["f64", "f32"])
+    full_rerun.setdefault("classifier", "naccess")
+    full_rerun.setdefault("include_hydrogens", True)
     full_rerun.setdefault("runs", 3)
     full_rerun.setdefault("warmup", 1)
     full_rerun.setdefault("prepare", "sync")
     full_rerun.setdefault("rerun_zsasa", True)
     full_rerun.setdefault("rerun_comparators", True)
     return full_rerun
+
+
+def require_zsasa_binary(tool_versions: Path) -> Path:
+    specs = load_tool_specs(tool_versions)
+    spec = specs.get("zsasa")
+    if spec is None or spec.binary is None:
+        return Path("zsasa")
+    return spec.binary
 
 
 def tools_for_dataset(dataset: dict[str, Any], settings: dict[str, Any]) -> list[str]:
@@ -100,8 +115,53 @@ def tools_for_dataset(dataset: dict[str, Any], settings: dict[str, Any]) -> list
     return [str(value) for value in settings["default_tools"]]
 
 
+def threads_for_dataset(dataset: dict[str, Any], settings: dict[str, Any]) -> list[int]:
+    raw_threads = settings.get("threads", dataset.get("refresh_threads", [10]))
+    if isinstance(raw_threads, int):
+        return [raw_threads]
+    return [int(value) for value in raw_threads]
+
+
+def command_variants(
+    *, tool: str, dataset: dict[str, Any], n_points: int, settings: dict[str, Any]
+) -> list[dict[str, Any]]:
+    threads = threads_for_dataset(dataset, settings)
+    if tool in {"zig", "zig_bitmask"}:
+        return [
+            {
+                "name_parts": [tool, str(precision), f"{thread}t", f"{n_points}p"],
+                "tool": tool,
+                "precision": str(precision),
+                "threads": thread,
+                "raw_parts": [str(dataset["id"]), tool, str(precision)],
+            }
+            for thread in threads
+            for precision in settings["cli_precisions"]
+        ]
+    if tool.startswith("zsasa_"):
+        return [
+            {
+                "name_parts": [tool, f"{thread}t", f"{n_points}p"],
+                "tool": tool,
+                "precision": None,
+                "threads": thread,
+                "raw_parts": [str(dataset["id"]), tool],
+            }
+            for thread in threads
+        ]
+    return [
+        {
+            "name_parts": [tool, f"{n_points}p"],
+            "tool": tool,
+            "precision": None,
+            "threads": threads[0],
+            "raw_parts": [str(dataset["id"]), tool],
+        }
+    ]
+
+
 def build_records(
-    *, datasets: list[Any], output_base: Path, settings: dict[str, Any]
+    *, datasets: list[Any], output_base: Path, settings: dict[str, Any], zsasa_binary: Path
 ) -> list[CommandRecord]:
     records: list[CommandRecord] = []
     n_points = int(settings["n_points"])
@@ -118,30 +178,38 @@ def build_records(
         xtc = resolve_repo_path(str(raw_dataset["xtc"]))
         pdb = resolve_repo_path(str(raw_dataset["pdb"]))
         for tool in tools_for_dataset(raw_dataset, settings):
-            raw_dir = output_base.joinpath("raw", dataset_id, tool)
-            raw_dir.mkdir(parents=True, exist_ok=True)
-            native = mdtraj_runner_command(
-                tool=tool,
-                xtc=xtc,
-                pdb=pdb,
-                n_points=n_points,
-                stride=stride,
-                output=raw_dir.joinpath("results.json"),
-            )
-            name = f"{dataset_id}_{tool}_{n_points}p"
-            records.append(
-                CommandRecord(
-                    name=name,
-                    argv=hyperfine_command(
-                        name=name,
-                        command=shell_join(native),
-                        output_json=output_base.joinpath("hyperfine", f"{name}.json"),
-                        warmup=warmup,
-                        runs=runs,
-                        prepare=prepare,
-                    ),
+            for variant in command_variants(
+                tool=tool, dataset=raw_dataset, n_points=n_points, settings=settings
+            ):
+                raw_dir = output_base.joinpath("raw", *variant["raw_parts"])
+                raw_dir.mkdir(parents=True, exist_ok=True)
+                native = mdtraj_runner_command(
+                    tool=str(variant["tool"]),
+                    xtc=xtc,
+                    pdb=pdb,
+                    n_points=n_points,
+                    stride=stride,
+                    output=raw_dir.joinpath("results.json"),
+                    threads=int(variant["threads"]),
+                    precision=variant["precision"],
+                    classifier=str(settings["classifier"]),
+                    include_hydrogens=bool(settings["include_hydrogens"]),
+                    zsasa_binary=zsasa_binary,
                 )
-            )
+                name = "_".join([dataset_id, *[str(part) for part in variant["name_parts"]]])
+                records.append(
+                    CommandRecord(
+                        name=name,
+                        argv=hyperfine_command(
+                            name=name,
+                            command=shell_join(native),
+                            output_json=output_base.joinpath("hyperfine", f"{name}.json"),
+                            warmup=warmup,
+                            runs=runs,
+                            prepare=prepare,
+                        ),
+                    )
+                )
     return records
 
 
@@ -152,10 +220,13 @@ def main() -> None:
     datasets = expect_list(manifest, "datasets")
     settings = full_rerun_settings(manifest)
     require_native_full_rerun_flags(settings, runner="scripts/run_trajectory.py")
+    zsasa_binary = require_zsasa_binary(resolve_repo_path(args.tool_versions))
     output_base = full_rerun_dir(args.run_id, "md")
     output_base.mkdir(parents=True, exist_ok=True)
 
-    records = build_records(datasets=datasets, output_base=output_base, settings=settings)
+    records = build_records(
+        datasets=datasets, output_base=output_base, settings=settings, zsasa_binary=zsasa_binary
+    )
     dataset_ids = [str(dataset["id"]) for dataset in datasets if isinstance(dataset, dict)]
     write_command_log(output_base.joinpath("commands.log"), records)
     write_config(
@@ -170,9 +241,14 @@ def main() -> None:
             "large_trajectory_tools": [str(value) for value in settings["large_trajectory_tools"]],
             "n_points": int(settings["n_points"]),
             "stride": int(settings["stride"]),
+            "threads": [int(value) for value in settings["threads"]],
+            "cli_precisions": [str(value) for value in settings["cli_precisions"]],
+            "classifier": str(settings["classifier"]),
+            "include_hydrogens": bool(settings["include_hydrogens"]),
             "runs": int(settings["runs"]),
             "warmup": int(settings["warmup"]),
             "prepare": settings.get("prepare"),
+            "zsasa_binary": str(zsasa_binary),
             "commands": [record.name for record in records],
         },
     )

@@ -47,7 +47,7 @@ python scripts/run_trajectory_validation.py --manifest manifests/validation-md-5
 python scripts/run_trajectory.py --manifest manifests/trajectory.toml --run-id v0_6_0_full --dry-run
 ```
 
-Phase 1 full-rerun artifacts belong under `results/full_rerun/<run_id>/...` and remain ignored until reviewed for archive staging. Single-file benchmark redesign remains Phase 2 work; do not fold the 2,013-structure single-file sample into the Phase 1 native runners.
+Phase 1 full-rerun artifacts belong under `results/full_rerun/<run_id>/...` and remain ignored until reviewed for archive staging. Trajectory plans use explicit hydrogens and `classifier = "naccess"` for `zsasa traj`, matching the historical MD benchmark treatment of hydrogenated trajectory topologies. Single-file benchmark redesign remains Phase 2 work; do not fold the 2,013-structure single-file sample into the Phase 1 native runners.
 
 
 ## FreeSASA batch wrapper provenance
