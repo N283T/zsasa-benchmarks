@@ -68,3 +68,25 @@ def test_run_validation_rejects_disabled_full_rerun_flags(tmp_path: Path) -> Non
 
     assert proc.returncode != 0
     assert "rerun_comparators must be true" in proc.stderr
+
+
+def test_run_validation_smoke_manifest_uses_smoke_output_dir() -> None:
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "scripts/run_validation.py",
+            "--manifest",
+            "manifests/validation-ecoli-smoke.toml",
+            "--run-id",
+            "test_smoke",
+            "--datasets",
+            "config/datasets.toml.example",
+            "--dry-run",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    assert "datasets/ecoli-smoke/pdb" in proc.stdout
+    assert "results/full_rerun/test_smoke/validation/ecoli_smoke" in proc.stdout

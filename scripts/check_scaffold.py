@@ -16,6 +16,7 @@ REQUIRED_FILES = [
     ".gitignore",
     "config/datasets.toml.example",
     "config/tool-versions.toml",
+    "manifests/validation-ecoli-smoke.toml",
     "manifests/validation-ecoli.toml",
     "manifests/validation-md-5wvo.toml",
     "manifests/batch-ecoli.toml",
@@ -46,6 +47,9 @@ REQUIRED_FILES = [
     "scripts/benchlib/trajectory_tools.py",
     "tools/freesasa_batch/freesasa_batch.cc",
     "tools/freesasa_batch/Makefile",
+    "datasets/ecoli-smoke/pdb/AF-A0A385XJ53-F1-model_v6.pdb",
+    "datasets/ecoli-smoke/pdb/AF-A5A605-F1-model_v6.pdb",
+    "datasets/ecoli-smoke/pdb/AF-A5A611-F1-model_v6.pdb",
     "results/.gitkeep",
     "archives/.gitkeep",
 ]
@@ -75,6 +79,7 @@ REMOVED_LEGACY_FILES = [
 
 
 FULL_RERUN_MANIFESTS = [
+    "manifests/validation-ecoli-smoke.toml",
     "manifests/validation-ecoli.toml",
     "manifests/validation-md-5wvo.toml",
     "manifests/batch-ecoli.toml",
@@ -181,6 +186,7 @@ def main() -> None:
         fail("validation manifest must identify the E. coli dataset")
     dataset_catalog = read_toml(ROOT.joinpath("config/datasets.toml.example"))
     for dataset_id in [
+        "ecoli_smoke_pdb",
         "UP000000625_83333_ECOLI_v6_pdb",
         "UP000005640_9606_HUMAN_v6_pdb",
         "single_file_stratified_sample",
@@ -196,6 +202,13 @@ def main() -> None:
         fail("validation manifest must include SR 100-point full rerun")
     if not any(run.get("algorithm") == "lr" and 20 in run.get("points", []) for run in runs):
         fail("validation manifest must include LR 20-slice full rerun")
+
+    smoke = read_toml(ROOT.joinpath("manifests/validation-ecoli-smoke.toml"))
+    smoke_dataset = smoke.get("dataset", {})
+    if smoke_dataset.get("id") != "ecoli_smoke_pdb":
+        fail("smoke validation manifest must use the tracked E. coli smoke dataset")
+    if smoke_dataset.get("expected_count") != 3:
+        fail("smoke validation manifest must describe the three tracked structures")
 
     md_validation = read_toml(ROOT.joinpath("manifests/validation-md-5wvo.toml"))
     md_full = md_validation.get("full_rerun", {})
