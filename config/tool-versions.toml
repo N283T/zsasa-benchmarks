@@ -7,6 +7,8 @@ repository = "https://github.com/N283T/zsasa"
 tag = "v0.6.0"
 commit = "94fdc1ee0ba27063d7cfe69e915e8425474316e1"
 zig = "0.16.0"
+binary = "/Users/nagaet/freesasa-zig/zig-out/bin/zsasa"
+check_args = ["--version"]
 
 [freesasa]
 policy = "reuse existing comparator baseline for first archive/preprint"
@@ -15,6 +17,8 @@ upstream = "https://github.com/mittinatten/freesasa"
 version = "2.1.3"
 commit = "9c9f204fd990ba2f50f47be8d4b96a61355f7a10"
 notes = "FreeSASA has no native directory batch mode; historical validation and batch baselines were produced through the tracked freesasa_batch wrapper."
+binary = "/Users/nagaet/freesasa-zig/benchmarks/external/bin/freesasa"
+check_args = ["--version"]
 
 [freesasa_batch]
 policy = "reuse existing wrapper-generated baseline for first archive/preprint"
@@ -22,6 +26,8 @@ repository = "https://github.com/N283T/zsasa/tree/main/benchmarks/external/frees
 source_path = "/Users/nagaet/freesasa-zig/benchmarks/external/freesasa_batch/freesasa_batch.cc"
 linked_tool = "freesasa"
 notes = "Custom batch wrapper around the FreeSASA C API used to generate per-file comparator baselines."
+binary = "/Users/nagaet/freesasa-zig/benchmarks/external/bin/freesasa_batch"
+check_args = ["--help"]
 
 [rustsasa]
 policy = "reuse existing comparator baseline for first archive/preprint"
@@ -29,12 +35,30 @@ repository = "https://github.com/N283T/RustSASA"
 upstream = "https://github.com/maxall41/RustSASA"
 version = "0.9.2"
 commit = "530277785533d0336bbdb43b041fb7de2f7e23f3"
+binary = "/Users/nagaet/freesasa-zig/benchmarks/external/bin/rust-sasa"
+check_args = ["--help"]
 
 [lahuta]
 policy = "reuse existing comparator baseline for first archive/preprint"
 repository = "https://github.com/bisejdiu/lahuta"
 version = "0.9.3-672-g4b5d6f9a"
 commit = "4b5d6f9ae2bc13bcf897b1df3483b9c1e3da1de9"
+binary = "/Users/nagaet/freesasa-zig/benchmarks/external/bin/lahuta"
+check_args = ["--version"]
+
+[mdtraj]
+policy = "rerun native mdtraj trajectory comparator for same-session manuscript evidence"
+repository = "https://github.com/mdtraj/mdtraj"
+version = "pin in final environment report"
+python_module = "mdtraj"
+check_args = []
+
+[mdsasa_bolt]
+policy = "rerun trajectory comparator for same-session manuscript evidence"
+repository = "https://github.com/refresh-bio/mdsasa-bolt"
+version = "pin in final environment report"
+python_module = "mdsasa_bolt"
+check_args = []
 
 [runner]
 python = "3.12"

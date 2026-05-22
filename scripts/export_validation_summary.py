@@ -6,7 +6,12 @@ import argparse
 import csv
 from pathlib import Path
 
-from db_common import DEFAULT_DB, connect, resolve
+if __package__:
+    from scripts.benchlib.metrics import r2_score, relative_error_percent
+    from scripts.db_common import DEFAULT_DB, connect, resolve
+else:
+    from benchlib.metrics import r2_score, relative_error_percent
+    from db_common import DEFAULT_DB, connect, resolve
 
 
 def parse_args() -> argparse.Namespace:
@@ -14,30 +19,39 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--db", type=Path, default=DEFAULT_DB)
     parser.add_argument("--out", type=Path, default=Path("results/exports/validation-summary.csv"))
     parser.add_argument("--reference-tool", default="freesasa")
+    parser.add_argument(
+        "--source-kind", default=None, help="optional benchmark_runs.source_kind filter"
+    )
     return parser.parse_args()
 
 
-def r2_score(reference: list[float], observed: list[float]) -> float:
-    mean_ref = sum(reference) / len(reference)
-    ss_tot = sum((value - mean_ref) ** 2 for value in reference)
-    ss_res = sum((obs - ref) ** 2 for obs, ref in zip(observed, reference, strict=True))
-    return 1.0 - (ss_res / ss_tot) if ss_tot else 1.0
-
-
-def summarize_pair(reference_rows: dict[str, float], observed_rows: dict[str, float]) -> dict[str, float | int]:
+def summarize_pair(
+    reference_rows: dict[str, float], observed_rows: dict[str, float]
+) -> dict[str, float | int]:
     shared = sorted(set(reference_rows) & set(observed_rows))
     reference = [reference_rows[key] for key in shared]
     observed = [observed_rows[key] for key in shared]
-    rel_errors = [abs(obs - ref) / ref * 100 for obs, ref in zip(observed, reference, strict=True) if ref > 0]
+    if not shared:
+        return {
+            "n": 0,
+            "r2": 0.0,
+            "mean_error_percent": 0.0,
+            "max_error_percent": 0.0,
+        }
+
+    rel_errors = [
+        relative_error_percent(obs, ref)
+        for obs, ref in zip(observed, reference, strict=True)
+    ]
     return {
         "n": len(shared),
         "r2": r2_score(reference, observed),
-        "mean_error_percent": sum(rel_errors) / len(rel_errors) if rel_errors else 0.0,
-        "max_error_percent": max(rel_errors) if rel_errors else 0.0,
+        "mean_error_percent": sum(rel_errors) / len(rel_errors),
+        "max_error_percent": max(rel_errors),
     }
 
 
-def load_runs(conn) -> list[dict]:
+def load_runs(conn, source_kind: str | None) -> list[dict]:
     columns = [
         "run_id",
         "dataset_id",
@@ -55,8 +69,10 @@ def load_runs(conn) -> list[dict]:
                n_points, n_slices, source_kind
         FROM benchmark_runs
         WHERE benchmark_kind = 'validation'
+          AND (? IS NULL OR source_kind = ?)
         ORDER BY dataset_id, algorithm, COALESCE(n_points, n_slices), tool_id, precision, mode
-        """
+        """,
+        [source_kind, source_kind],
     ).fetchall()
     return [dict(zip(columns, row, strict=True)) for row in rows]
 
@@ -74,7 +90,7 @@ def main() -> None:
     args = parse_args()
     conn = connect(resolve(args.db))
     try:
-        runs = load_runs(conn)
+        runs = load_runs(conn, args.source_kind)
         values = {run["run_id"]: load_values(conn, run["run_id"]) for run in runs}
     finally:
         conn.close()

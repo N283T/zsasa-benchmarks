@@ -5,6 +5,7 @@ description = "Benchmark harness for release-fixed zsasa manuscript evidence"
 requires-python = ">=3.12"
 dependencies = [
   "duckdb==1.5.3",
+  "pytest>=8.0",
 ]
 
 [tool.ruff]
@@ -13,3 +14,6 @@ src = ["scripts"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

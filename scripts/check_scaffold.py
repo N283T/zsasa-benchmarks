@@ -41,7 +41,17 @@ REQUIRED_FILES = [
     "scripts/report_existing_assets.py",
     "scripts/refresh_validation.py",
     "scripts/refresh_validation_md.py",
+    "scripts/run_validation.py",
+    "scripts/run_batch.py",
+    "scripts/run_trajectory_validation.py",
+    "scripts/run_trajectory.py",
     "scripts/smoke_db.py",
+    "scripts/benchlib/commands.py",
+    "scripts/benchlib/trajectory_tools.py",
+    "scripts/benchlib/manifest.py",
+    "scripts/benchlib/paths.py",
+    "scripts/benchlib/runner.py",
+    "scripts/benchlib/tools.py",
     "tests/fixtures/validation/validation-fixture.toml",
     "tests/fixtures/validation/sr/results_100.csv",
     "tests/fixtures/validation/lr/results_20.csv",
@@ -81,6 +91,18 @@ def main() -> None:
     if "replace zsasa columns" not in manifest.get("baseline", {}).get("policy", ""):
         fail("validation manifest must state the zsasa-only refresh policy")
 
+    full_rerun = manifest.get("full_rerun", {})
+    if full_rerun.get("source_kind") != "full_rerun":
+        fail("validation manifest must define the native full_rerun source kind")
+    if full_rerun.get("run_id_default") != "v0_6_0_full":
+        fail("validation manifest must define the default full rerun id")
+    if full_rerun.get("threads") != 10:
+        fail("validation manifest must define the full rerun thread count")
+    if full_rerun.get("rerun_zsasa") is not True:
+        fail("validation manifest must rerun zsasa for full_rerun")
+    if full_rerun.get("rerun_comparators") is not True:
+        fail("validation manifest must rerun comparators for full_rerun")
+
     runs = manifest.get("runs", [])
     if not any(run.get("algorithm") == "sr" and 100 in run.get("points", []) for run in runs):
         fail("validation manifest must include SR 100-point refresh")
@@ -105,7 +127,12 @@ def main() -> None:
             fail(f"database docs missing source kind: {phrase}")
 
     rerun_log = ROOT.joinpath("docs/validation-rerun-log.md").read_text(encoding="utf-8")
-    for phrase in ["freesasa_batch", "zsasa 0.6.0", "4,370 PDB files", "Comparator tools were not rerun"]:
+    for phrase in [
+        "freesasa_batch",
+        "zsasa 0.6.0",
+        "4,370 PDB files",
+        "Comparator tools were not rerun",
+    ]:
         if phrase not in rerun_log:
             fail(f"validation rerun log missing phrase: {phrase}")
 
@@ -118,6 +145,43 @@ def main() -> None:
     md_validation_refresh = md_validation_manifest.get("refresh", {})
     if md_validation_refresh.get("native_mdtraj_rerun") is not False:
         fail("MD validation refresh must reuse the historical mdtraj reference")
+    md_validation_full_rerun = md_validation_manifest.get("full_rerun", {})
+    if md_validation_full_rerun.get("source_kind") != "full_rerun":
+        fail("MD validation manifest must define the native full_rerun source kind")
+    if md_validation_full_rerun.get("run_id_default") != "v0_6_0_full":
+        fail("MD validation full_rerun must define the default run id")
+    if md_validation_full_rerun.get("tools") != ["mdtraj", "zsasa_mdtraj", "zsasa_mdanalysis"]:
+        fail("MD validation full_rerun must list native mdtraj and zsasa wrapper tools")
+    if md_validation_full_rerun.get("n_points") != [100, 200, 500, 1000]:
+        fail("MD validation full_rerun must preserve the representative point counts")
+    if md_validation_full_rerun.get("rerun_zsasa") is not True:
+        fail("MD validation full_rerun must rerun zsasa")
+    if md_validation_full_rerun.get("rerun_comparators") is not True:
+        fail("MD validation full_rerun must rerun comparators")
+
+    phase1_runner_files = [
+        "scripts/run_validation.py",
+        "scripts/run_batch.py",
+        "scripts/run_trajectory_validation.py",
+        "scripts/run_trajectory.py",
+        "scripts/benchlib/commands.py",
+        "scripts/benchlib/trajectory_tools.py",
+        "scripts/benchlib/manifest.py",
+        "scripts/benchlib/paths.py",
+        "scripts/benchlib/runner.py",
+        "scripts/benchlib/tools.py",
+    ]
+    # Final native runner guard: Phase 1 runner files must not call old benchmark scripts.
+    legacy_script_markers = ["benchmarks/scripts/"]
+    trajectory_runner_markers = ["scripts/validation_md.py", "scripts/bench_md.py"]
+    for path in phase1_runner_files:
+        text = ROOT.joinpath(path).read_text(encoding="utf-8")
+        banned_markers = legacy_script_markers
+        if path in {"scripts/run_trajectory_validation.py", "scripts/run_trajectory.py"}:
+            banned_markers = [*legacy_script_markers, *trajectory_runner_markers]
+        for marker in banned_markers:
+            if marker in text:
+                fail(f"Phase 1 native runner file references legacy runner marker {marker}: {path}")
 
     batch_manifest = read_toml(ROOT.joinpath("manifests/batch-ecoli.toml"))
     refresh = batch_manifest.get("planned_refresh", {})
@@ -127,6 +191,13 @@ def main() -> None:
         fail("batch manifest must restrict the first refresh to zsasa tools")
     if refresh.get("threads") != [1, 2, 4, 8, 10] or refresh.get("n_points") != 128:
         fail("batch manifest must describe the refreshed E. coli scaling settings")
+    batch_full_rerun = batch_manifest.get("full_rerun", {})
+    if batch_full_rerun.get("source_kind") != "full_rerun":
+        fail("batch manifest must define the native full_rerun source kind")
+    if batch_full_rerun.get("threads") != [1, 2, 4, 8, 10]:
+        fail("batch full_rerun must preserve the E. coli scaling threads")
+    if batch_full_rerun.get("n_points") != 128:
+        fail("batch full_rerun must define the 128-point batch setting")
 
     batch_plan = ROOT.joinpath("docs/batch-rerun-plan.md").read_text(encoding="utf-8")
     for phrase in [
@@ -158,6 +229,11 @@ def main() -> None:
         fail("human batch manifest must describe the completed t10 refresh")
     if human_refresh.get("tools") != ["zig", "zig_bitmask"]:
         fail("human batch manifest must restrict the refresh to zsasa tools")
+    human_full_rerun = human_manifest.get("full_rerun", {})
+    if human_full_rerun.get("source_kind") != "full_rerun":
+        fail("human batch manifest must define the native full_rerun source kind")
+    if human_full_rerun.get("threads") != [10] or human_full_rerun.get("runs") != 3:
+        fail("human batch full_rerun must use t10 with three runs")
 
     human_log = ROOT.joinpath("docs/batch-human-rerun-log.md").read_text(encoding="utf-8")
     for phrase in [
@@ -203,7 +279,9 @@ def main() -> None:
         fail("trajectory manifest has unexpected dataset ids")
     if any(dataset.get("refresh_threads") != [10] for dataset in trajectory_datasets):
         fail("trajectory manifest must describe t10-only refresh threads for all datasets")
-    dataset_tools = {dataset.get("id"): dataset.get("refresh_tools") for dataset in trajectory_datasets}
+    dataset_tools = {
+        dataset.get("id"): dataset.get("refresh_tools") for dataset in trajectory_datasets
+    }
     expected_cli_and_wrappers = [
         "zig",
         "zig_bitmask",
@@ -227,6 +305,22 @@ def main() -> None:
         fail("trajectory refresh must leave external comparators as historical baselines")
     if trajectory_refresh.get("n_points") != 100:
         fail("trajectory refresh must describe the t10 100-point rerun")
+    trajectory_full_rerun = trajectory_manifest.get("full_rerun", {})
+    if trajectory_full_rerun.get("source_kind") != "full_rerun":
+        fail("trajectory manifest must define the native full_rerun source kind")
+    if trajectory_full_rerun.get("run_id_default") != "v0_6_0_full":
+        fail("trajectory full_rerun must define the default run id")
+    expected_full_tools = [*expected_cli_and_wrappers, "mdtraj", "mdsasa_bolt"]
+    if trajectory_full_rerun.get("default_tools") != expected_full_tools:
+        fail("trajectory full_rerun default tools must include native comparators")
+    if trajectory_full_rerun.get("large_trajectory_tools") != ["zig", "zig_bitmask", "mdsasa_bolt"]:
+        fail("trajectory full_rerun must define large trajectory tools")
+    if trajectory_full_rerun.get("n_points") != 100:
+        fail("trajectory full_rerun must define the 100-point setting")
+    if trajectory_full_rerun.get("rerun_zsasa") is not True:
+        fail("trajectory full_rerun must rerun zsasa")
+    if trajectory_full_rerun.get("rerun_comparators") is not True:
+        fail("trajectory full_rerun must rerun comparators")
 
     trajectory_plan = ROOT.joinpath("docs/trajectory-rerun-plan.md").read_text(encoding="utf-8")
     for phrase in [
@@ -250,7 +344,9 @@ def main() -> None:
         if phrase not in trajectory_log:
             fail(f"trajectory rerun log missing phrase: {phrase}")
 
-    md_validation_log = ROOT.joinpath("docs/trajectory-validation-rerun-log.md").read_text(encoding="utf-8")
+    md_validation_log = ROOT.joinpath("docs/trajectory-validation-rerun-log.md").read_text(
+        encoding="utf-8"
+    )
     for phrase in [
         "Native MDTraj rerun: no",
         "0.999539",

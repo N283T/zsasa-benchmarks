@@ -26,3 +26,16 @@ prepare = "sync"
 
 [refresh.output]
 default_dir = "results/batch/zsasa_v0_6_0_human_t10"
+
+[full_rerun]
+source_kind = "full_rerun"
+run_id_default = "v0_6_0_full"
+n_points = 128
+threads = [10]
+runs = 3
+warmup = 3
+precisions = ["f64", "f32"]
+prepare = "sync"
+rerun_zsasa = true
+rerun_comparators = true
+output_base = "results/full_rerun/v0_6_0_full/batch/human"

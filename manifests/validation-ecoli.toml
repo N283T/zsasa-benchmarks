@@ -20,6 +20,14 @@ keep_columns = ["structure", "n_atoms", "freesasa", "rustsasa", "lahuta_bitmask"
 [output]
 default_dir = "results/validation/zsasa_v0_6_0_ecoli"
 
+[full_rerun]
+source_kind = "full_rerun"
+run_id_default = "v0_6_0_full"
+threads = 10
+output_base = "results/full_rerun/v0_6_0_full/validation/ecoli"
+rerun_zsasa = true
+rerun_comparators = true
+
 [[runs]]
 algorithm = "sr"
 points_flag = "--n-points"
