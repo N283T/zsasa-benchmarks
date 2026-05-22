@@ -18,6 +18,8 @@ def relative_error_percent(observed: float, reference: float) -> float:
 def r2_score(reference: list[float], observed: list[float]) -> float:
     if len(reference) != len(observed):
         raise ValueError("reference and observed lengths differ")
+    if not reference:
+        raise ValueError("reference and observed must not be empty")
     mean_ref = sum(reference) / len(reference)
     ss_tot = sum((value - mean_ref) ** 2 for value in reference)
     ss_res = sum((obs - ref) ** 2 for obs, ref in zip(observed, reference, strict=True))

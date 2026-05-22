@@ -47,3 +47,30 @@ def test_source_kind_for_full_rerun() -> None:
 def test_artifact_path_returns_string_path(tmp_path: Path) -> None:
     path = tmp_path.joinpath("artifact.json")
     assert artifact_path(path) == str(path)
+
+
+def test_r2_score_rejects_empty_input() -> None:
+    with pytest.raises(ValueError, match="reference and observed must not be empty"):
+        r2_score([], [])
+
+
+def test_validation_summary_no_overlap_returns_zero_stats() -> None:
+    from scripts.export_validation_summary import summarize_pair
+
+    assert summarize_pair({"a": 1.0}, {"b": 2.0}) == {
+        "n": 0,
+        "r2": 0.0,
+        "mean_error_percent": 0.0,
+        "max_error_percent": 0.0,
+    }
+
+
+def test_validation_summary_includes_zero_reference_errors() -> None:
+    from scripts.export_validation_summary import summarize_pair
+
+    stats = summarize_pair({"a": 0.0}, {"a": 1.0})
+
+    assert stats["n"] == 1
+    assert stats["r2"] == 1.0
+    assert math.isinf(stats["mean_error_percent"])
+    assert math.isinf(stats["max_error_percent"])
