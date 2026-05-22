@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import shutil
 import subprocess
 import sys
+from pathlib import Path
 
 
 def test_run_batch_dry_run_outputs_native_hyperfine_commands() -> None:
@@ -33,3 +35,37 @@ def test_run_batch_dry_run_outputs_native_hyperfine_commands() -> None:
     assert "--use-bitmask" in proc.stdout
     assert "lahuta" in proc.stdout
     assert "rustsasa" in proc.stdout
+
+
+def test_run_batch_dry_run_prepares_output_directories() -> None:
+    run_id = "test_run_dirs_task9_fix"
+    output_base = Path("results/full_rerun") / run_id / "batch" / "ecoli"
+    if output_base.exists():
+        shutil.rmtree(output_base)
+
+    subprocess.run(
+        [
+            sys.executable,
+            "scripts/run_batch.py",
+            "--manifest",
+            "manifests/batch-ecoli.toml",
+            "--run-id",
+            run_id,
+            "--dry-run",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    assert output_base.joinpath("commands.log").is_file()
+    assert output_base.joinpath("config.json").is_file()
+    for dirname in ["hyperfine", "zsasa", "freesasa_batch", "lahuta", "rustsasa"]:
+        assert output_base.joinpath(dirname).is_dir()
+    for dirname in [
+        "freesasa_batch/1t_128p",
+        "rustsasa/10t_128p",
+        "lahuta/standard_1t_128p",
+        "lahuta/bitmask_10t_128p",
+    ]:
+        assert output_base.joinpath(dirname).is_dir()

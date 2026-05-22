@@ -225,6 +225,31 @@ def build_native_records(
     return records
 
 
+def prepare_output_directories(*, output_base: Path, settings: dict[str, Any]) -> None:
+    threads = [int(thread) for thread in settings["threads"]]
+    n_points = int(settings["n_points"])
+    directories = [output_base, output_base.joinpath("hyperfine")]
+
+    if settings.get("rerun_zsasa", True):
+        directories.append(output_base.joinpath("zsasa"))
+
+    if settings.get("rerun_comparators", True):
+        for thread in threads:
+            directories.extend(
+                [
+                    output_base.joinpath("freesasa_batch", f"{thread}t_{n_points}p"),
+                    output_base.joinpath("rustsasa", f"{thread}t_{n_points}p"),
+                ]
+            )
+            for suffix in ["standard", "bitmask"]:
+                directories.append(
+                    output_base.joinpath("lahuta", f"{suffix}_{thread}t_{n_points}p")
+                )
+
+    for directory in directories:
+        directory.mkdir(parents=True, exist_ok=True)
+
+
 def main() -> None:
     args = parse_args()
     manifest_path = resolve_repo_path(args.manifest)
@@ -242,6 +267,7 @@ def main() -> None:
         output_base=output_base,
         settings=settings,
     )
+    prepare_output_directories(output_base=output_base, settings=settings)
 
     write_command_log(output_base.joinpath("commands.log"), records)
     write_config(
