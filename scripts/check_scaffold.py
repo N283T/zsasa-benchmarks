@@ -41,7 +41,13 @@ REQUIRED_FILES = [
     "scripts/report_existing_assets.py",
     "scripts/refresh_validation.py",
     "scripts/refresh_validation_md.py",
+    "scripts/run_validation.py",
     "scripts/smoke_db.py",
+    "scripts/benchlib/commands.py",
+    "scripts/benchlib/manifest.py",
+    "scripts/benchlib/paths.py",
+    "scripts/benchlib/runner.py",
+    "scripts/benchlib/tools.py",
     "tests/fixtures/validation/validation-fixture.toml",
     "tests/fixtures/validation/sr/results_100.csv",
     "tests/fixtures/validation/lr/results_20.csv",
@@ -81,6 +87,18 @@ def main() -> None:
     if "replace zsasa columns" not in manifest.get("baseline", {}).get("policy", ""):
         fail("validation manifest must state the zsasa-only refresh policy")
 
+    full_rerun = manifest.get("full_rerun", {})
+    if full_rerun.get("source_kind") != "full_rerun":
+        fail("validation manifest must define the native full_rerun source kind")
+    if full_rerun.get("run_id_default") != "v0_6_0_full":
+        fail("validation manifest must define the default full rerun id")
+    if full_rerun.get("threads") != 10:
+        fail("validation manifest must define the full rerun thread count")
+    if full_rerun.get("rerun_zsasa") is not True:
+        fail("validation manifest must rerun zsasa for full_rerun")
+    if full_rerun.get("rerun_comparators") is not True:
+        fail("validation manifest must rerun comparators for full_rerun")
+
     runs = manifest.get("runs", [])
     if not any(run.get("algorithm") == "sr" and 100 in run.get("points", []) for run in runs):
         fail("validation manifest must include SR 100-point refresh")
@@ -105,7 +123,12 @@ def main() -> None:
             fail(f"database docs missing source kind: {phrase}")
 
     rerun_log = ROOT.joinpath("docs/validation-rerun-log.md").read_text(encoding="utf-8")
-    for phrase in ["freesasa_batch", "zsasa 0.6.0", "4,370 PDB files", "Comparator tools were not rerun"]:
+    for phrase in [
+        "freesasa_batch",
+        "zsasa 0.6.0",
+        "4,370 PDB files",
+        "Comparator tools were not rerun",
+    ]:
         if phrase not in rerun_log:
             fail(f"validation rerun log missing phrase: {phrase}")
 
@@ -118,6 +141,19 @@ def main() -> None:
     md_validation_refresh = md_validation_manifest.get("refresh", {})
     if md_validation_refresh.get("native_mdtraj_rerun") is not False:
         fail("MD validation refresh must reuse the historical mdtraj reference")
+
+    phase1_runner_files = [
+        "scripts/run_validation.py",
+        "scripts/benchlib/commands.py",
+        "scripts/benchlib/manifest.py",
+        "scripts/benchlib/paths.py",
+        "scripts/benchlib/runner.py",
+        "scripts/benchlib/tools.py",
+    ]
+    for path in phase1_runner_files:
+        text = ROOT.joinpath(path).read_text(encoding="utf-8")
+        if "benchmarks/scripts/" in text:
+            fail(f"Phase 1 native runner file references legacy benchmarks/scripts path: {path}")
 
     batch_manifest = read_toml(ROOT.joinpath("manifests/batch-ecoli.toml"))
     refresh = batch_manifest.get("planned_refresh", {})
@@ -203,7 +239,9 @@ def main() -> None:
         fail("trajectory manifest has unexpected dataset ids")
     if any(dataset.get("refresh_threads") != [10] for dataset in trajectory_datasets):
         fail("trajectory manifest must describe t10-only refresh threads for all datasets")
-    dataset_tools = {dataset.get("id"): dataset.get("refresh_tools") for dataset in trajectory_datasets}
+    dataset_tools = {
+        dataset.get("id"): dataset.get("refresh_tools") for dataset in trajectory_datasets
+    }
     expected_cli_and_wrappers = [
         "zig",
         "zig_bitmask",
@@ -250,7 +288,9 @@ def main() -> None:
         if phrase not in trajectory_log:
             fail(f"trajectory rerun log missing phrase: {phrase}")
 
-    md_validation_log = ROOT.joinpath("docs/trajectory-validation-rerun-log.md").read_text(encoding="utf-8")
+    md_validation_log = ROOT.joinpath("docs/trajectory-validation-rerun-log.md").read_text(
+        encoding="utf-8"
+    )
     for phrase in [
         "Native MDTraj rerun: no",
         "0.999539",
