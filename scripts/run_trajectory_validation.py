@@ -13,6 +13,11 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.benchlib.commands import mdtraj_runner_command  # noqa: E402
+from scripts.benchlib.datasets import (  # noqa: E402
+    DEFAULT_DATASETS_CONFIG,
+    dataset_path,
+    load_dataset_catalog,
+)
 from scripts.benchlib.manifest import (  # noqa: E402
     expect_dict,
     load_manifest,
@@ -35,6 +40,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--manifest", required=True, type=Path)
     parser.add_argument("--run-id", default=DEFAULT_RUN_ID)
     parser.add_argument("--tool-versions", type=Path, default=Path("config/tool-versions.toml"))
+    parser.add_argument("--datasets", type=Path, default=DEFAULT_DATASETS_CONFIG)
     parser.add_argument(
         "--dry-run",
         action="store_true",
@@ -110,12 +116,14 @@ def command_variants(*, tool: str, n_points: int, settings: dict[str, Any]) -> l
 def build_records(
     *,
     dataset: dict[str, Any],
+    dataset_catalog: dict[str, dict[str, Any]],
     output_base: Path,
     settings: dict[str, Any],
     zsasa_binary: Path,
 ) -> list[CommandRecord]:
-    xtc = resolve_repo_path(str(dataset["xtc"]))
-    pdb = resolve_repo_path(str(dataset["pdb"]))
+    dataset_id = str(dataset["id"])
+    xtc = dataset_path(dataset_catalog, dataset_id, "xtc")
+    pdb = dataset_path(dataset_catalog, dataset_id, "pdb")
     stride = int(settings["stride"])
     records: list[CommandRecord] = []
     for tool in [str(value) for value in settings["tools"]]:
@@ -149,6 +157,7 @@ def main() -> None:
     manifest_path = resolve_repo_path(args.manifest)
     manifest = load_manifest(manifest_path)
     dataset = expect_dict(manifest, "dataset")
+    dataset_catalog = load_dataset_catalog(args.datasets)
     settings = full_rerun_settings(manifest)
     require_native_full_rerun_flags(settings, runner="scripts/run_trajectory_validation.py")
     zsasa_binary = require_zsasa_binary(resolve_repo_path(args.tool_versions))
@@ -157,7 +166,11 @@ def main() -> None:
     output_base.mkdir(parents=True, exist_ok=True)
 
     records = build_records(
-        dataset=dataset, output_base=output_base, settings=settings, zsasa_binary=zsasa_binary
+        dataset=dataset,
+        dataset_catalog=dataset_catalog,
+        output_base=output_base,
+        settings=settings,
+        zsasa_binary=zsasa_binary,
     )
     write_command_log(output_base.joinpath("commands.log"), records)
     write_config(
@@ -167,9 +180,10 @@ def main() -> None:
             "run_id": args.run_id,
             "source_kind": settings["source_kind"],
             "dataset_id": dataset_id,
-            "xtc": str(resolve_repo_path(str(dataset["xtc"]))),
-            "pdb": str(resolve_repo_path(str(dataset["pdb"]))),
+            "xtc": str(dataset_path(dataset_catalog, dataset_id, "xtc")),
+            "pdb": str(dataset_path(dataset_catalog, dataset_id, "pdb")),
             "output_base": str(output_base),
+            "datasets": str(resolve_repo_path(args.datasets)),
             "tools": [str(value) for value in settings["tools"]],
             "n_points": [int(value) for value in settings["n_points"]],
             "stride": int(settings["stride"]),

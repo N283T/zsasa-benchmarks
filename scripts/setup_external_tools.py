@@ -16,7 +16,7 @@ ROOT: Final = Path(__file__).resolve().parents[1]
 EXTERNAL: Final = ROOT.joinpath("external")
 BIN: Final = EXTERNAL.joinpath("bin")
 FREESASA_BATCH_SRC: Final = ROOT.joinpath("tools", "freesasa_batch")
-DEFAULT_TESTDATA: Final = Path("/Users/nagaet/freesasa-zig/benchmarks/external/testdata")
+DEFAULT_TESTDATA: Final = Path.home().joinpath("freesasa-zig", "benchmarks", "external", "testdata")
 
 
 @dataclass(frozen=True)
@@ -312,7 +312,8 @@ def main() -> None:
         else:
             raise SetupError(f"unsupported tool: {tool}")
     if args.verify or "verify" in args.tools:
-        verify_tools(testdata=args.testdata, dry_run=args.dry_run)
+        testdata = Path(os.path.expandvars(str(args.testdata))).expanduser()
+        verify_tools(testdata=testdata, dry_run=args.dry_run)
 
 
 if __name__ == "__main__":

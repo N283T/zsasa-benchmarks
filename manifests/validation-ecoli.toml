@@ -7,7 +7,6 @@ description = "Run zsasa and comparator validation on the E. coli AlphaFold prot
 id = "UP000000625_83333_ECOLI_v6_pdb"
 name = "AlphaFold E. coli K-12 proteome PDB set"
 expected_count = 4370
-path_or_uri = "/Users/nagaet/pdb/afdb/UP000000625_83333_ECOLI_v6/pdb"
 redistribution_status = "not copied; use local AlphaFold proteome mirror or reconstruct from public AlphaFold proteome source"
 role = ["validation", "approximation"]
 

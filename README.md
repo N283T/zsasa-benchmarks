@@ -19,15 +19,17 @@ nix develop
 python scripts/check_scaffold.py
 python scripts/check_tools.py --profile minimal --dry-run
 python scripts/setup_external_tools.py --dry-run --reset freesasa freesasa_batch rustsasa lahuta verify
-python scripts/run_validation.py --manifest manifests/validation-ecoli.toml --run-id v0_6_0_full --dry-run
-python scripts/run_batch.py --manifest manifests/batch-ecoli.toml --run-id v0_6_0_full --dry-run
-uv run python scripts/run_trajectory_validation.py --manifest manifests/validation-md-5wvo.toml --run-id v0_6_0_full --dry-run
-uv run python scripts/run_trajectory.py --manifest manifests/trajectory.toml --run-id v0_6_0_full --dry-run
+python scripts/run_validation.py --manifest manifests/validation-ecoli.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
+python scripts/run_batch.py --manifest manifests/batch-ecoli.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
+uv run python scripts/run_trajectory_validation.py --manifest manifests/validation-md-5wvo.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
+uv run python scripts/run_trajectory.py --manifest manifests/trajectory.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
 ```
 
 The native Phase 1 runner examples above are dry-runs. They print the commands and `results/full_rerun/<run_id>/...` layout without running benchmarks; do not remove `--dry-run` until a real rerun is explicitly approved. Trajectory runners now route execution through `scripts.benchlib.trajectory_tools`, including explicit hydrogens and the `naccess` trajectory classifier for `zsasa traj` CLI commands.
 
 The `nix develop` shell provides the pinned `zsasa` CLI from `github:N283T/zsasa/v0.6.0` and exports `ZSASA_CLI` to that Nix-store binary so uv-installed Python console scripts cannot shadow the CLI benchmark target. Python trajectory backends and the `zsasa` Python package are pinned in `pyproject.toml`/`uv.lock`; do not import `zsasa` from a local source checkout for manuscript reruns. External comparator binaries are built under the ignored `external/` tree by `scripts/setup_external_tools.py` from pinned commits, then referenced through `external/bin/*`.
+
+Local dataset paths are centralized in `config/datasets.local.toml` (ignored). Copy `config/datasets.toml.example` and adjust paths before real runs.
 
 ## Repository layout
 
@@ -47,6 +49,7 @@ Initialize a local ignored database for newly generated benchmark evidence:
 
 ```bash
 uv run python scripts/init_db.py \
+  --datasets config/datasets.toml.example \
   --manifest manifests/validation-ecoli.toml \
   --manifest manifests/batch-ecoli.toml
 ```

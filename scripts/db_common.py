@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import hashlib
+import os
 import tomllib
 from pathlib import Path
 from typing import Any
@@ -19,7 +20,8 @@ def load_toml(path: Path) -> dict[str, Any]:
 
 
 def resolve(path: Path, base: Path = ROOT) -> Path:
-    return path if path.is_absolute() else base.joinpath(path)
+    candidate = Path(os.path.expandvars(str(path))).expanduser()
+    return candidate if candidate.is_absolute() else base.joinpath(candidate)
 
 
 def stable_id(*parts: object) -> str:

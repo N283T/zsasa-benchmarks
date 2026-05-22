@@ -6,7 +6,6 @@ status = "planning"
 [dataset]
 id = "UP000000625_83333_ECOLI_v6_pdb"
 expected_count = 4370
-path_or_uri = "/Users/nagaet/pdb/afdb/UP000000625_83333_ECOLI_v6/pdb"
 role = ["batch-throughput"]
 
 [full_rerun]

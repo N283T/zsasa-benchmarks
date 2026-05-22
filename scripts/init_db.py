@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+from benchlib.datasets import DEFAULT_DATASETS_CONFIG, dataset_path, load_dataset_catalog
 from db_common import DEFAULT_DB, apply_schema, connect, load_toml, resolve
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -19,6 +20,7 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=ROOT.joinpath("config/tool-versions.toml"),
     )
+    parser.add_argument("--datasets", type=Path, default=DEFAULT_DATASETS_CONFIG)
     parser.add_argument("--manifest", type=Path, action="append", default=[])
     return parser.parse_args()
 
@@ -45,10 +47,12 @@ def seed_tools(conn, tool_versions: dict) -> None:
         )
 
 
-def seed_dataset_from_manifest(conn, manifest: dict) -> None:
+def seed_dataset_from_manifest(conn, manifest: dict, dataset_catalog: dict) -> None:
     dataset = manifest.get("dataset", {})
     if not dataset:
         return
+    dataset_id = str(dataset.get("id"))
+    path_or_uri = str(dataset_path(dataset_catalog, dataset_id, "path"))
     conn.execute(
         """
         INSERT OR REPLACE INTO datasets
@@ -56,7 +60,7 @@ def seed_dataset_from_manifest(conn, manifest: dict) -> None:
         VALUES (?, ?, ?, ?, ?, ?, ?)
         """,
         [
-            dataset.get("id"),
+            dataset_id,
             dataset.get("name") or dataset.get("id"),
             (
                 ",".join(dataset.get("role", []))
@@ -64,7 +68,7 @@ def seed_dataset_from_manifest(conn, manifest: dict) -> None:
                 else dataset.get("role")
             ),
             dataset.get("expected_count"),
-            dataset.get("path_or_uri") or dataset.get("historical_path"),
+            path_or_uri,
             dataset.get("redistribution_status"),
             manifest.get("description") or manifest.get("status"),
         ],
@@ -78,8 +82,9 @@ def main() -> None:
     try:
         apply_schema(conn)
         seed_tools(conn, load_toml(resolve(args.tool_versions)))
+        dataset_catalog = load_dataset_catalog(args.datasets)
         for manifest_path in args.manifest:
-            seed_dataset_from_manifest(conn, load_toml(resolve(manifest_path)))
+            seed_dataset_from_manifest(conn, load_toml(resolve(manifest_path)), dataset_catalog)
     finally:
         conn.close()
     print(f"initialized {db_path}")

@@ -3,22 +3,16 @@ status = "planning"
 
 [[datasets]]
 id = "5wvo_C_analysis"
-xtc = "/Users/nagaet/freesasa-zig/benchmarks/md_data/5wvo_C_analysis/5wvo_C_R1.xtc"
-pdb = "/Users/nagaet/freesasa-zig/benchmarks/md_data/5wvo_C_analysis/5wvo_C.pdb"
 atoms = 3858
 frames = 1001
 
 [[datasets]]
 id = "6sup_A_analysis"
-xtc = "/Users/nagaet/freesasa-zig/benchmarks/md_data/6sup_A_analysis/6sup_A_R1.xtc"
-pdb = "/Users/nagaet/freesasa-zig/benchmarks/md_data/6sup_A_analysis/6sup_A.pdb"
 atoms = 33377
 frames = 1001
 
 [[datasets]]
 id = "5vz0_A_protein"
-xtc = "/Users/nagaet/freesasa-zig/benchmarks/md_data/5vz0_A_protein/5vz0_A_prod_R1_fit.xtc"
-pdb = "/Users/nagaet/freesasa-zig/benchmarks/md_data/5vz0_A_protein/5vz0_A.pdb"
 atoms = 17910
 frames = 10001
 

@@ -17,6 +17,11 @@ from scripts.benchlib.commands import (  # noqa: E402
     freesasa_batch_command,
     lahuta_batch_command,
 )
+from scripts.benchlib.datasets import (  # noqa: E402
+    DEFAULT_DATASETS_CONFIG,
+    dataset_path,
+    load_dataset_catalog,
+)
 from scripts.benchlib.manifest import (  # noqa: E402
     expect_dict,
     expect_list,
@@ -46,6 +51,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--manifest", required=True, type=Path)
     parser.add_argument("--run-id", default=DEFAULT_RUN_ID)
     parser.add_argument("--tool-versions", type=Path, default=DEFAULT_TOOL_VERSIONS)
+    parser.add_argument("--datasets", type=Path, default=DEFAULT_DATASETS_CONFIG)
     parser.add_argument(
         "--dry-run",
         action="store_true",
@@ -237,11 +243,12 @@ def build_records(
     *,
     manifest: dict[str, Any],
     specs: dict[str, ToolSpec],
+    dataset_catalog: dict[str, dict[str, Any]],
     output_base: Path,
 ) -> list[CommandRecord]:
     dataset = expect_dict(manifest, "dataset")
     full_rerun = full_rerun_settings(manifest)
-    input_dir = resolve_repo_path(str(dataset.get("path_or_uri") or dataset["historical_path"]))
+    input_dir = dataset_path(dataset_catalog, str(dataset["id"]), "path")
     threads = int(full_rerun["threads"])
 
     zsasa = require_binary(specs, "zsasa")
@@ -309,6 +316,7 @@ def main() -> None:
     manifest_path = resolve_repo_path(args.manifest)
     manifest = load_manifest(manifest_path)
     specs = load_tool_specs(args.tool_versions)
+    dataset_catalog = load_dataset_catalog(args.datasets)
     full_rerun = full_rerun_settings(manifest)
     require_native_full_rerun_flags(full_rerun, runner="scripts/run_validation.py")
     source_kind = str(full_rerun["source_kind"])
@@ -317,6 +325,7 @@ def main() -> None:
     records = build_records(
         manifest=manifest,
         specs=specs,
+        dataset_catalog=dataset_catalog,
         output_base=output_base,
     )
     prepare_output_directories(manifest=manifest, output_base=output_base)
@@ -330,6 +339,7 @@ def main() -> None:
             "source_kind": source_kind,
             "threads": full_rerun["threads"],
             "tool_versions": str(resolve_repo_path(args.tool_versions)),
+            "datasets": str(resolve_repo_path(args.datasets)),
             "commands": [record.name for record in records],
         },
     )

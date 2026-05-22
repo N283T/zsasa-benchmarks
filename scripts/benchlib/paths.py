@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -10,7 +11,7 @@ ARCHIVES_DIR = ROOT.joinpath("archives")
 
 
 def resolve_repo_path(path: str | Path) -> Path:
-    candidate = Path(path)
+    candidate = Path(os.path.expandvars(str(path))).expanduser()
     return candidate if candidate.is_absolute() else ROOT.joinpath(candidate)
 
 
