@@ -27,7 +27,8 @@ from scripts.benchlib.manifest import expect_dict, load_manifest  # noqa: E402
 from scripts.benchlib.paths import full_rerun_dir, resolve_repo_path  # noqa: E402
 from scripts.benchlib.runner import (  # noqa: E402
     CommandRecord,
-    run_command,
+    filter_records,
+    run_records,
     shell_join,
     write_command_log,
     write_config,
@@ -60,6 +61,25 @@ def parse_args() -> argparse.Namespace:
         action="store_false",
         dest="dry_run",
         help="execute commands instead of only printing the plan",
+    )
+    parser.add_argument(
+        "--only",
+        action="append",
+        default=[],
+        metavar="GLOB",
+        help="run only command records whose names match this glob; repeatable",
+    )
+    parser.add_argument(
+        "--exclude",
+        action="append",
+        default=[],
+        metavar="GLOB",
+        help="skip command records whose names match this glob; repeatable",
+    )
+    parser.add_argument(
+        "--replace",
+        action="store_true",
+        help="remove selected command outputs before running; dry-runs only print removals",
     )
     return parser.parse_args()
 
@@ -166,6 +186,12 @@ def build_native_records(
                     records.append(
                         CommandRecord(
                             name=name,
+                            outputs=[
+                                output_base.joinpath(
+                                    "zsasa", f"{precision}_{suffix}_{thread}t_{n_points}p.jsonl"
+                                ),
+                                output_base.joinpath("hyperfine", f"{name}.json"),
+                            ],
                             argv=hyperfine_command(
                                 name=name,
                                 command=shell_join(native),
@@ -222,9 +248,25 @@ def build_native_records(
                     )
                 )
             for name, native in comparator_commands:
+                output_stem = name.removeprefix("lahuta_")
+                lahuta_outputs = [
+                    output_base.joinpath("lahuta", output_stem),
+                    output_base.joinpath("lahuta", f"{output_stem}.jsonl"),
+                ]
+                native_outputs = {
+                    "freesasa_batch": [
+                        output_base.joinpath("freesasa_batch", f"{thread}t_{n_points}p")
+                    ],
+                    "rustsasa": [output_base.joinpath("rustsasa", f"{thread}t_{n_points}p")],
+                    "lahuta": lahuta_outputs,
+                }
+                tool_outputs = next(
+                    outputs for prefix, outputs in native_outputs.items() if name.startswith(prefix)
+                )
                 records.append(
                     CommandRecord(
                         name=name,
+                        outputs=[*tool_outputs, output_base.joinpath("hyperfine", f"{name}.json")],
                         argv=hyperfine_command(
                             name=name,
                             command=shell_join(native),
@@ -282,8 +324,9 @@ def main() -> None:
         settings=settings,
     )
     prepare_output_directories(output_base=output_base, settings=settings)
+    selected_records = filter_records(records, only=args.only, exclude=args.exclude)
 
-    write_command_log(output_base.joinpath("commands.log"), records)
+    write_command_log(output_base.joinpath("commands.log"), selected_records)
     write_config(
         output_base.joinpath("config.json"),
         {
@@ -298,7 +341,10 @@ def main() -> None:
             "precisions": settings["precisions"],
             "tool_versions": str(resolve_repo_path(args.tool_versions)),
             "datasets": str(resolve_repo_path(args.datasets)),
-            "commands": [record.name for record in records],
+            "only": list(args.only),
+            "exclude": list(args.exclude),
+            "replace": bool(args.replace),
+            "commands": [record.name for record in selected_records],
             "rustsasa_note": (
                 "RustSASA batch command is a dry-run plan for the pinned comparator invocation."
             ),
@@ -311,9 +357,8 @@ def main() -> None:
     print(f"input_dir={input_dir}")
     print(f"output_base={output_base}")
     print(f"mode={'dry-run' if args.dry_run else 'execute'}")
-    for record in records:
-        print(f"# name: {record.name}")
-        run_command(record, execute=not args.dry_run)
+    print(f"selected_commands={len(selected_records)}/{len(records)}")
+    run_records(selected_records, execute=not args.dry_run, replace=bool(args.replace))
 
 
 if __name__ == "__main__":

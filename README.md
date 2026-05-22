@@ -33,6 +33,20 @@ The `nix develop` shell provides the pinned `zsasa` CLI from `github:N283T/zsasa
 
 Local dataset paths are centralized in `config/datasets.local.toml` (ignored). Copy `config/datasets.toml.example` and adjust paths before real runs.
 
+## Selective reruns
+
+Native runners accept command-record glob filters for targeted reruns:
+
+```bash
+python scripts/run_validation.py --manifest manifests/validation-ecoli.toml --datasets config/datasets.local.toml --run-id v0_6_0_full --only 'rustsasa_*' --replace --execute
+python scripts/run_batch.py --manifest manifests/batch-ecoli.toml --datasets config/datasets.local.toml --run-id v0_6_0_full --only 'zsasa_batch_*_10t_*' --dry-run
+uv run python scripts/run_trajectory_validation.py --manifest manifests/validation-md-5wvo.toml --datasets config/datasets.local.toml --run-id v0_6_0_full --only 'zig_bitmask_*_1000p' --dry-run
+```
+
+Use `--only` and `--exclude` repeatedly to combine conditions. Use `--replace` only when
+you want the selected outputs removed before execution; dry-runs print the paths that would
+be removed without deleting anything.
+
 ## Repository layout
 
 ```text
