@@ -76,13 +76,18 @@ def require_tools(specs: dict[str, ToolSpec], tool_ids: list[str]) -> dict[str, 
             if not spec.binary.exists() or not os.access(spec.binary, os.X_OK):
                 raise ToolError(f"missing executable for {tool_id}: {spec.binary}")
             if spec.check_args:
-                subprocess.run(
-                    [str(spec.binary), *spec.check_args],
-                    check=False,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                    timeout=20,
-                )
+                try:
+                    proc = subprocess.run(
+                        [str(spec.binary), *spec.check_args],
+                        check=False,
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                        timeout=20,
+                    )
+                except (subprocess.TimeoutExpired, OSError) as error:
+                    raise ToolError(f"check command failed for {tool_id}: {error}") from error
+                if proc.returncode != 0:
+                    raise ToolError(f"check command failed for {tool_id}: exit {proc.returncode}")
         checked[tool_id] = spec
     return checked
 

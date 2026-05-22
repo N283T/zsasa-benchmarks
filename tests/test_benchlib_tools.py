@@ -52,3 +52,23 @@ def test_require_tools_accepts_executable(tmp_path: Path) -> None:
     }
     checked = require_tools(specs, ["fake"])
     assert checked["fake"].binary == binary
+
+
+def test_require_tools_rejects_failing_check_command(tmp_path: Path) -> None:
+    binary = tmp_path.joinpath("fake-tool")
+    binary.write_text("#!/bin/sh\nexit 42\n", encoding="utf-8")
+    binary.chmod(0o755)
+    specs = {
+        "fake": ToolSpec(
+            tool_id="fake",
+            repository=None,
+            version="1.0",
+            tag=None,
+            commit=None,
+            binary=binary,
+            check_args=["--version"],
+            policy="test",
+        )
+    }
+    with pytest.raises(ToolError, match="check command failed for fake"):
+        require_tools(specs, ["fake"])
