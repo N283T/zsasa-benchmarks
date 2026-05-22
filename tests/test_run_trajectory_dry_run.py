@@ -84,6 +84,56 @@ def test_run_trajectory_dry_run_outputs_native_hyperfine_commands() -> None:
     assert output_base.joinpath("raw", "5vz0_A_protein", "zig").is_dir()
 
 
+def test_run_trajectory_rejects_disabled_full_rerun_flags(tmp_path: Path) -> None:
+    manifest = Path("manifests/trajectory.toml").read_text(encoding="utf-8")
+    manifest = manifest.replace("rerun_zsasa = true", "rerun_zsasa = false")
+    manifest_path = tmp_path / "trajectory.toml"
+    manifest_path.write_text(manifest, encoding="utf-8")
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "scripts/run_trajectory.py",
+            "--manifest",
+            str(manifest_path),
+            "--run-id",
+            "test_run_disabled_flags",
+            "--dry-run",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert proc.returncode != 0
+    assert "rerun_zsasa must be true" in proc.stderr
+
+
+def test_run_trajectory_validation_rejects_disabled_full_rerun_flags(tmp_path: Path) -> None:
+    manifest = Path("manifests/validation-md-5wvo.toml").read_text(encoding="utf-8")
+    manifest = manifest.replace("rerun_comparators = true", "rerun_comparators = false")
+    manifest_path = tmp_path / "validation-md-5wvo.toml"
+    manifest_path.write_text(manifest, encoding="utf-8")
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "scripts/run_trajectory_validation.py",
+            "--manifest",
+            str(manifest_path),
+            "--run-id",
+            "test_run_disabled_flags",
+            "--dry-run",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert proc.returncode != 0
+    assert "rerun_comparators must be true" in proc.stderr
+
+
 def test_trajectory_tools_module_help_is_available() -> None:
     proc = subprocess.run(
         [

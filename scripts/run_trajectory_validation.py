@@ -13,7 +13,11 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.benchlib.commands import mdtraj_runner_command  # noqa: E402
-from scripts.benchlib.manifest import expect_dict, load_manifest  # noqa: E402
+from scripts.benchlib.manifest import (  # noqa: E402
+    expect_dict,
+    load_manifest,
+    require_native_full_rerun_flags,
+)
 from scripts.benchlib.paths import full_rerun_dir, resolve_repo_path  # noqa: E402
 from scripts.benchlib.runner import (  # noqa: E402
     CommandRecord,
@@ -95,6 +99,7 @@ def main() -> None:
     manifest = load_manifest(manifest_path)
     dataset = expect_dict(manifest, "dataset")
     settings = full_rerun_settings(manifest)
+    require_native_full_rerun_flags(settings, runner="scripts/run_trajectory_validation.py")
     dataset_id = str(dataset["id"])
     output_base = full_rerun_dir(args.run_id, "validation_md", dataset_id)
     output_base.mkdir(parents=True, exist_ok=True)

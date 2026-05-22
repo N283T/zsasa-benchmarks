@@ -48,3 +48,13 @@ def expect_int(mapping: dict[str, Any], key: str) -> int:
     if isinstance(value, bool) or not isinstance(value, int):
         raise ManifestError(f"{key} must be an integer")
     return value
+
+
+def require_native_full_rerun_flags(settings: dict[str, Any], *, runner: str) -> None:
+    """Reject partial full-rerun manifests for native runners."""
+    for key in ["rerun_zsasa", "rerun_comparators"]:
+        if settings.get(key) is not True:
+            raise SystemExit(
+                f"{key} must be true for {runner}; "
+                "native full-rerun runners do not support partial reruns"
+            )

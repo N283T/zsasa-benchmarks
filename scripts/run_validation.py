@@ -17,7 +17,12 @@ from scripts.benchlib.commands import (  # noqa: E402
     freesasa_batch_command,
     lahuta_batch_command,
 )
-from scripts.benchlib.manifest import expect_dict, expect_list, load_manifest  # noqa: E402
+from scripts.benchlib.manifest import (  # noqa: E402
+    expect_dict,
+    expect_list,
+    load_manifest,
+    require_native_full_rerun_flags,
+)
 from scripts.benchlib.paths import full_rerun_dir, resolve_repo_path  # noqa: E402
 from scripts.benchlib.runner import (  # noqa: E402
     CommandRecord,
@@ -269,12 +274,37 @@ def build_records(
     return records
 
 
+
+def prepare_output_directories(*, manifest: dict[str, Any], output_base: Path) -> None:
+    directories = [output_base, output_base.joinpath("zsasa")]
+
+    for run in expect_list(manifest, "runs"):
+        if not isinstance(run, dict):
+            continue
+        algorithm = str(run.get("algorithm", ""))
+        if algorithm != "sr":
+            continue
+        for n_points in [int(point) for point in run.get("points", [])]:
+            directories.extend(
+                [
+                    output_base.joinpath("freesasa_batch", f"sr_{n_points}"),
+                    output_base.joinpath("rustsasa", f"sr_{n_points}"),
+                    output_base.joinpath("lahuta", f"sr_standard_{n_points}"),
+                    output_base.joinpath("lahuta", f"sr_bitmask_{n_points}"),
+                ]
+            )
+
+    for directory in directories:
+        directory.mkdir(parents=True, exist_ok=True)
+
+
 def main() -> None:
     args = parse_args()
     manifest_path = resolve_repo_path(args.manifest)
     manifest = load_manifest(manifest_path)
     specs = load_tool_specs(args.tool_versions)
     full_rerun = full_rerun_settings(manifest)
+    require_native_full_rerun_flags(full_rerun, runner="scripts/run_validation.py")
     source_kind = str(full_rerun["source_kind"])
     output_base = full_rerun_dir(args.run_id, "validation", "ecoli")
 
@@ -283,6 +313,7 @@ def main() -> None:
         specs=specs,
         output_base=output_base,
     )
+    prepare_output_directories(manifest=manifest, output_base=output_base)
 
     write_command_log(output_base.joinpath("commands.log"), records)
     write_config(

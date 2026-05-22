@@ -14,7 +14,11 @@ if str(ROOT) not in sys.path:
 
 from scripts.benchlib.commands import mdtraj_runner_command  # noqa: E402
 from scripts.benchlib.hyperfine import hyperfine_command  # noqa: E402
-from scripts.benchlib.manifest import expect_list, load_manifest  # noqa: E402
+from scripts.benchlib.manifest import (  # noqa: E402
+    expect_list,
+    load_manifest,
+    require_native_full_rerun_flags,
+)
 from scripts.benchlib.paths import full_rerun_dir, resolve_repo_path  # noqa: E402
 from scripts.benchlib.runner import (  # noqa: E402
     CommandRecord,
@@ -147,6 +151,7 @@ def main() -> None:
     manifest = load_manifest(manifest_path)
     datasets = expect_list(manifest, "datasets")
     settings = full_rerun_settings(manifest)
+    require_native_full_rerun_flags(settings, runner="scripts/run_trajectory.py")
     output_base = full_rerun_dir(args.run_id, "md")
     output_base.mkdir(parents=True, exist_ok=True)
 
