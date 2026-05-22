@@ -42,6 +42,7 @@ REQUIRED_FILES = [
     "scripts/refresh_validation.py",
     "scripts/refresh_validation_md.py",
     "scripts/run_validation.py",
+    "scripts/run_batch.py",
     "scripts/smoke_db.py",
     "scripts/benchlib/commands.py",
     "scripts/benchlib/manifest.py",
@@ -144,6 +145,7 @@ def main() -> None:
 
     phase1_runner_files = [
         "scripts/run_validation.py",
+        "scripts/run_batch.py",
         "scripts/benchlib/commands.py",
         "scripts/benchlib/manifest.py",
         "scripts/benchlib/paths.py",
@@ -163,6 +165,13 @@ def main() -> None:
         fail("batch manifest must restrict the first refresh to zsasa tools")
     if refresh.get("threads") != [1, 2, 4, 8, 10] or refresh.get("n_points") != 128:
         fail("batch manifest must describe the refreshed E. coli scaling settings")
+    batch_full_rerun = batch_manifest.get("full_rerun", {})
+    if batch_full_rerun.get("source_kind") != "full_rerun":
+        fail("batch manifest must define the native full_rerun source kind")
+    if batch_full_rerun.get("threads") != [1, 2, 4, 8, 10]:
+        fail("batch full_rerun must preserve the E. coli scaling threads")
+    if batch_full_rerun.get("n_points") != 128:
+        fail("batch full_rerun must define the 128-point batch setting")
 
     batch_plan = ROOT.joinpath("docs/batch-rerun-plan.md").read_text(encoding="utf-8")
     for phrase in [
@@ -194,6 +203,11 @@ def main() -> None:
         fail("human batch manifest must describe the completed t10 refresh")
     if human_refresh.get("tools") != ["zig", "zig_bitmask"]:
         fail("human batch manifest must restrict the refresh to zsasa tools")
+    human_full_rerun = human_manifest.get("full_rerun", {})
+    if human_full_rerun.get("source_kind") != "full_rerun":
+        fail("human batch manifest must define the native full_rerun source kind")
+    if human_full_rerun.get("threads") != [10] or human_full_rerun.get("runs") != 10:
+        fail("human batch full_rerun must mirror the t10 rerun shape")
 
     human_log = ROOT.joinpath("docs/batch-human-rerun-log.md").read_text(encoding="utf-8")
     for phrase in [
