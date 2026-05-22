@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from unittest.mock import patch
 
+import pytest
 from scripts.benchlib.hyperfine import hyperfine_command, parse_hyperfine_result
-from scripts.benchlib.runner import CommandRecord, write_command_log, write_config
+from scripts.benchlib.runner import CommandRecord, run_command, write_command_log, write_config
 
 
 def test_write_command_log(tmp_path: Path) -> None:
@@ -12,6 +14,16 @@ def test_write_command_log(tmp_path: Path) -> None:
     path = tmp_path.joinpath("commands.log")
     write_command_log(path, records)
     assert "echo hello" in path.read_text(encoding="utf-8")
+
+
+def test_run_command_dry_run_does_not_execute(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    record = CommandRecord(name="example", argv=["echo", "hello"], cwd=tmp_path)
+    with patch("scripts.benchlib.runner.subprocess.run") as run_mock:
+        run_command(record, execute=False)
+    run_mock.assert_not_called()
+    assert "echo hello" in capsys.readouterr().out
 
 
 def test_write_config(tmp_path: Path) -> None:
