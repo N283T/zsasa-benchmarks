@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Native static validation dry-run runner for the E. coli full rerun."""
+
 from __future__ import annotations
 
 import argparse
@@ -16,7 +17,7 @@ from scripts.benchlib.commands import (  # noqa: E402
     freesasa_batch_command,
     lahuta_batch_command,
 )
-from scripts.benchlib.manifest import expect_dict, load_manifest  # noqa: E402
+from scripts.benchlib.manifest import expect_dict, expect_list, load_manifest  # noqa: E402
 from scripts.benchlib.paths import full_rerun_dir, resolve_repo_path  # noqa: E402
 from scripts.benchlib.runner import (  # noqa: E402
     CommandRecord,
@@ -69,24 +70,64 @@ def full_rerun_settings(manifest: dict[str, Any]) -> dict[str, Any]:
     return full_rerun
 
 
-def build_records(
+def zsasa_lr_batch_command(
     *,
-    manifest: dict[str, Any],
-    specs: dict[str, ToolSpec],
+    binary: Path,
+    input_dir: Path,
+    output_jsonl: Path,
+    precision: str,
+    n_slices: int,
+    threads: int,
+) -> list[str]:
+    return [
+        str(binary),
+        "batch",
+        str(input_dir),
+        "--format=jsonl",
+        "-o",
+        str(output_jsonl),
+        f"--threads={threads}",
+        f"--precision={precision}",
+        "--algorithm=lr",
+        f"--n-slices={n_slices}",
+    ]
+
+
+def rustsasa_validation_command(
+    *,
+    binary: Path,
+    input_dir: Path,
+    output_dir: Path,
+    n_points: int,
+    threads: int,
+) -> list[str]:
+    return [
+        str(binary),
+        str(input_dir),
+        str(output_dir),
+        "-n",
+        str(n_points),
+        "-t",
+        str(threads),
+        "-o",
+        "protein",
+        "--allow-vdw-fallback",
+    ]
+
+
+def sr_records(
+    *,
+    zsasa: Path,
+    freesasa_batch: Path,
+    lahuta: Path,
+    rustsasa: Path,
+    input_dir: Path,
     output_base: Path,
+    points: list[int],
+    threads: int,
 ) -> list[CommandRecord]:
-    dataset = expect_dict(manifest, "dataset")
-    full_rerun = full_rerun_settings(manifest)
-    input_dir = resolve_repo_path(str(dataset["historical_path"]))
-    threads = int(full_rerun["threads"])
-
-    zsasa = require_binary(specs, "zsasa")
-    freesasa_batch = require_binary(specs, "freesasa_batch")
-    lahuta = require_binary(specs, "lahuta")
-
     records: list[CommandRecord] = []
-    sr_points = [64, 128, 256]
-    for n_points in sr_points:
+    for n_points in points:
         for precision in ["f64", "f32"]:
             for bitmask in [False, True]:
                 suffix = "bitmask" if bitmask else "standard"
@@ -119,6 +160,18 @@ def build_records(
                 ),
             )
         )
+        records.append(
+            CommandRecord(
+                name=f"rustsasa_sr_{n_points}",
+                argv=rustsasa_validation_command(
+                    binary=rustsasa,
+                    input_dir=input_dir,
+                    output_dir=output_base.joinpath("rustsasa", f"sr_{n_points}"),
+                    n_points=n_points,
+                    threads=threads,
+                ),
+            )
+        )
         for bitmask in [False, True]:
             suffix = "bitmask" if bitmask else "standard"
             records.append(
@@ -132,6 +185,82 @@ def build_records(
                         threads=threads,
                         bitmask=bitmask,
                     ),
+                )
+            )
+    return records
+
+
+def lr_records(
+    *,
+    zsasa: Path,
+    input_dir: Path,
+    output_base: Path,
+    slices: list[int],
+    threads: int,
+) -> list[CommandRecord]:
+    records: list[CommandRecord] = []
+    for n_slices in slices:
+        for precision in ["f64", "f32"]:
+            records.append(
+                CommandRecord(
+                    name=f"zsasa_lr_{precision}_{n_slices}",
+                    argv=zsasa_lr_batch_command(
+                        binary=zsasa,
+                        input_dir=input_dir,
+                        output_jsonl=output_base.joinpath(
+                            "zsasa", f"lr_{precision}_{n_slices}.jsonl"
+                        ),
+                        precision=precision,
+                        n_slices=n_slices,
+                        threads=threads,
+                    ),
+                )
+            )
+    return records
+
+
+def build_records(
+    *,
+    manifest: dict[str, Any],
+    specs: dict[str, ToolSpec],
+    output_base: Path,
+) -> list[CommandRecord]:
+    dataset = expect_dict(manifest, "dataset")
+    full_rerun = full_rerun_settings(manifest)
+    input_dir = resolve_repo_path(str(dataset["historical_path"]))
+    threads = int(full_rerun["threads"])
+
+    zsasa = require_binary(specs, "zsasa")
+    freesasa_batch = require_binary(specs, "freesasa_batch")
+    lahuta = require_binary(specs, "lahuta")
+    rustsasa = require_binary(specs, "rustsasa")
+
+    records: list[CommandRecord] = []
+    for run in expect_list(manifest, "runs"):
+        if not isinstance(run, dict):
+            continue
+        algorithm = str(run.get("algorithm", ""))
+        if algorithm == "sr":
+            records.extend(
+                sr_records(
+                    zsasa=zsasa,
+                    freesasa_batch=freesasa_batch,
+                    lahuta=lahuta,
+                    rustsasa=rustsasa,
+                    input_dir=input_dir,
+                    output_base=output_base,
+                    points=[int(point) for point in run.get("points", [])],
+                    threads=threads,
+                )
+            )
+        elif algorithm == "lr":
+            records.extend(
+                lr_records(
+                    zsasa=zsasa,
+                    input_dir=input_dir,
+                    output_base=output_base,
+                    slices=[int(point) for point in run.get("points", [])],
+                    threads=threads,
                 )
             )
 
