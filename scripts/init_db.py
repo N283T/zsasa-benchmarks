@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Initialize a DuckDB benchmark database and seed static metadata."""
+
 from __future__ import annotations
 
 import argparse
@@ -13,7 +14,11 @@ ROOT = Path(__file__).resolve().parents[1]
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--db", type=Path, default=DEFAULT_DB)
-    parser.add_argument("--tool-versions", type=Path, default=ROOT.joinpath("config/tool-versions.toml"))
+    parser.add_argument(
+        "--tool-versions",
+        type=Path,
+        default=ROOT.joinpath("config/tool-versions.toml"),
+    )
     parser.add_argument("--manifest", type=Path, action="append", default=[])
     return parser.parse_args()
 
@@ -53,9 +58,13 @@ def seed_dataset_from_manifest(conn, manifest: dict) -> None:
         [
             dataset.get("id"),
             dataset.get("name") or dataset.get("id"),
-            ",".join(dataset.get("role", [])) if isinstance(dataset.get("role"), list) else dataset.get("role"),
+            (
+                ",".join(dataset.get("role", []))
+                if isinstance(dataset.get("role"), list)
+                else dataset.get("role")
+            ),
             dataset.get("expected_count"),
-            dataset.get("historical_path") or dataset.get("path_or_uri"),
+            dataset.get("path_or_uri") or dataset.get("historical_path"),
             dataset.get("redistribution_status"),
             manifest.get("description") or manifest.get("status"),
         ],

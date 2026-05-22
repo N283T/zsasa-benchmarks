@@ -1,31 +1,13 @@
-id = "batch-human-zsasa-v0.6.0-refresh"
-status = "completed"
+# Human batch throughput manifest for same-harness full reruns.
+
+id = "batch-human-full-rerun"
+status = "planning"
 
 [dataset]
 id = "UP000005640_9606_HUMAN_v6_pdb"
 expected_count = 23586
-historical_path = "/Users/nagaet/pdb/afdb/UP000005640_9606_HUMAN_v6/pdb"
+path_or_uri = "/Users/nagaet/pdb/afdb/UP000005640_9606_HUMAN_v6/pdb"
 role = ["batch-throughput"]
-
-[historical_results]
-results_dir = "/Users/nagaet/freesasa-zig/benchmarks/results/batch/128/human_t10"
-secondary_results_dir = "/Users/nagaet/freesasa-zig/benchmarks/results/batch/128/human"
-policy = "reuse existing comparator timings unless a full benchmark rerun is explicitly approved"
-
-[refresh]
-source_kind = "zsasa_v0.6.0_refresh"
-rerun_zsasa_only = true
-rerun_comparators = false
-tools = ["zig", "zig_bitmask"]
-n_points = 128
-threads = [10]
-runs = 10
-warmup = 3
-precisions = ["f64", "f32"]
-prepare = "sync"
-
-[refresh.output]
-default_dir = "results/batch/zsasa_v0_6_0_human_t10"
 
 [full_rerun]
 source_kind = "full_rerun"

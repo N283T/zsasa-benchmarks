@@ -241,7 +241,7 @@ def build_records(
 ) -> list[CommandRecord]:
     dataset = expect_dict(manifest, "dataset")
     full_rerun = full_rerun_settings(manifest)
-    input_dir = resolve_repo_path(str(dataset["historical_path"]))
+    input_dir = resolve_repo_path(str(dataset.get("path_or_uri") or dataset["historical_path"]))
     threads = int(full_rerun["threads"])
 
     zsasa = require_binary(specs, "zsasa")

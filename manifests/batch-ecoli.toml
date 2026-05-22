@@ -1,32 +1,13 @@
-# Batch benchmark manifest placeholder.
-# Existing comparator outputs may be reused for first archive/preprint, but no rerun is scheduled here yet.
+# E. coli batch throughput manifest for same-harness full reruns.
 
-id = "batch-ecoli-existing-comparator-baseline"
+id = "batch-ecoli-full-rerun"
 status = "planning"
 
 [dataset]
 id = "UP000000625_83333_ECOLI_v6_pdb"
 expected_count = 4370
-historical_path = "/Users/nagaet/pdb/afdb/UP000000625_83333_ECOLI_v6/pdb"
+path_or_uri = "/Users/nagaet/pdb/afdb/UP000000625_83333_ECOLI_v6/pdb"
 role = ["batch-throughput"]
-
-[historical_results]
-results_dir = "/Users/nagaet/freesasa-zig/benchmarks/results/batch/128/ecoli_t10"
-policy = "reuse existing comparator timings unless a full benchmark rerun is explicitly approved"
-
-[planned_refresh]
-rerun_zsasa_only = true
-rerun_comparators = false
-source_kind = "zsasa_v0.6.0_refresh"
-tools = ["zig", "zig_bitmask"]
-n_points = 128
-threads = [1, 2, 4, 8, 10]
-runs = 3
-warmup = 3
-prepare = "sync"
-
-[planned_refresh.output]
-default_dir = "results/batch/zsasa_v0_6_0_ecoli_scaling"
 
 [full_rerun]
 source_kind = "full_rerun"

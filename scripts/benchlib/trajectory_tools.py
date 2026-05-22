@@ -3,7 +3,7 @@
 The native dry-run runners emit commands through this module so each planned
 trajectory invocation has one importable entrypoint, an explicit output path,
 and a small command-stub mode for tests. Real execution is implemented for the
-same tool labels used by the historical trajectory benchmark scripts, while
+same tool labels used by the trajectory benchmark runners, while
 unit tests exercise command construction without running large trajectories.
 """
 
@@ -80,7 +80,7 @@ def build_zsasa_traj_command(
     include_hydrogens: bool,
     classifier: str,
 ) -> list[str]:
-    """Build a zsasa CLI trajectory command matching historical MD benches."""
+    """Build a zsasa CLI trajectory command matching the MD benchmark settings."""
     cmd = [
         str(binary),
         "traj",

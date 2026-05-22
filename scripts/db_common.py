@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Shared helpers for DuckDB-backed benchmark scripts."""
+
 from __future__ import annotations
 
 import hashlib
@@ -24,7 +25,9 @@ def resolve(path: Path, base: Path = ROOT) -> Path:
 def stable_id(*parts: object) -> str:
     raw = "::".join(str(part) for part in parts)
     digest = hashlib.sha1(raw.encode("utf-8")).hexdigest()[:12]
-    safe = "_".join(str(part).replace("/", "_").replace(" ", "_") for part in parts if part is not None)
+    safe = "_".join(
+        str(part).replace("/", "_").replace(" ", "_") for part in parts if part is not None
+    )
     return f"{safe}_{digest}"[:180]
 
 

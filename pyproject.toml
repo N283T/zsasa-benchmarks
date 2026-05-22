@@ -21,6 +21,7 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
+norecursedirs = ["external", "results", "archives"]
 
 [tool.uv.sources]
 zsasa = { git = "https://github.com/N283T/zsasa", subdirectory = "python", rev = "v0.6.0" }
