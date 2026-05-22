@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
+import pytest
 from scripts.benchlib.commands import (
     batch_command,
     freesasa_batch_command,
@@ -54,32 +56,115 @@ def test_batch_command_writes_jsonl() -> None:
 
 
 def test_freesasa_batch_command() -> None:
-    cmd = freesasa_batch_command(Path("/bin/freesasa_batch"), Path("pdbs"), Path("out"), 128, 10)
-    assert cmd == ["/bin/freesasa_batch", "pdbs", "out", "--n-threads=10", "--n-points=128"]
+    cmd = freesasa_batch_command(
+        binary=Path("/bin/freesasa_batch"),
+        input_dir=Path("pdbs"),
+        output_dir=Path("out"),
+        n_points=128,
+        threads=10,
+    )
+    assert cmd == [
+        "/bin/freesasa_batch",
+        "pdbs",
+        "out",
+        "--n-threads=10",
+        "--n-points=128",
+    ]
 
 
 def test_rustsasa_single_command() -> None:
     cmd = rustsasa_single_command(
-        Path("/bin/rust-sasa"),
-        Path("input.pdb"),
-        Path("out.json"),
-        100,
-        2,
+        binary=Path("/bin/rust-sasa"),
+        input_path=Path("input.pdb"),
+        output_path=Path("out.json"),
+        n_points=100,
+        threads=2,
     )
-    assert "--allow-vdw-fallback" in cmd
-    assert "-n" in cmd
-    assert "100" in cmd
+    assert cmd == [
+        "/bin/rust-sasa",
+        "input.pdb",
+        "out.json",
+        "-n",
+        "100",
+        "-t",
+        "2",
+        "-o",
+        "protein",
+        "--allow-vdw-fallback",
+    ]
 
 
 def test_lahuta_batch_command() -> None:
-    cmd = lahuta_batch_command(Path("/bin/lahuta"), Path("pdbs"), Path("out"), 128, 10, True)
-    assert "sasa-sr" in cmd
-    assert "--use-bitmask" in cmd
-    assert "--points" in cmd
+    cmd = lahuta_batch_command(
+        binary=Path("/bin/lahuta"),
+        input_dir=Path("pdbs"),
+        output_dir=Path("out"),
+        n_points=128,
+        threads=10,
+        bitmask=True,
+    )
+    assert cmd == [
+        "/bin/lahuta",
+        "sasa-sr",
+        "-f",
+        "pdbs",
+        "--is_af2_model",
+        "--points",
+        "128",
+        "-t",
+        "10",
+        "--output",
+        "out",
+        "--progress",
+        "0",
+        "--use-bitmask",
+    ]
 
 
 def test_mdtraj_runner_command() -> None:
-    cmd = mdtraj_runner_command("mdtraj", Path("traj.xtc"), Path("top.pdb"), 100, 1)
-    assert cmd[:3] == ["python", "-m", "scripts.benchlib.trajectory_tools"]
-    assert "--tool" in cmd
-    assert "mdtraj" in cmd
+    cmd = mdtraj_runner_command(
+        tool="mdtraj",
+        xtc=Path("traj.xtc"),
+        pdb=Path("top.pdb"),
+        n_points=100,
+        stride=1,
+        python="python",
+    )
+    assert cmd == [
+        "python",
+        "-m",
+        "scripts.benchlib.trajectory_tools",
+        "--tool",
+        "mdtraj",
+        "--xtc",
+        "traj.xtc",
+        "--pdb",
+        "top.pdb",
+        "--n-points",
+        "100",
+        "--stride",
+        "1",
+    ]
+
+
+@pytest.mark.parametrize(
+    ("builder", "args"),
+    [
+        (
+            freesasa_batch_command,
+            (Path("/bin/freesasa_batch"), Path("pdbs"), Path("out"), 128, 10),
+        ),
+        (
+            rustsasa_single_command,
+            (Path("/bin/rust-sasa"), Path("input.pdb"), Path("out.json"), 100, 2),
+        ),
+        (
+            lahuta_batch_command,
+            (Path("/bin/lahuta"), Path("pdbs"), Path("out"), 128, 10, True),
+        ),
+        (mdtraj_runner_command, ("mdtraj", Path("traj.xtc"), Path("top.pdb"), 100, 1)),
+    ],
+)
+def test_command_builders_are_keyword_only(builder: Any, args: tuple[object, ...]) -> None:
+    with pytest.raises(TypeError):
+        builder(*args)

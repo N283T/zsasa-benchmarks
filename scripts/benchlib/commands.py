@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 
@@ -64,6 +65,7 @@ def batch_command(
 
 
 def freesasa_batch_command(
+    *,
     binary: Path,
     input_dir: Path,
     output_dir: Path,
@@ -80,6 +82,7 @@ def freesasa_batch_command(
 
 
 def rustsasa_single_command(
+    *,
     binary: Path,
     input_path: Path,
     output_path: Path,
@@ -101,6 +104,7 @@ def rustsasa_single_command(
 
 
 def lahuta_batch_command(
+    *,
     binary: Path,
     input_dir: Path,
     output_dir: Path,
@@ -129,14 +133,16 @@ def lahuta_batch_command(
 
 
 def mdtraj_runner_command(
+    *,
     tool: str,
     xtc: Path,
     pdb: Path,
     n_points: int,
     stride: int,
+    python: Path | str | None = None,
 ) -> list[str]:
     return [
-        "python",
+        str(python or sys.executable),
         "-m",
         "scripts.benchlib.trajectory_tools",
         "--tool",
