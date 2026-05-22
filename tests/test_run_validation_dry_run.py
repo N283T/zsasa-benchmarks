@@ -24,6 +24,7 @@ def test_run_validation_dry_run_outputs_native_commands() -> None:
     assert "zsasa" in proc.stdout
     assert "freesasa_batch" in proc.stdout
     assert "rustsasa" in proc.stdout
+    assert " -f pdb " in proc.stdout
     assert "--n-points=100" in proc.stdout
     assert "--n-points=1000" in proc.stdout
     assert "--n-slices=20" in proc.stdout

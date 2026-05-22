@@ -107,6 +107,8 @@ def rustsasa_validation_command(
         str(output_dir),
         "-n",
         str(n_points),
+        "-f",
+        "pdb",
         "-t",
         str(threads),
         "-o",
