@@ -7,7 +7,7 @@ repository = "https://github.com/N283T/zsasa"
 tag = "v0.6.0"
 commit = "94fdc1ee0ba27063d7cfe69e915e8425474316e1"
 zig = "0.16.0"
-binary = "/Users/nagaet/freesasa-zig/zig-out/bin/zsasa"
+binary = "zsasa"
 check_args = ["--version"]
 
 [freesasa]
@@ -49,14 +49,21 @@ check_args = ["--version"]
 [mdtraj]
 policy = "rerun native mdtraj trajectory comparator for same-session manuscript evidence"
 repository = "https://github.com/mdtraj/mdtraj"
-version = "pin in final environment report"
+version = "1.11.1.post1"
 python_module = "mdtraj"
+check_args = []
+
+[mdanalysis]
+policy = "runtime dependency for zsasa MDAnalysis wrappers and mdsasa-bolt trajectory runs"
+repository = "https://github.com/MDAnalysis/mdanalysis"
+version = "2.10.0"
+python_module = "MDAnalysis"
 check_args = []
 
 [mdsasa_bolt]
 policy = "rerun trajectory comparator for same-session manuscript evidence"
 repository = "https://github.com/refresh-bio/mdsasa-bolt"
-version = "pin in final environment report"
+version = "4.0.1"
 python_module = "mdsasa_bolt"
 check_args = []
 

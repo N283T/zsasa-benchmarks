@@ -27,7 +27,7 @@ from scripts.benchlib.runner import (  # noqa: E402
     write_command_log,
     write_config,
 )
-from scripts.benchlib.tools import load_tool_specs  # noqa: E402
+from scripts.benchlib.tools import load_tool_specs, resolve_tool_binary  # noqa: E402
 
 DEFAULT_RUN_ID = "v0_6_0_full"
 
@@ -103,8 +103,8 @@ def require_zsasa_binary(tool_versions: Path) -> Path:
     specs = load_tool_specs(tool_versions)
     spec = specs.get("zsasa")
     if spec is None or spec.binary is None:
-        return Path("zsasa")
-    return spec.binary
+        return resolve_tool_binary("zsasa", Path("zsasa"))
+    return resolve_tool_binary("zsasa", spec.binary)
 
 
 def tools_for_dataset(dataset: dict[str, Any], settings: dict[str, Any]) -> list[str]:

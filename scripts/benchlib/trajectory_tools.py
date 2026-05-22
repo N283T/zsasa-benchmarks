@@ -30,7 +30,7 @@ SUPPORTED_TOOLS = {
     "zsasa_mdanalysis_bitmask",
 }
 
-DEFAULT_ZSASA_BINARY = "/Users/nagaet/freesasa-zig/zig-out/bin/zsasa"
+DEFAULT_ZSASA_BINARY = "zsasa"
 
 
 def parse_args() -> argparse.Namespace:
@@ -146,11 +146,13 @@ def parse_zsasa_csv_totals(path: Path) -> list[float]:
 
 
 def resolve_zsasa_binary(path: Path) -> Path:
-    if path.exists():
-        return path
-    found = shutil.which("zsasa")
-    if found:
-        return Path(found)
+    env_binary = os.environ.get("ZSASA_CLI")
+    if env_binary:
+        return Path(os.path.expanduser(env_binary))
+    if path.parent == Path("."):
+        found = shutil.which(str(path))
+        if found:
+            return Path(found)
     return path
 
 
@@ -185,28 +187,8 @@ def run_mdtraj(args: argparse.Namespace) -> None:
     write_json_output(args.output, _totals_payload(args=args, totals_a2=totals))
 
 
-def zsasa_python_path_from_binary(binary: Path) -> Path:
-    """Infer the local zsasa Python package path from a built CLI binary."""
-    parts = binary.parts
-    if len(parts) >= 3 and parts[-3:-1] == ("zig-out", "bin"):
-        return binary.parents[2].joinpath("python")
-    return binary.parent.parent.joinpath("python")
-
-
-def ensure_zsasa_python_path(binary: Path) -> None:
-    python_path = zsasa_python_path_from_binary(binary)
-    if python_path.exists():
-        import sys
-
-        path_text = str(python_path)
-        if path_text not in sys.path:
-            sys.path.insert(0, path_text)
-
-
 def run_zsasa_mdtraj(args: argparse.Namespace, *, use_bitmask: bool) -> None:
     import mdtraj as md
-
-    ensure_zsasa_python_path(resolve_zsasa_binary(args.zsasa_binary))
     from zsasa.mdtraj import compute_sasa
 
     traj = md.load(str(args.xtc), top=str(args.pdb), stride=args.stride)
@@ -223,8 +205,6 @@ def run_zsasa_mdtraj(args: argparse.Namespace, *, use_bitmask: bool) -> None:
 
 def run_zsasa_mdanalysis(args: argparse.Namespace, *, use_bitmask: bool) -> None:
     import MDAnalysis as mda
-
-    ensure_zsasa_python_path(resolve_zsasa_binary(args.zsasa_binary))
     from zsasa.mdanalysis import SASAAnalysis
 
     universe = mda.Universe(str(args.pdb), str(args.xtc))

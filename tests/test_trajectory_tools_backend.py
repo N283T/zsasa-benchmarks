@@ -5,10 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from scripts.benchlib.trajectory_tools import (
-    build_zsasa_traj_command,
-    zsasa_python_path_from_binary,
-)
+from scripts.benchlib.trajectory_tools import build_zsasa_traj_command, resolve_zsasa_binary
 
 
 def test_build_zsasa_traj_command_includes_hydrogens_classifier_and_precision() -> None:
@@ -86,7 +83,22 @@ def test_trajectory_tools_stub_records_execution_settings(tmp_path: Path) -> Non
     assert payload["zsasa_binary"] == "/bin/zsasa"
 
 
+def test_resolve_zsasa_binary_uses_path(tmp_path: Path, monkeypatch) -> None:
+    binary = tmp_path.joinpath("zsasa")
+    binary.write_text("#!/bin/sh\necho zsasa 0.6.0\n", encoding="utf-8")
+    binary.chmod(0o755)
+    monkeypatch.setenv("PATH", str(tmp_path))
+    assert resolve_zsasa_binary(Path("zsasa")) == binary
 
-def test_zsasa_python_path_from_binary_uses_local_source_tree() -> None:
-    path = zsasa_python_path_from_binary(Path("/repo/zig-out/bin/zsasa"))
-    assert path == Path("/repo/python")
+
+def test_resolve_zsasa_binary_prefers_zsasa_cli_env(tmp_path: Path, monkeypatch) -> None:
+    env_binary = tmp_path.joinpath("nix-zsasa")
+    env_binary.write_text("#!/bin/sh\necho zsasa 0.6.0\n", encoding="utf-8")
+    env_binary.chmod(0o755)
+    path_binary = tmp_path.joinpath("path", "zsasa")
+    path_binary.parent.mkdir()
+    path_binary.write_text("#!/bin/sh\necho path zsasa\n", encoding="utf-8")
+    path_binary.chmod(0o755)
+    monkeypatch.setenv("PATH", str(path_binary.parent))
+    monkeypatch.setenv("ZSASA_CLI", str(env_binary))
+    assert resolve_zsasa_binary(Path("zsasa")) == env_binary
