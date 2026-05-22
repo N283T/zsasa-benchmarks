@@ -232,8 +232,8 @@ def main() -> None:
     human_full_rerun = human_manifest.get("full_rerun", {})
     if human_full_rerun.get("source_kind") != "full_rerun":
         fail("human batch manifest must define the native full_rerun source kind")
-    if human_full_rerun.get("threads") != [10] or human_full_rerun.get("runs") != 10:
-        fail("human batch full_rerun must mirror the t10 rerun shape")
+    if human_full_rerun.get("threads") != [10] or human_full_rerun.get("runs") != 3:
+        fail("human batch full_rerun must use t10 with three runs")
 
     human_log = ROOT.joinpath("docs/batch-human-rerun-log.md").read_text(encoding="utf-8")
     for phrase in [
