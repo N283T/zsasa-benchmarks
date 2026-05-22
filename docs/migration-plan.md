@@ -1,20 +1,23 @@
 # Migration plan
 
-## Phase 1: scaffold only
+## Phase 1: native dry-run runners
 
 - Create this standalone benchmark repository.
 - Add reproducible Nix dev shell.
 - Add manifests for validation, batch, single-file, and trajectory benchmark roles.
-- Add a `zsasa`-only validation refresh script that reuses existing comparator CSVs.
+- Add native dry-run runners for static validation, batch throughput, trajectory validation, and trajectory throughput.
+- Use `scripts/check_tools.py --profile minimal --dry-run` for tool preflight planning.
+- Plan Phase 1 full reruns under `results/full_rerun/<run_id>/...` with `source_kind = 'full_rerun'`.
 - Add a DuckDB schema plus import/export scripts for historical and refreshed validation results.
-- Do not move historical result files.
+- Do not move historical result files or execute heavy benchmarks during scaffold review.
 
-## Phase 2: dry-run and review
+## Phase 2: single-file redesign and review
 
+- Keep the 2,013-structure single-file benchmark out of Phase 1 native runners.
+- Design a native single-file runner separately, preserving the curated sample and historical logs.
 - Run scaffold and database smoke checks.
-- Dry-run the validation refresh command plan.
+- Dry-run native Phase 1 command plans and review output layout, DB provenance labels, and archive naming.
 - Import a tiny fixture into DuckDB and export validation summaries.
-- Confirm dataset paths, output layout, DB provenance labels, and archive naming.
 
 ## Phase 3: controlled rerun
 

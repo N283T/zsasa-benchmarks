@@ -20,13 +20,17 @@ nix develop
 python scripts/check_scaffold.py
 uv run python scripts/smoke_db.py
 python scripts/report_existing_assets.py --zsasa-repo /Users/nagaet/freesasa-zig
-uv run python scripts/refresh_validation.py --manifest manifests/validation-ecoli.toml --dry-run
+python scripts/check_tools.py --profile minimal --dry-run
+python scripts/run_validation.py --manifest manifests/validation-ecoli.toml --run-id v0_6_0_full --dry-run
+python scripts/run_batch.py --manifest manifests/batch-ecoli.toml --run-id v0_6_0_full --dry-run
+python scripts/run_trajectory_validation.py --manifest manifests/validation-md-5wvo.toml --run-id v0_6_0_full --dry-run
+python scripts/run_trajectory.py --manifest manifests/trajectory.toml --run-id v0_6_0_full --dry-run
 python scripts/run_single_file_subset.py
 python scripts/export_single_file_subset_summary.py
 scripts/plot_figures.py
 ```
 
-`refresh_validation.py` defaults to dry-run behavior. It prints the `zsasa` commands that would be run and does not execute benchmarks unless `--execute` is passed.
+The native Phase 1 runner examples above are dry-runs. They print the commands and `results/full_rerun/<run_id>/...` layout without running benchmarks; do not remove `--dry-run` until a real rerun is explicitly approved.
 
 ## Repository layout
 

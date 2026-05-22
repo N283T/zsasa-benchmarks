@@ -35,6 +35,21 @@ New benchmark evidence should flow through DuckDB rather than ad-hoc CSV/JSON su
 For the first archive/preprint, validation can combine historical comparator columns with refreshed `zsasa` columns because SASA values are deterministic. Performance comparisons that mix runs from different environments must be labeled as provisional until comparator reruns are complete.
 
 
+## Native runner dry-runs
+
+Phase 1 full-rerun planning uses native runner CLIs in this repository, not the temporary full-rerun planner or legacy scripts. Use dry-run mode to review command plans and output paths before any approved execution:
+
+```bash
+python scripts/check_tools.py --profile minimal --dry-run
+python scripts/run_validation.py --manifest manifests/validation-ecoli.toml --run-id v0_6_0_full --dry-run
+python scripts/run_batch.py --manifest manifests/batch-ecoli.toml --run-id v0_6_0_full --dry-run
+python scripts/run_trajectory_validation.py --manifest manifests/validation-md-5wvo.toml --run-id v0_6_0_full --dry-run
+python scripts/run_trajectory.py --manifest manifests/trajectory.toml --run-id v0_6_0_full --dry-run
+```
+
+Phase 1 full-rerun artifacts belong under `results/full_rerun/<run_id>/...` and remain ignored until reviewed for archive staging. Single-file benchmark redesign remains Phase 2 work; do not fold the 2,013-structure single-file sample into the Phase 1 native runners.
+
+
 ## FreeSASA batch wrapper provenance
 
 FreeSASA has no native directory batch mode. Historical FreeSASA comparator baselines in this project were generated with the tracked `freesasa_batch` wrapper around the FreeSASA C API, not by an upstream FreeSASA batch command. New infrastructure must preserve that provenance when importing or reporting FreeSASA-derived values.

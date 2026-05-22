@@ -171,6 +171,7 @@ def main() -> None:
         "scripts/benchlib/runner.py",
         "scripts/benchlib/tools.py",
     ]
+    # Final native runner guard: Phase 1 runner files must not call old benchmark scripts.
     legacy_script_markers = ["benchmarks/scripts/"]
     trajectory_runner_markers = ["scripts/validation_md.py", "scripts/bench_md.py"]
     for path in phase1_runner_files:
