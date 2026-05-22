@@ -25,6 +25,7 @@ from scripts.benchlib.runner import (  # noqa: E402
     write_command_log,
     write_config,
 )
+from scripts.benchlib.tools import load_tool_specs, resolve_tool_binary  # noqa: E402
 
 DEFAULT_RUN_ID = "v0_6_0_full"
 
@@ -33,6 +34,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", required=True, type=Path)
     parser.add_argument("--run-id", default=DEFAULT_RUN_ID)
+    parser.add_argument("--tool-versions", type=Path, default=Path("config/tool-versions.toml"))
     parser.add_argument(
         "--dry-run",
         action="store_true",
@@ -52,21 +54,65 @@ def full_rerun_settings(manifest: dict[str, Any]) -> dict[str, Any]:
     full_rerun = dict(manifest.get("full_rerun", {}))
     refresh = manifest.get("refresh", {})
     if isinstance(refresh, dict):
-        for key in ["tools", "n_points", "stride"]:
+        for key in ["tools", "n_points", "stride", "threads"]:
             if key in refresh:
                 full_rerun.setdefault(key, refresh[key])
     full_rerun.setdefault("source_kind", "full_rerun")
     full_rerun.setdefault("run_id_default", DEFAULT_RUN_ID)
-    full_rerun.setdefault("tools", ["mdtraj", "zsasa_mdtraj", "zsasa_mdanalysis"])
+    full_rerun.setdefault(
+        "tools", ["mdtraj", "zsasa_mdtraj", "zsasa_mdanalysis", "zig", "zig_bitmask"]
+    )
     full_rerun.setdefault("n_points", [100, 200, 500, 1000])
     full_rerun.setdefault("stride", 1)
+    full_rerun.setdefault("threads", 10)
+    full_rerun.setdefault("cli_precisions", ["f64", "f32"])
+    full_rerun.setdefault("classifier", "naccess")
+    full_rerun.setdefault("include_hydrogens", True)
     full_rerun.setdefault("rerun_zsasa", True)
     full_rerun.setdefault("rerun_comparators", True)
     return full_rerun
 
 
+def require_zsasa_binary(tool_versions: Path) -> Path:
+    specs = load_tool_specs(tool_versions)
+    spec = specs.get("zsasa")
+    if spec is None or spec.binary is None:
+        return resolve_tool_binary("zsasa", Path("zsasa"))
+    return resolve_tool_binary("zsasa", spec.binary)
+
+
+def command_variants(*, tool: str, n_points: int, settings: dict[str, Any]) -> list[dict[str, Any]]:
+    threads = int(settings["threads"])
+    if tool in {"zig", "zig_bitmask"}:
+        return [
+            {
+                "name": f"{tool}_{precision}_{threads}t_{n_points}p",
+                "tool": tool,
+                "precision": str(precision),
+                "threads": threads,
+                "raw_parts": [tool, str(precision), f"{n_points}p"],
+            }
+            for precision in settings["cli_precisions"]
+        ]
+    return [
+        {
+            "name": f"{tool}_{threads}t_{n_points}p"
+            if tool.startswith("zsasa_")
+            else f"{tool}_{n_points}p",
+            "tool": tool,
+            "precision": None,
+            "threads": threads,
+            "raw_parts": [tool, f"{n_points}p"],
+        }
+    ]
+
+
 def build_records(
-    *, dataset: dict[str, Any], output_base: Path, settings: dict[str, Any]
+    *,
+    dataset: dict[str, Any],
+    output_base: Path,
+    settings: dict[str, Any],
+    zsasa_binary: Path,
 ) -> list[CommandRecord]:
     xtc = resolve_repo_path(str(dataset["xtc"]))
     pdb = resolve_repo_path(str(dataset["pdb"]))
@@ -74,22 +120,27 @@ def build_records(
     records: list[CommandRecord] = []
     for tool in [str(value) for value in settings["tools"]]:
         for n_points in [int(value) for value in settings["n_points"]]:
-            name = f"{tool}_{n_points}p"
-            raw_dir = output_base.joinpath("raw", tool, f"{n_points}p")
-            raw_dir.mkdir(parents=True, exist_ok=True)
-            records.append(
-                CommandRecord(
-                    name=name,
-                    argv=mdtraj_runner_command(
-                        tool=tool,
-                        xtc=xtc,
-                        pdb=pdb,
-                        n_points=n_points,
-                        stride=stride,
-                        output=raw_dir.joinpath("results.json"),
-                    ),
+            for variant in command_variants(tool=tool, n_points=n_points, settings=settings):
+                raw_dir = output_base.joinpath("raw", *variant["raw_parts"])
+                raw_dir.mkdir(parents=True, exist_ok=True)
+                records.append(
+                    CommandRecord(
+                        name=str(variant["name"]),
+                        argv=mdtraj_runner_command(
+                            tool=str(variant["tool"]),
+                            xtc=xtc,
+                            pdb=pdb,
+                            n_points=n_points,
+                            stride=stride,
+                            output=raw_dir.joinpath("results.json"),
+                            threads=int(variant["threads"]),
+                            precision=variant["precision"],
+                            classifier=str(settings["classifier"]),
+                            include_hydrogens=bool(settings["include_hydrogens"]),
+                            zsasa_binary=zsasa_binary,
+                        ),
+                    )
                 )
-            )
     return records
 
 
@@ -100,11 +151,14 @@ def main() -> None:
     dataset = expect_dict(manifest, "dataset")
     settings = full_rerun_settings(manifest)
     require_native_full_rerun_flags(settings, runner="scripts/run_trajectory_validation.py")
+    zsasa_binary = require_zsasa_binary(resolve_repo_path(args.tool_versions))
     dataset_id = str(dataset["id"])
     output_base = full_rerun_dir(args.run_id, "validation_md", dataset_id)
     output_base.mkdir(parents=True, exist_ok=True)
 
-    records = build_records(dataset=dataset, output_base=output_base, settings=settings)
+    records = build_records(
+        dataset=dataset, output_base=output_base, settings=settings, zsasa_binary=zsasa_binary
+    )
     write_command_log(output_base.joinpath("commands.log"), records)
     write_config(
         output_base.joinpath("config.json"),
@@ -119,6 +173,11 @@ def main() -> None:
             "tools": [str(value) for value in settings["tools"]],
             "n_points": [int(value) for value in settings["n_points"]],
             "stride": int(settings["stride"]),
+            "threads": int(settings["threads"]),
+            "cli_precisions": [str(value) for value in settings["cli_precisions"]],
+            "classifier": str(settings["classifier"]),
+            "include_hydrogens": bool(settings["include_hydrogens"]),
+            "zsasa_binary": str(zsasa_binary),
             "commands": [record.name for record in records],
         },
     )

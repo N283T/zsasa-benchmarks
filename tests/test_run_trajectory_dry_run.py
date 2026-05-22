@@ -30,6 +30,10 @@ def test_run_trajectory_validation_dry_run_outputs_native_commands() -> None:
     assert "--n-points 100" in proc.stdout
     assert "--n-points 1000" in proc.stdout
     assert "--output" in proc.stdout
+    assert "--include-hydrogens" in proc.stdout
+    assert "--classifier naccess" in proc.stdout
+    assert "--precision f64" in proc.stdout
+    assert "--precision f32" in proc.stdout
     assert "raw/mdtraj/100p/results.json" in proc.stdout
 
     output_base = Path("results/full_rerun") / run_id / "validation_md" / "5wvo_C_analysis"
@@ -70,6 +74,11 @@ def test_run_trajectory_dry_run_outputs_native_hyperfine_commands() -> None:
     assert "--tool zig" in proc.stdout
     assert "--tool zsasa_mdtraj" in proc.stdout
     assert "--tool mdsasa_bolt" in proc.stdout
+    assert "--include-hydrogens" in proc.stdout
+    assert "--classifier naccess" in proc.stdout
+    assert "--precision f64" in proc.stdout
+    assert "--precision f32" in proc.stdout
+    assert "--threads 10" in proc.stdout
     assert "--output" in proc.stdout
     assert "raw/5wvo_C_analysis/mdsasa_bolt/results.json" in proc.stdout
 

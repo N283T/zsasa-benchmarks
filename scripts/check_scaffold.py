@@ -150,8 +150,19 @@ def main() -> None:
         fail("MD validation manifest must define the native full_rerun source kind")
     if md_validation_full_rerun.get("run_id_default") != "v0_6_0_full":
         fail("MD validation full_rerun must define the default run id")
-    if md_validation_full_rerun.get("tools") != ["mdtraj", "zsasa_mdtraj", "zsasa_mdanalysis"]:
-        fail("MD validation full_rerun must list native mdtraj and zsasa wrapper tools")
+    expected_md_validation_tools = [
+        "mdtraj",
+        "zsasa_mdtraj",
+        "zsasa_mdanalysis",
+        "zig",
+        "zig_bitmask",
+    ]
+    if md_validation_full_rerun.get("tools") != expected_md_validation_tools:
+        fail("MD validation full_rerun must list native mdtraj, zsasa wrappers, and CLI tools")
+    if md_validation_full_rerun.get("include_hydrogens") is not True:
+        fail("MD validation full_rerun must include explicit hydrogens")
+    if md_validation_full_rerun.get("classifier") != "naccess":
+        fail("MD validation full_rerun must use the trajectory naccess classifier")
     if md_validation_full_rerun.get("n_points") != [100, 200, 500, 1000]:
         fail("MD validation full_rerun must preserve the representative point counts")
     if md_validation_full_rerun.get("rerun_zsasa") is not True:
@@ -317,6 +328,14 @@ def main() -> None:
         fail("trajectory full_rerun must define large trajectory tools")
     if trajectory_full_rerun.get("n_points") != 100:
         fail("trajectory full_rerun must define the 100-point setting")
+    if trajectory_full_rerun.get("threads") != [10]:
+        fail("trajectory full_rerun must define t10 execution")
+    if trajectory_full_rerun.get("cli_precisions") != ["f64", "f32"]:
+        fail("trajectory full_rerun must keep f64/f32 CLI precision variants")
+    if trajectory_full_rerun.get("include_hydrogens") is not True:
+        fail("trajectory full_rerun must include explicit hydrogens")
+    if trajectory_full_rerun.get("classifier") != "naccess":
+        fail("trajectory full_rerun must use the trajectory naccess classifier")
     if trajectory_full_rerun.get("rerun_zsasa") is not True:
         fail("trajectory full_rerun must rerun zsasa")
     if trajectory_full_rerun.get("rerun_comparators") is not True:

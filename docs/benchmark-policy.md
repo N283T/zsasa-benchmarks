@@ -43,11 +43,13 @@ Phase 1 full-rerun planning uses native runner CLIs in this repository, not the 
 python scripts/check_tools.py --profile minimal --dry-run
 python scripts/run_validation.py --manifest manifests/validation-ecoli.toml --run-id v0_6_0_full --dry-run
 python scripts/run_batch.py --manifest manifests/batch-ecoli.toml --run-id v0_6_0_full --dry-run
-python scripts/run_trajectory_validation.py --manifest manifests/validation-md-5wvo.toml --run-id v0_6_0_full --dry-run
-python scripts/run_trajectory.py --manifest manifests/trajectory.toml --run-id v0_6_0_full --dry-run
+uv run python scripts/run_trajectory_validation.py --manifest manifests/validation-md-5wvo.toml --run-id v0_6_0_full --dry-run
+uv run python scripts/run_trajectory.py --manifest manifests/trajectory.toml --run-id v0_6_0_full --dry-run
 ```
 
-Phase 1 full-rerun artifacts belong under `results/full_rerun/<run_id>/...` and remain ignored until reviewed for archive staging. Single-file benchmark redesign remains Phase 2 work; do not fold the 2,013-structure single-file sample into the Phase 1 native runners.
+Phase 1 full-rerun artifacts belong under `results/full_rerun/<run_id>/...` and remain ignored until reviewed for archive staging. Trajectory plans use explicit hydrogens and `classifier = "naccess"` for `zsasa traj`, matching the historical MD benchmark treatment of hydrogenated trajectory topologies. Single-file benchmark redesign remains Phase 2 work; do not fold the 2,013-structure single-file sample into the Phase 1 native runners.
+
+For reproducibility, `zsasa` CLI execution must resolve from the Nix dev shell (`github:N283T/zsasa/v0.6.0`). The shell exports `ZSASA_CLI` to the Nix-store binary, and runners prefer that path over `PATH` so uv-installed Python console scripts cannot shadow the CLI benchmark target. Python backends must resolve from the uv environment pinned by `pyproject.toml` and `uv.lock` (`zsasa==0.6.0`, MDTraj, MDAnalysis, and mdsasa-bolt). Do not add local source-tree imports such as `/Users/nagaet/freesasa-zig/python` to the benchmark runners.
 
 
 ## FreeSASA batch wrapper provenance

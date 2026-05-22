@@ -30,7 +30,12 @@ from scripts.benchlib.runner import (  # noqa: E402
     write_command_log,
     write_config,
 )
-from scripts.benchlib.tools import ToolError, ToolSpec, load_tool_specs  # noqa: E402
+from scripts.benchlib.tools import (  # noqa: E402
+    ToolError,
+    ToolSpec,
+    load_tool_specs,
+    resolve_tool_binary,
+)
 
 DEFAULT_RUN_ID = "v0_6_0_full"
 DEFAULT_TOOL_VERSIONS = Path("config/tool-versions.toml")
@@ -62,6 +67,8 @@ def require_binary(specs: dict[str, ToolSpec], tool_id: str) -> Path:
         raise ToolError(f"unknown tool: {tool_id}")
     if spec.binary is None:
         raise ToolError(f"missing binary for tool: {tool_id}")
+    if tool_id == "zsasa":
+        return resolve_tool_binary(tool_id, spec.binary)
     return spec.binary
 
 
@@ -272,7 +279,6 @@ def build_records(
             )
 
     return records
-
 
 
 def prepare_output_directories(*, manifest: dict[str, Any], output_base: Path) -> None:

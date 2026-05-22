@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import importlib.util
 import os
+import shutil
 import subprocess
 import tomllib
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
@@ -30,10 +31,40 @@ class ToolSpec:
     python_module: str | None = None
 
 
-def _path_or_none(value: object) -> Path | None:
+def _binary_or_none(value: object) -> Path | None:
     if not isinstance(value, str) or not value:
         return None
-    return resolve_repo_path(Path(os.path.expanduser(value)))
+    expanded = os.path.expanduser(value)
+    path = Path(expanded)
+    if path.is_absolute() or path.parent != Path("."):
+        return resolve_repo_path(path)
+    return path
+
+
+def _executable_from_env(tool_id: str) -> Path | None:
+    env_var = "ZSASA_CLI" if tool_id == "zsasa" else None
+    if env_var is None:
+        return None
+    value = os.environ.get(env_var)
+    if not value:
+        return None
+    return Path(os.path.expanduser(value))
+
+
+def resolve_tool_binary(tool_id: str, binary: Path) -> Path:
+    env_binary = _executable_from_env(tool_id)
+    if env_binary is not None:
+        if not env_binary.exists() or not os.access(env_binary, os.X_OK):
+            raise ToolError(f"missing executable for {tool_id}: {env_binary} from environment")
+        return env_binary
+    if binary.parent == Path("."):
+        found = shutil.which(str(binary))
+        if found is None:
+            raise ToolError(f"missing executable for {tool_id}: {binary} (not found on PATH)")
+        return Path(found)
+    if not binary.exists() or not os.access(binary, os.X_OK):
+        raise ToolError(f"missing executable for {tool_id}: {binary}")
+    return binary
 
 
 def _list_of_strings(value: object) -> list[str]:
@@ -56,7 +87,7 @@ def load_tool_specs(path: str | Path) -> dict[str, ToolSpec]:
             version=data.get("version"),
             tag=data.get("tag"),
             commit=data.get("commit") or data.get("commit_sha"),
-            binary=_path_or_none(data.get("binary")),
+            binary=_binary_or_none(data.get("binary")),
             check_args=_list_of_strings(data.get("check_args")),
             policy=data.get("policy"),
             python_module=data.get("python_module"),
@@ -73,12 +104,12 @@ def require_tools(specs: dict[str, ToolSpec], tool_ids: list[str]) -> dict[str, 
         if spec.python_module and importlib.util.find_spec(spec.python_module) is None:
             raise ToolError(f"missing Python module for {tool_id}: {spec.python_module}")
         if spec.binary is not None:
-            if not spec.binary.exists() or not os.access(spec.binary, os.X_OK):
-                raise ToolError(f"missing executable for {tool_id}: {spec.binary}")
+            resolved_binary = resolve_tool_binary(tool_id, spec.binary)
+            spec = replace(spec, binary=resolved_binary)
             if spec.check_args:
                 try:
                     proc = subprocess.run(
-                        [str(spec.binary), *spec.check_args],
+                        [str(resolved_binary), *spec.check_args],
                         check=False,
                         stdout=subprocess.DEVNULL,
                         stderr=subprocess.DEVNULL,
@@ -96,6 +127,14 @@ PROFILES: dict[str, list[str]] = {
     "minimal": ["zsasa"],
     "validation": ["zsasa", "freesasa_batch", "rustsasa", "lahuta"],
     "batch": ["zsasa", "freesasa_batch", "rustsasa", "lahuta"],
-    "trajectory": ["zsasa", "mdtraj", "mdsasa_bolt"],
-    "full": ["zsasa", "freesasa_batch", "rustsasa", "lahuta", "mdtraj", "mdsasa_bolt"],
+    "trajectory": ["zsasa", "mdtraj", "mdanalysis", "mdsasa_bolt"],
+    "full": [
+        "zsasa",
+        "freesasa_batch",
+        "rustsasa",
+        "lahuta",
+        "mdtraj",
+        "mdanalysis",
+        "mdsasa_bolt",
+    ],
 }

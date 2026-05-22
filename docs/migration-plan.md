@@ -1,11 +1,12 @@
 # Migration plan
 
-## Phase 1: native dry-run runners
+## Phase 1: native runners and dry-run plans
 
 - Create this standalone benchmark repository.
 - Add reproducible Nix dev shell.
 - Add manifests for validation, batch, single-file, and trajectory benchmark roles.
 - Add native dry-run runners for static validation, batch throughput, trajectory validation, and trajectory throughput.
+- Wire trajectory execution through `scripts.benchlib.trajectory_tools` so approved reruns use explicit hydrogens, `naccess` classifier settings for `zsasa traj`, and the same tool labels as the dry-run plans.
 - Use `scripts/check_tools.py --profile minimal --dry-run` for tool preflight planning.
 - Plan Phase 1 full reruns under `results/full_rerun/<run_id>/...` with `source_kind = 'full_rerun'`.
 - Add a DuckDB schema plus import/export scripts for historical and refreshed validation results.
