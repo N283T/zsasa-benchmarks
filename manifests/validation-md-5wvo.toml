@@ -3,8 +3,6 @@ status = "planning"
 
 [dataset]
 id = "5wvo_C_analysis"
-xtc = "$HOME/freesasa-zig/benchmarks/md_data/5wvo_C_analysis/5wvo_C_R1.xtc"
-pdb = "$HOME/freesasa-zig/benchmarks/md_data/5wvo_C_analysis/5wvo_C.pdb"
 atoms = 3858
 frames = 1001
 role = ["trajectory-validation"]

@@ -17,6 +17,11 @@ from scripts.benchlib.commands import (  # noqa: E402
     freesasa_batch_command,
     lahuta_batch_command,
 )
+from scripts.benchlib.datasets import (  # noqa: E402
+    DEFAULT_DATASETS_CONFIG,
+    dataset_path,
+    load_dataset_catalog,
+)
 from scripts.benchlib.hyperfine import hyperfine_command  # noqa: E402
 from scripts.benchlib.manifest import expect_dict, load_manifest  # noqa: E402
 from scripts.benchlib.paths import full_rerun_dir, resolve_repo_path  # noqa: E402
@@ -43,6 +48,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--manifest", required=True, type=Path)
     parser.add_argument("--run-id", default=DEFAULT_RUN_ID)
     parser.add_argument("--tool-versions", type=Path, default=DEFAULT_TOOL_VERSIONS)
+    parser.add_argument("--datasets", type=Path, default=DEFAULT_DATASETS_CONFIG)
     parser.add_argument(
         "--dry-run",
         action="store_true",
@@ -262,10 +268,11 @@ def main() -> None:
     manifest_path = resolve_repo_path(args.manifest)
     manifest = load_manifest(manifest_path)
     specs = load_tool_specs(args.tool_versions)
+    dataset_catalog = load_dataset_catalog(args.datasets)
     settings = full_rerun_settings(manifest)
     dataset = expect_dict(manifest, "dataset")
     name = dataset_name(manifest_path, manifest)
-    input_dir = resolve_repo_path(str(dataset.get("path_or_uri") or dataset["historical_path"]))
+    input_dir = dataset_path(dataset_catalog, str(dataset["id"]), "path")
     output_base = full_rerun_dir(args.run_id, "batch", name)
 
     records = build_native_records(
@@ -290,6 +297,7 @@ def main() -> None:
             "threads": settings["threads"],
             "precisions": settings["precisions"],
             "tool_versions": str(resolve_repo_path(args.tool_versions)),
+            "datasets": str(resolve_repo_path(args.datasets)),
             "commands": [record.name for record in records],
             "rustsasa_note": (
                 "RustSASA batch command is a dry-run plan for the pinned comparator invocation."

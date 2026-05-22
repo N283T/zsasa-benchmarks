@@ -6,7 +6,6 @@ status = "planning"
 [dataset]
 id = "UP000005640_9606_HUMAN_v6_pdb"
 expected_count = 23586
-path_or_uri = "$HOME/pdb/afdb/UP000005640_9606_HUMAN_v6/pdb"
 role = ["batch-throughput"]
 
 [full_rerun]

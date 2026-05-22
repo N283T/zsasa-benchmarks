@@ -13,6 +13,8 @@ REQUIRED_FILES = [
     "README.md",
     "flake.nix",
     "pyproject.toml",
+    ".gitignore",
+    "config/datasets.toml.example",
     "config/tool-versions.toml",
     "manifests/validation-ecoli.toml",
     "manifests/validation-md-5wvo.toml",
@@ -33,6 +35,7 @@ REQUIRED_FILES = [
     "scripts/run_trajectory_validation.py",
     "scripts/run_trajectory.py",
     "scripts/benchlib/commands.py",
+    "scripts/benchlib/datasets.py",
     "scripts/benchlib/hyperfine.py",
     "scripts/benchlib/importers.py",
     "scripts/benchlib/manifest.py",
@@ -119,6 +122,21 @@ def main() -> None:
     ]
     if hardcoded_user_paths:
         fail(f"hard-coded {forbidden_user_path} paths remain: " + ", ".join(hardcoded_user_paths))
+    local_path_keys = ["path_or_uri", "historical_path", 'xtc = "', 'pdb = "']
+    manifest_local_paths = []
+    for path in FULL_RERUN_MANIFESTS:
+        text = ROOT.joinpath(path).read_text(encoding="utf-8")
+        if any(key in text for key in local_path_keys):
+            manifest_local_paths.append(path)
+    if manifest_local_paths:
+        fail(
+            "local data paths must live in config/datasets.local.toml: "
+            + ", ".join(manifest_local_paths)
+        )
+
+    gitignore = ROOT.joinpath(".gitignore").read_text(encoding="utf-8")
+    if "/config/datasets.local.toml" not in gitignore:
+        fail(".gitignore must ignore config/datasets.local.toml")
 
     remaining_legacy = [path for path in REMOVED_LEGACY_FILES if ROOT.joinpath(path).exists()]
     if remaining_legacy:
@@ -159,8 +177,20 @@ def main() -> None:
     dataset = validation.get("dataset", {})
     if dataset.get("expected_count") != 4370:
         fail("validation manifest must describe the E. coli 4,370-structure dataset")
-    if "UP000000625_83333_ECOLI" not in dataset.get("path_or_uri", ""):
-        fail("validation manifest must point to the E. coli dataset path")
+    if dataset.get("id") != "UP000000625_83333_ECOLI_v6_pdb":
+        fail("validation manifest must identify the E. coli dataset")
+    dataset_catalog = read_toml(ROOT.joinpath("config/datasets.toml.example"))
+    for dataset_id in [
+        "UP000000625_83333_ECOLI_v6_pdb",
+        "UP000005640_9606_HUMAN_v6_pdb",
+        "single_file_stratified_sample",
+    ]:
+        if "path" not in dataset_catalog.get(dataset_id, {}):
+            fail(f"datasets example missing path for {dataset_id}")
+    for dataset_id in ["5wvo_C_analysis", "6sup_A_analysis", "5vz0_A_protein"]:
+        entry = dataset_catalog.get(dataset_id, {})
+        if "xtc" not in entry or "pdb" not in entry:
+            fail(f"datasets example missing trajectory paths for {dataset_id}")
     runs = validation.get("runs", [])
     if not any(run.get("algorithm") == "sr" and 100 in run.get("points", []) for run in runs):
         fail("validation manifest must include SR 100-point full rerun")

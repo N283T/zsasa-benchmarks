@@ -13,6 +13,11 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.benchlib.commands import mdtraj_runner_command  # noqa: E402
+from scripts.benchlib.datasets import (  # noqa: E402
+    DEFAULT_DATASETS_CONFIG,
+    dataset_path,
+    load_dataset_catalog,
+)
 from scripts.benchlib.hyperfine import hyperfine_command  # noqa: E402
 from scripts.benchlib.manifest import (  # noqa: E402
     expect_list,
@@ -37,6 +42,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--manifest", required=True, type=Path)
     parser.add_argument("--run-id", default=DEFAULT_RUN_ID)
     parser.add_argument("--tool-versions", type=Path, default=Path("config/tool-versions.toml"))
+    parser.add_argument("--datasets", type=Path, default=DEFAULT_DATASETS_CONFIG)
     parser.add_argument(
         "--dry-run",
         action="store_true",
@@ -161,7 +167,12 @@ def command_variants(
 
 
 def build_records(
-    *, datasets: list[Any], output_base: Path, settings: dict[str, Any], zsasa_binary: Path
+    *,
+    datasets: list[Any],
+    dataset_catalog: dict[str, dict[str, Any]],
+    output_base: Path,
+    settings: dict[str, Any],
+    zsasa_binary: Path,
 ) -> list[CommandRecord]:
     records: list[CommandRecord] = []
     n_points = int(settings["n_points"])
@@ -175,8 +186,8 @@ def build_records(
         if not isinstance(raw_dataset, dict):
             continue
         dataset_id = str(raw_dataset["id"])
-        xtc = resolve_repo_path(str(raw_dataset["xtc"]))
-        pdb = resolve_repo_path(str(raw_dataset["pdb"]))
+        xtc = dataset_path(dataset_catalog, dataset_id, "xtc")
+        pdb = dataset_path(dataset_catalog, dataset_id, "pdb")
         for tool in tools_for_dataset(raw_dataset, settings):
             for variant in command_variants(
                 tool=tool, dataset=raw_dataset, n_points=n_points, settings=settings
@@ -218,6 +229,7 @@ def main() -> None:
     manifest_path = resolve_repo_path(args.manifest)
     manifest = load_manifest(manifest_path)
     datasets = expect_list(manifest, "datasets")
+    dataset_catalog = load_dataset_catalog(args.datasets)
     settings = full_rerun_settings(manifest)
     require_native_full_rerun_flags(settings, runner="scripts/run_trajectory.py")
     zsasa_binary = require_zsasa_binary(resolve_repo_path(args.tool_versions))
@@ -225,7 +237,11 @@ def main() -> None:
     output_base.mkdir(parents=True, exist_ok=True)
 
     records = build_records(
-        datasets=datasets, output_base=output_base, settings=settings, zsasa_binary=zsasa_binary
+        datasets=datasets,
+        dataset_catalog=dataset_catalog,
+        output_base=output_base,
+        settings=settings,
+        zsasa_binary=zsasa_binary,
     )
     dataset_ids = [str(dataset["id"]) for dataset in datasets if isinstance(dataset, dict)]
     write_command_log(output_base.joinpath("commands.log"), records)
@@ -237,6 +253,7 @@ def main() -> None:
             "source_kind": settings["source_kind"],
             "dataset_ids": dataset_ids,
             "output_base": str(output_base),
+            "datasets": str(resolve_repo_path(args.datasets)),
             "default_tools": [str(value) for value in settings["default_tools"]],
             "large_trajectory_tools": [str(value) for value in settings["large_trajectory_tools"]],
             "n_points": int(settings["n_points"]),

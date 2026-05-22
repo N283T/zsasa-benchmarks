@@ -5,6 +5,7 @@
 !/archives/.gitkeep
 
 # Local inputs and external tool checkouts
+/config/datasets.local.toml
 /data/**
 /external/**
 /inputs/**

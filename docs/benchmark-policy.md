@@ -12,18 +12,17 @@ ignored `results/` tree.
 3. Resolve Python trajectory backends from the uv environment pinned by `pyproject.toml` and `uv.lock`.
 4. Write generated outputs under `results/full_rerun/<run_id>/...`; review before staging archives.
 5. Keep raw generated results, local DB files, and external source/build trees out of git.
-6. Keep local data paths portable in manifests; use `$HOME/...`, repo-relative
-   paths, or `~/...` rather than machine-specific `/Users/<name>/...` paths.
+6. Keep local data paths out of manifests. Put them in ignored `config/datasets.local.toml`; use `config/datasets.toml.example` as the tracked template.
 
 ## Setup and dry-run checks
 
 ```bash
 python scripts/check_tools.py --profile minimal --dry-run
 python scripts/setup_external_tools.py --dry-run --reset freesasa freesasa_batch rustsasa lahuta verify
-python scripts/run_validation.py --manifest manifests/validation-ecoli.toml --run-id v0_6_0_full --dry-run
-python scripts/run_batch.py --manifest manifests/batch-ecoli.toml --run-id v0_6_0_full --dry-run
-uv run python scripts/run_trajectory_validation.py --manifest manifests/validation-md-5wvo.toml --run-id v0_6_0_full --dry-run
-uv run python scripts/run_trajectory.py --manifest manifests/trajectory.toml --run-id v0_6_0_full --dry-run
+python scripts/run_validation.py --manifest manifests/validation-ecoli.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
+python scripts/run_batch.py --manifest manifests/batch-ecoli.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
+uv run python scripts/run_trajectory_validation.py --manifest manifests/validation-md-5wvo.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
+uv run python scripts/run_trajectory.py --manifest manifests/trajectory.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
 ```
 
 Remove `--dry-run` / use `--execute` only when a real benchmark run is explicitly approved.

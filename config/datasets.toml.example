@@ -1,0 +1,23 @@
+# Copy to config/datasets.local.toml and adjust paths for the local machine.
+# Values may use $HOME, ~, absolute paths, or repository-relative paths.
+
+[UP000000625_83333_ECOLI_v6_pdb]
+path = "$HOME/pdb/afdb/UP000000625_83333_ECOLI_v6/pdb"
+
+[UP000005640_9606_HUMAN_v6_pdb]
+path = "$HOME/pdb/afdb/UP000005640_9606_HUMAN_v6/pdb"
+
+[single_file_stratified_sample]
+path = "$HOME/freesasa-zig/benchmarks/dataset/pdb"
+
+[5wvo_C_analysis]
+xtc = "$HOME/freesasa-zig/benchmarks/md_data/5wvo_C_analysis/5wvo_C_R1.xtc"
+pdb = "$HOME/freesasa-zig/benchmarks/md_data/5wvo_C_analysis/5wvo_C.pdb"
+
+[6sup_A_analysis]
+xtc = "$HOME/freesasa-zig/benchmarks/md_data/6sup_A_analysis/6sup_A_R1.xtc"
+pdb = "$HOME/freesasa-zig/benchmarks/md_data/6sup_A_analysis/6sup_A.pdb"
+
+[5vz0_A_protein]
+xtc = "$HOME/freesasa-zig/benchmarks/md_data/5vz0_A_protein/5vz0_A_prod_R1_fit.xtc"
+pdb = "$HOME/freesasa-zig/benchmarks/md_data/5vz0_A_protein/5vz0_A.pdb"

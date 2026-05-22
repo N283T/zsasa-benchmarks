@@ -4,7 +4,6 @@ id = "single-file-stratified-sample"
 status = "planning"
 
 [dataset]
-path_or_uri = "$HOME/freesasa-zig/benchmarks/dataset/pdb"
 expected_count = 2013
 role = ["single-file-throughput"]
 

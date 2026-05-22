@@ -19,6 +19,6 @@ manuscript rerun uses `full_rerun` for same-harness comparator and `zsasa` data.
 ## Typical commands
 
 ```bash
-uv run python scripts/init_db.py --manifest manifests/validation-ecoli.toml
+uv run python scripts/init_db.py --datasets config/datasets.toml.example --manifest manifests/validation-ecoli.toml
 uv run python scripts/export_validation_summary.py
 ```
