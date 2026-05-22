@@ -21,3 +21,6 @@ pdb = "$HOME/freesasa-zig/benchmarks/md_data/6sup_A_analysis/6sup_A.pdb"
 [5vz0_A_protein]
 xtc = "$HOME/freesasa-zig/benchmarks/md_data/5vz0_A_protein/5vz0_A_prod_R1_fit.xtc"
 pdb = "$HOME/freesasa-zig/benchmarks/md_data/5vz0_A_protein/5vz0_A.pdb"
+
+[ecoli_smoke_pdb]
+path = "datasets/ecoli-smoke/pdb"

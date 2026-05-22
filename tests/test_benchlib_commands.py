@@ -106,7 +106,7 @@ def test_lahuta_batch_command() -> None:
     assert cmd == [
         "/bin/lahuta",
         "sasa-sr",
-        "-f",
+        "-d",
         "pdbs",
         "--is_af2_model",
         "--points",

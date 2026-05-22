@@ -115,7 +115,7 @@ def lahuta_batch_command(
     cmd = [
         str(binary),
         "sasa-sr",
-        "-f",
+        "-d",
         str(input_dir),
         "--is_af2_model",
         "--points",

@@ -88,6 +88,16 @@ def full_rerun_settings(manifest: dict[str, Any]) -> dict[str, Any]:
     return full_rerun
 
 
+def validation_dataset_name(manifest: dict[str, Any]) -> str:
+    dataset = expect_dict(manifest, "dataset")
+    dataset_id = str(dataset.get("id", "")).lower()
+    if dataset_id == "ecoli_smoke_pdb":
+        return "ecoli_smoke"
+    if "ecoli" in dataset_id:
+        return "ecoli"
+    return dataset_id.replace("-", "_")
+
+
 def zsasa_lr_batch_command(
     *,
     binary: Path,
@@ -320,7 +330,7 @@ def main() -> None:
     full_rerun = full_rerun_settings(manifest)
     require_native_full_rerun_flags(full_rerun, runner="scripts/run_validation.py")
     source_kind = str(full_rerun["source_kind"])
-    output_base = full_rerun_dir(args.run_id, "validation", "ecoli")
+    output_base = full_rerun_dir(args.run_id, "validation", validation_dataset_name(manifest))
 
     records = build_records(
         manifest=manifest,
