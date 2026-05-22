@@ -10,14 +10,14 @@ def test_root_is_repository_root() -> None:
     assert ROOT.name == "zsasa-benchmarks"
 
 
-def test_resolve_repo_path_keeps_absolute_path() -> None:
-    absolute = Path("/tmp/example")
+def test_resolve_repo_path_keeps_absolute_path(tmp_path: Path) -> None:
+    absolute = tmp_path.joinpath("example")
     assert resolve_repo_path(absolute) == absolute
 
 
 def test_resolve_repo_path_joins_relative_path() -> None:
     assert resolve_repo_path(Path("results/example")).is_absolute()
-    assert str(resolve_repo_path(Path("results/example"))).endswith("results/example")
+    assert resolve_repo_path(Path("results/example")) == ROOT.joinpath("results", "example")
 
 
 def test_full_rerun_dir_uses_run_id_and_parts() -> None:
