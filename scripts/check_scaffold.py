@@ -43,6 +43,8 @@ REQUIRED_FILES = [
     "scripts/refresh_validation_md.py",
     "scripts/run_validation.py",
     "scripts/run_batch.py",
+    "scripts/run_trajectory_validation.py",
+    "scripts/run_trajectory.py",
     "scripts/smoke_db.py",
     "scripts/benchlib/commands.py",
     "scripts/benchlib/manifest.py",
@@ -142,20 +144,41 @@ def main() -> None:
     md_validation_refresh = md_validation_manifest.get("refresh", {})
     if md_validation_refresh.get("native_mdtraj_rerun") is not False:
         fail("MD validation refresh must reuse the historical mdtraj reference")
+    md_validation_full_rerun = md_validation_manifest.get("full_rerun", {})
+    if md_validation_full_rerun.get("source_kind") != "full_rerun":
+        fail("MD validation manifest must define the native full_rerun source kind")
+    if md_validation_full_rerun.get("run_id_default") != "v0_6_0_full":
+        fail("MD validation full_rerun must define the default run id")
+    if md_validation_full_rerun.get("tools") != ["mdtraj", "zsasa_mdtraj", "zsasa_mdanalysis"]:
+        fail("MD validation full_rerun must list native mdtraj and zsasa wrapper tools")
+    if md_validation_full_rerun.get("n_points") != [100, 200, 500, 1000]:
+        fail("MD validation full_rerun must preserve the representative point counts")
+    if md_validation_full_rerun.get("rerun_zsasa") is not True:
+        fail("MD validation full_rerun must rerun zsasa")
+    if md_validation_full_rerun.get("rerun_comparators") is not True:
+        fail("MD validation full_rerun must rerun comparators")
 
     phase1_runner_files = [
         "scripts/run_validation.py",
         "scripts/run_batch.py",
+        "scripts/run_trajectory_validation.py",
+        "scripts/run_trajectory.py",
         "scripts/benchlib/commands.py",
         "scripts/benchlib/manifest.py",
         "scripts/benchlib/paths.py",
         "scripts/benchlib/runner.py",
         "scripts/benchlib/tools.py",
     ]
+    legacy_script_markers = ["benchmarks/scripts/"]
+    trajectory_runner_markers = ["scripts/validation_md.py", "scripts/bench_md.py"]
     for path in phase1_runner_files:
         text = ROOT.joinpath(path).read_text(encoding="utf-8")
-        if "benchmarks/scripts/" in text:
-            fail(f"Phase 1 native runner file references legacy benchmarks/scripts path: {path}")
+        banned_markers = legacy_script_markers
+        if path in {"scripts/run_trajectory_validation.py", "scripts/run_trajectory.py"}:
+            banned_markers = [*legacy_script_markers, *trajectory_runner_markers]
+        for marker in banned_markers:
+            if marker in text:
+                fail(f"Phase 1 native runner file references legacy runner marker {marker}: {path}")
 
     batch_manifest = read_toml(ROOT.joinpath("manifests/batch-ecoli.toml"))
     refresh = batch_manifest.get("planned_refresh", {})
@@ -279,6 +302,22 @@ def main() -> None:
         fail("trajectory refresh must leave external comparators as historical baselines")
     if trajectory_refresh.get("n_points") != 100:
         fail("trajectory refresh must describe the t10 100-point rerun")
+    trajectory_full_rerun = trajectory_manifest.get("full_rerun", {})
+    if trajectory_full_rerun.get("source_kind") != "full_rerun":
+        fail("trajectory manifest must define the native full_rerun source kind")
+    if trajectory_full_rerun.get("run_id_default") != "v0_6_0_full":
+        fail("trajectory full_rerun must define the default run id")
+    expected_full_tools = [*expected_cli_and_wrappers, "mdtraj", "mdsasa_bolt"]
+    if trajectory_full_rerun.get("default_tools") != expected_full_tools:
+        fail("trajectory full_rerun default tools must include native comparators")
+    if trajectory_full_rerun.get("large_trajectory_tools") != ["zig", "zig_bitmask", "mdsasa_bolt"]:
+        fail("trajectory full_rerun must define large trajectory tools")
+    if trajectory_full_rerun.get("n_points") != 100:
+        fail("trajectory full_rerun must define the 100-point setting")
+    if trajectory_full_rerun.get("rerun_zsasa") is not True:
+        fail("trajectory full_rerun must rerun zsasa")
+    if trajectory_full_rerun.get("rerun_comparators") is not True:
+        fail("trajectory full_rerun must rerun comparators")
 
     trajectory_plan = ROOT.joinpath("docs/trajectory-rerun-plan.md").read_text(encoding="utf-8")
     for phrase in [
