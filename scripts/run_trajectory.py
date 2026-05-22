@@ -27,7 +27,8 @@ from scripts.benchlib.manifest import (  # noqa: E402
 from scripts.benchlib.paths import full_rerun_dir, resolve_repo_path  # noqa: E402
 from scripts.benchlib.runner import (  # noqa: E402
     CommandRecord,
-    run_command,
+    filter_records,
+    run_records,
     shell_join,
     write_command_log,
     write_config,
@@ -54,6 +55,25 @@ def parse_args() -> argparse.Namespace:
         action="store_false",
         dest="dry_run",
         help="execute commands instead of only printing the plan",
+    )
+    parser.add_argument(
+        "--only",
+        action="append",
+        default=[],
+        metavar="GLOB",
+        help="run only command records whose names match this glob; repeatable",
+    )
+    parser.add_argument(
+        "--exclude",
+        action="append",
+        default=[],
+        metavar="GLOB",
+        help="skip command records whose names match this glob; repeatable",
+    )
+    parser.add_argument(
+        "--replace",
+        action="store_true",
+        help="remove selected command outputs before running; dry-runs only print removals",
     )
     return parser.parse_args()
 
@@ -211,6 +231,10 @@ def build_records(
                 records.append(
                     CommandRecord(
                         name=name,
+                        outputs=[
+                            raw_dir.joinpath("results.json"),
+                            output_base.joinpath("hyperfine", f"{name}.json"),
+                        ],
                         argv=hyperfine_command(
                             name=name,
                             command=shell_join(native),
@@ -243,8 +267,9 @@ def main() -> None:
         settings=settings,
         zsasa_binary=zsasa_binary,
     )
+    selected_records = filter_records(records, only=args.only, exclude=args.exclude)
     dataset_ids = [str(dataset["id"]) for dataset in datasets if isinstance(dataset, dict)]
-    write_command_log(output_base.joinpath("commands.log"), records)
+    write_command_log(output_base.joinpath("commands.log"), selected_records)
     write_config(
         output_base.joinpath("config.json"),
         {
@@ -266,7 +291,10 @@ def main() -> None:
             "warmup": int(settings["warmup"]),
             "prepare": settings.get("prepare"),
             "zsasa_binary": str(zsasa_binary),
-            "commands": [record.name for record in records],
+            "only": list(args.only),
+            "exclude": list(args.exclude),
+            "replace": bool(args.replace),
+            "commands": [record.name for record in selected_records],
         },
     )
 
@@ -275,9 +303,8 @@ def main() -> None:
     print(f"datasets={','.join(dataset_ids)}")
     print(f"output_base={output_base}")
     print(f"mode={'dry-run' if args.dry_run else 'execute'}")
-    for record in records:
-        print(f"# name: {record.name}")
-        run_command(record, execute=not args.dry_run)
+    print(f"selected_commands={len(selected_records)}/{len(records)}")
+    run_records(selected_records, execute=not args.dry_run, replace=bool(args.replace))
 
 
 if __name__ == "__main__":

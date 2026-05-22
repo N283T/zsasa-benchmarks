@@ -75,3 +75,28 @@ def test_run_batch_dry_run_prepares_output_directories() -> None:
         "lahuta/bitmask_10t_128p",
     ]:
         assert output_base.joinpath(dirname).is_dir()
+
+
+def test_run_batch_dry_run_filters_record_names() -> None:
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "scripts/run_batch.py",
+            "--manifest",
+            "manifests/batch-ecoli.toml",
+            "--run-id",
+            "test_run_filtered",
+            "--datasets",
+            "config/datasets.toml.example",
+            "--only",
+            "rustsasa_10t_*",
+            "--dry-run",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    assert "# name: rustsasa_10t_128p" in proc.stdout
+    assert "# name: rustsasa_1t_128p" not in proc.stdout
+    assert "# name: zsasa_batch_f64_standard_10t_128p" not in proc.stdout

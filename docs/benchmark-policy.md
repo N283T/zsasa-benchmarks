@@ -29,6 +29,20 @@ uv run python scripts/run_trajectory.py --manifest manifests/trajectory.toml --d
 
 Remove `--dry-run` / use `--execute` only when a real benchmark run is explicitly approved.
 
+## Selective rerun policy
+
+The native runners support repeatable glob filters over command record names:
+
+```bash
+python scripts/run_validation.py ... --only 'rustsasa_*' --execute
+python scripts/run_validation.py ... --only '*_sr_1000' --exclude '*bitmask*' --dry-run
+python scripts/run_batch.py ... --only 'rustsasa_10t_*' --replace --execute
+```
+
+Run filtered jobs with `--dry-run` first and inspect `selected_commands=N/M`. Use
+`--replace` for reruns that write directory outputs or when output formats changed, because
+it removes only the selected command outputs before execution and avoids stale-file mixing.
+
 ## FreeSASA batch wrapper provenance
 
 FreeSASA has no native directory batch mode. This repository therefore tracks

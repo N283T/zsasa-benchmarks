@@ -31,7 +31,8 @@ from scripts.benchlib.manifest import (  # noqa: E402
 from scripts.benchlib.paths import full_rerun_dir, resolve_repo_path  # noqa: E402
 from scripts.benchlib.runner import (  # noqa: E402
     CommandRecord,
-    run_command,
+    filter_records,
+    run_records,
     write_command_log,
     write_config,
 )
@@ -63,6 +64,25 @@ def parse_args() -> argparse.Namespace:
         action="store_false",
         dest="dry_run",
         help="execute commands instead of only printing the plan",
+    )
+    parser.add_argument(
+        "--only",
+        action="append",
+        default=[],
+        metavar="GLOB",
+        help="run only command records whose names match this glob; repeatable",
+    )
+    parser.add_argument(
+        "--exclude",
+        action="append",
+        default=[],
+        metavar="GLOB",
+        help="skip command records whose names match this glob; repeatable",
+    )
+    parser.add_argument(
+        "--replace",
+        action="store_true",
+        help="remove selected command outputs before running; dry-runs only print removals",
     )
     return parser.parse_args()
 
@@ -164,6 +184,11 @@ def sr_records(
                 records.append(
                     CommandRecord(
                         name=f"zsasa_sr_{precision}_{suffix}_{n_points}",
+                        outputs=[
+                            output_base.joinpath(
+                                "zsasa", f"sr_{precision}_{suffix}_{n_points}.jsonl"
+                            )
+                        ],
                         argv=batch_command(
                             binary=zsasa,
                             input_dir=input_dir,
@@ -181,6 +206,7 @@ def sr_records(
         records.append(
             CommandRecord(
                 name=f"freesasa_batch_sr_{n_points}",
+                outputs=[output_base.joinpath("freesasa_batch", f"sr_{n_points}")],
                 argv=freesasa_batch_command(
                     binary=freesasa_batch,
                     input_dir=input_dir,
@@ -193,6 +219,7 @@ def sr_records(
         records.append(
             CommandRecord(
                 name=f"rustsasa_sr_{n_points}",
+                outputs=[output_base.joinpath("rustsasa", f"sr_{n_points}")],
                 argv=rustsasa_validation_command(
                     binary=rustsasa,
                     input_dir=input_dir,
@@ -207,6 +234,10 @@ def sr_records(
             records.append(
                 CommandRecord(
                     name=f"lahuta_sr_{suffix}_{n_points}",
+                    outputs=[
+                        output_base.joinpath("lahuta", f"sr_{suffix}_{n_points}"),
+                        output_base.joinpath("lahuta", f"sr_{suffix}_{n_points}.jsonl"),
+                    ],
                     argv=lahuta_batch_command(
                         binary=lahuta,
                         input_dir=input_dir,
@@ -234,6 +265,7 @@ def lr_records(
             records.append(
                 CommandRecord(
                     name=f"zsasa_lr_{precision}_{n_slices}",
+                    outputs=[output_base.joinpath("zsasa", f"lr_{precision}_{n_slices}.jsonl")],
                     argv=zsasa_lr_batch_command(
                         binary=zsasa,
                         input_dir=input_dir,
@@ -339,8 +371,9 @@ def main() -> None:
         output_base=output_base,
     )
     prepare_output_directories(manifest=manifest, output_base=output_base)
+    selected_records = filter_records(records, only=args.only, exclude=args.exclude)
 
-    write_command_log(output_base.joinpath("commands.log"), records)
+    write_command_log(output_base.joinpath("commands.log"), selected_records)
     write_config(
         output_base.joinpath("config.json"),
         {
@@ -350,7 +383,10 @@ def main() -> None:
             "threads": full_rerun["threads"],
             "tool_versions": str(resolve_repo_path(args.tool_versions)),
             "datasets": str(resolve_repo_path(args.datasets)),
-            "commands": [record.name for record in records],
+            "only": list(args.only),
+            "exclude": list(args.exclude),
+            "replace": bool(args.replace),
+            "commands": [record.name for record in selected_records],
         },
     )
 
@@ -358,9 +394,8 @@ def main() -> None:
     print(f"run_id={args.run_id}")
     print(f"output_base={output_base}")
     print(f"mode={'dry-run' if args.dry_run else 'execute'}")
-    for record in records:
-        print(f"# name: {record.name}")
-        run_command(record, execute=not args.dry_run)
+    print(f"selected_commands={len(selected_records)}/{len(records)}")
+    run_records(selected_records, execute=not args.dry_run, replace=bool(args.replace))
 
 
 if __name__ == "__main__":

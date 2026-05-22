@@ -91,3 +91,28 @@ def test_run_validation_smoke_manifest_uses_smoke_output_dir() -> None:
 
     assert "datasets/ecoli-smoke/pdb" in proc.stdout
     assert "results/full_rerun/test_smoke/validation/ecoli_smoke" in proc.stdout
+
+
+def test_run_validation_dry_run_filters_record_names() -> None:
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "scripts/run_validation.py",
+            "--manifest",
+            "manifests/validation-ecoli-smoke.toml",
+            "--run-id",
+            "test_filtered",
+            "--datasets",
+            "config/datasets.toml.example",
+            "--only",
+            "rustsasa_*",
+            "--dry-run",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    assert "# name: rustsasa_sr_100" in proc.stdout
+    assert "# name: zsasa_sr_f64_standard_100" not in proc.stdout
+    assert "# name: freesasa_batch_sr_100" not in proc.stdout

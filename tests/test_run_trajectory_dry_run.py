@@ -151,6 +151,56 @@ def test_run_trajectory_validation_rejects_disabled_full_rerun_flags(tmp_path: P
     assert "rerun_comparators must be true" in proc.stderr
 
 
+def test_run_trajectory_validation_dry_run_filters_record_names() -> None:
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "scripts/run_trajectory_validation.py",
+            "--manifest",
+            "manifests/validation-md-5wvo.toml",
+            "--run-id",
+            "test_filtered",
+            "--datasets",
+            "config/datasets.toml.example",
+            "--only",
+            "zig_bitmask_f64_10t_1000p",
+            "--dry-run",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    assert "# name: zig_bitmask_f64_10t_1000p" in proc.stdout
+    assert "# name: mdtraj_1000p" not in proc.stdout
+    assert "# name: zig_f64_10t_1000p" not in proc.stdout
+
+
+def test_run_trajectory_dry_run_filters_record_names() -> None:
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "scripts/run_trajectory.py",
+            "--manifest",
+            "manifests/trajectory.toml",
+            "--run-id",
+            "test_filtered",
+            "--datasets",
+            "config/datasets.toml.example",
+            "--only",
+            "5wvo_C_analysis_zig_f64_10t_100p",
+            "--dry-run",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    assert "# name: 5wvo_C_analysis_zig_f64_10t_100p" in proc.stdout
+    assert "# name: 5wvo_C_analysis_mdtraj_100p" not in proc.stdout
+    assert "# name: 5vz0_A_protein_zig_f64_10t_100p" not in proc.stdout
+
+
 def test_trajectory_tools_module_help_is_available() -> None:
     proc = subprocess.run(
         [
