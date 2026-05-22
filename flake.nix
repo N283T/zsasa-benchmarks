@@ -106,7 +106,7 @@
             echo "zsasa benchmark shell"
             echo "- zsasa CLI: $ZSASA_CLI"
             echo "- Run: python scripts/check_scaffold.py"
-            echo "- Dry run validation refresh: uv run python scripts/refresh_validation.py --manifest manifests/validation-ecoli.toml --dry-run"
+            echo "- Dry run full validation: uv run python scripts/run_validation.py --manifest manifests/validation-ecoli.toml --run-id v0_6_0_full --dry-run"
           '';
         };
       }

@@ -108,7 +108,7 @@ def rustsasa_batch_command(
     n_points: int,
     threads: int,
 ) -> list[str]:
-    """Plan the historical RustSASA directory invocation used by batch baselines."""
+    """Plan the RustSASA directory invocation used by batch benchmarks."""
     return [
         str(binary),
         str(input_dir),
@@ -265,7 +265,7 @@ def main() -> None:
     settings = full_rerun_settings(manifest)
     dataset = expect_dict(manifest, "dataset")
     name = dataset_name(manifest_path, manifest)
-    input_dir = resolve_repo_path(str(dataset["historical_path"]))
+    input_dir = resolve_repo_path(str(dataset.get("path_or_uri") or dataset["historical_path"]))
     output_base = full_rerun_dir(args.run_id, "batch", name)
 
     records = build_native_records(
@@ -292,7 +292,7 @@ def main() -> None:
             "tool_versions": str(resolve_repo_path(args.tool_versions)),
             "commands": [record.name for record in records],
             "rustsasa_note": (
-                "RustSASA batch command is a dry-run plan for the historical directory invocation."
+                "RustSASA batch command is a dry-run plan for the pinned comparator invocation."
             ),
         },
     )

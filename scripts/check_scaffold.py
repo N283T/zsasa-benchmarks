@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Check the benchmark repository scaffold without running benchmarks."""
+
 from __future__ import annotations
 
 import sys
@@ -20,43 +21,63 @@ REQUIRED_FILES = [
     "manifests/single-file-sample.toml",
     "manifests/trajectory.toml",
     "docs/benchmark-policy.md",
-    "docs/existing-assets.md",
-    "docs/migration-plan.md",
-    "docs/zsasa-only-validation-refresh.md",
-    "docs/batch-rerun-plan.md",
-    "docs/batch-rerun-log.md",
-    "docs/batch-human-rerun-log.md",
-    "docs/trajectory-rerun-plan.md",
-    "docs/trajectory-rerun-log.md",
-    "docs/trajectory-validation-rerun-log.md",
-    "docs/single-file-subset-plan.md",
     "docs/database.md",
-    "docs/validation-rerun-log.md",
     "schemas/benchmark.sql",
     "scripts/check_scaffold.py",
+    "scripts/setup_external_tools.py",
     "scripts/db_common.py",
     "scripts/init_db.py",
-    "scripts/import_validation_csv.py",
     "scripts/export_validation_summary.py",
-    "scripts/report_existing_assets.py",
-    "scripts/refresh_validation.py",
-    "scripts/refresh_validation_md.py",
     "scripts/run_validation.py",
     "scripts/run_batch.py",
     "scripts/run_trajectory_validation.py",
     "scripts/run_trajectory.py",
-    "scripts/smoke_db.py",
     "scripts/benchlib/commands.py",
-    "scripts/benchlib/trajectory_tools.py",
+    "scripts/benchlib/hyperfine.py",
+    "scripts/benchlib/importers.py",
     "scripts/benchlib/manifest.py",
+    "scripts/benchlib/metrics.py",
     "scripts/benchlib/paths.py",
     "scripts/benchlib/runner.py",
     "scripts/benchlib/tools.py",
-    "tests/fixtures/validation/validation-fixture.toml",
-    "tests/fixtures/validation/sr/results_100.csv",
-    "tests/fixtures/validation/lr/results_20.csv",
+    "scripts/benchlib/trajectory_tools.py",
+    "tools/freesasa_batch/freesasa_batch.cc",
+    "tools/freesasa_batch/Makefile",
     "results/.gitkeep",
     "archives/.gitkeep",
+]
+
+REMOVED_LEGACY_FILES = [
+    "scripts/import_validation_csv.py",
+    "scripts/refresh_validation.py",
+    "scripts/refresh_validation_md.py",
+    "scripts/report_existing_assets.py",
+    "scripts/smoke_db.py",
+    "scripts/run_single_file_subset.py",
+    "scripts/export_single_file_subset_summary.py",
+    "scripts/plot_figures.py",
+    "docs/existing-assets.md",
+    "docs/migration-plan.md",
+    "docs/zsasa-only-validation-refresh.md",
+    "docs/validation-rerun-log.md",
+    "docs/trajectory-validation-rerun-log.md",
+    "docs/batch-rerun-log.md",
+    "docs/batch-human-rerun-log.md",
+    "docs/trajectory-rerun-log.md",
+    "docs/single-file-rerun-log.md",
+    "docs/batch-rerun-plan.md",
+    "docs/trajectory-rerun-plan.md",
+    "docs/single-file-subset-plan.md",
+]
+
+
+FULL_RERUN_MANIFESTS = [
+    "manifests/validation-ecoli.toml",
+    "manifests/validation-md-5wvo.toml",
+    "manifests/batch-ecoli.toml",
+    "manifests/batch-human.toml",
+    "manifests/trajectory.toml",
+    "manifests/single-file-sample.toml",
 ]
 
 
@@ -70,44 +91,87 @@ def read_toml(path: Path) -> dict:
         return tomllib.load(handle)
 
 
+def require_no_legacy_markers(path: str) -> None:
+    text = ROOT.joinpath(path).read_text(encoding="utf-8")
+    for marker in [
+        "benchmarks/scripts/",
+        "refresh_validation.py",
+        "import_validation_csv.py",
+        "historical comparator",
+        "historical baseline",
+        "reuse existing comparator",
+    ]:
+        if marker in text:
+            fail(f"legacy benchmark marker {marker!r} remains in {path}")
+
+
 def main() -> None:
     missing = [path for path in REQUIRED_FILES if not ROOT.joinpath(path).exists()]
     if missing:
         fail("missing required files: " + ", ".join(missing))
 
+    remaining_legacy = [path for path in REMOVED_LEGACY_FILES if ROOT.joinpath(path).exists()]
+    if remaining_legacy:
+        fail("legacy files should be removed: " + ", ".join(remaining_legacy))
+
     tools = read_toml(ROOT.joinpath("config/tool-versions.toml"))
     if tools.get("zsasa", {}).get("tag") != "v0.6.0":
-        fail("tool-versions.toml must pin zsasa to v0.6.0 for the current refresh")
-    for tool in ["freesasa", "rustsasa", "lahuta"]:
-        if "reuse existing comparator baseline" not in tools.get(tool, {}).get("policy", ""):
-            fail(f"{tool} policy must preserve baseline reuse")
+        fail("tool-versions.toml must pin zsasa to v0.6.0 for the current rerun")
+    expected_external_bins = {
+        "freesasa": "external/bin/freesasa",
+        "freesasa_batch": "external/bin/freesasa_batch",
+        "rustsasa": "external/bin/rust-sasa",
+        "lahuta": "external/bin/lahuta",
+    }
+    for tool, expected_binary in expected_external_bins.items():
+        spec = tools.get(tool, {})
+        if spec.get("binary") != expected_binary:
+            fail(f"{tool} binary must resolve through the benchmark repo external/bin tree")
+        if "pinned" not in spec.get("policy", ""):
+            fail(f"{tool} policy must require pinned reruns")
+    if (
+        tools.get("freesasa_batch", {}).get("source_path")
+        != "tools/freesasa_batch/freesasa_batch.cc"
+    ):
+        fail("freesasa_batch source must be tracked in tools/freesasa_batch")
 
-    manifest = read_toml(ROOT.joinpath("manifests/validation-ecoli.toml"))
-    dataset = manifest.get("dataset", {})
+    for manifest_path in FULL_RERUN_MANIFESTS:
+        manifest = read_toml(ROOT.joinpath(manifest_path))
+        full_rerun = manifest.get("full_rerun", {})
+        if full_rerun.get("source_kind") != "full_rerun":
+            fail(f"{manifest_path} must define source_kind = full_rerun")
+        if full_rerun.get("rerun_zsasa") is not True:
+            fail(f"{manifest_path} must rerun zsasa")
+        if full_rerun.get("rerun_comparators") is not True:
+            fail(f"{manifest_path} must rerun comparators")
+
+    validation = read_toml(ROOT.joinpath("manifests/validation-ecoli.toml"))
+    dataset = validation.get("dataset", {})
     if dataset.get("expected_count") != 4370:
         fail("validation manifest must describe the E. coli 4,370-structure dataset")
-    if "UP000000625_83333_ECOLI" not in dataset.get("historical_path", ""):
-        fail("validation manifest must point to the historical E. coli dataset path")
-    if "replace zsasa columns" not in manifest.get("baseline", {}).get("policy", ""):
-        fail("validation manifest must state the zsasa-only refresh policy")
-
-    full_rerun = manifest.get("full_rerun", {})
-    if full_rerun.get("source_kind") != "full_rerun":
-        fail("validation manifest must define the native full_rerun source kind")
-    if full_rerun.get("run_id_default") != "v0_6_0_full":
-        fail("validation manifest must define the default full rerun id")
-    if full_rerun.get("threads") != 10:
-        fail("validation manifest must define the full rerun thread count")
-    if full_rerun.get("rerun_zsasa") is not True:
-        fail("validation manifest must rerun zsasa for full_rerun")
-    if full_rerun.get("rerun_comparators") is not True:
-        fail("validation manifest must rerun comparators for full_rerun")
-
-    runs = manifest.get("runs", [])
+    if "UP000000625_83333_ECOLI" not in dataset.get("path_or_uri", ""):
+        fail("validation manifest must point to the E. coli dataset path")
+    runs = validation.get("runs", [])
     if not any(run.get("algorithm") == "sr" and 100 in run.get("points", []) for run in runs):
-        fail("validation manifest must include SR 100-point refresh")
+        fail("validation manifest must include SR 100-point full rerun")
     if not any(run.get("algorithm") == "lr" and 20 in run.get("points", []) for run in runs):
-        fail("validation manifest must include LR 20-slice refresh")
+        fail("validation manifest must include LR 20-slice full rerun")
+
+    md_validation = read_toml(ROOT.joinpath("manifests/validation-md-5wvo.toml"))
+    md_full = md_validation.get("full_rerun", {})
+    if md_full.get("tools") != ["mdtraj", "zsasa_mdtraj", "zsasa_mdanalysis", "zig", "zig_bitmask"]:
+        fail("MD validation full_rerun must include mdtraj, zsasa wrappers, and CLI tools")
+    if md_full.get("classifier") != "naccess" or md_full.get("include_hydrogens") is not True:
+        fail("MD validation full_rerun must use naccess with explicit hydrogens")
+
+    trajectory = read_toml(ROOT.joinpath("manifests/trajectory.toml"))
+    trajectory_full = trajectory.get("full_rerun", {})
+    if "mdtraj" not in trajectory_full.get("default_tools", []):
+        fail("trajectory full_rerun must include native mdtraj")
+    if "mdsasa_bolt" not in trajectory_full.get("default_tools", []):
+        fail("trajectory full_rerun must include mdsasa_bolt")
+    if len(trajectory.get("datasets", [])) != 3:
+        fail("trajectory manifest must describe the three benchmark datasets")
 
     schema = ROOT.joinpath("schemas/benchmark.sql").read_text(encoding="utf-8")
     for table in [
@@ -121,259 +185,16 @@ def main() -> None:
         if f"CREATE TABLE IF NOT EXISTS {table}" not in schema:
             fail(f"benchmark schema missing table: {table}")
 
-    database_doc = ROOT.joinpath("docs/database.md").read_text(encoding="utf-8")
-    for phrase in ["historical_baseline", "zsasa_v0.6.0_refresh", "full_rerun"]:
-        if phrase not in database_doc:
-            fail(f"database docs missing source kind: {phrase}")
-
-    rerun_log = ROOT.joinpath("docs/validation-rerun-log.md").read_text(encoding="utf-8")
-    for phrase in [
-        "freesasa_batch",
-        "zsasa 0.6.0",
-        "4,370 PDB files",
-        "Comparator tools were not rerun",
-    ]:
-        if phrase not in rerun_log:
-            fail(f"validation rerun log missing phrase: {phrase}")
-
-    md_validation_manifest = read_toml(ROOT.joinpath("manifests/validation-md-5wvo.toml"))
-    if md_validation_manifest.get("status") != "completed":
-        fail("MD validation manifest must record the completed refresh")
-    md_validation_dataset = md_validation_manifest.get("dataset", {})
-    if md_validation_dataset.get("frames") != 1001 or md_validation_dataset.get("atoms") != 3858:
-        fail("MD validation manifest must describe the 5wvo_C_analysis dataset")
-    md_validation_refresh = md_validation_manifest.get("refresh", {})
-    if md_validation_refresh.get("native_mdtraj_rerun") is not False:
-        fail("MD validation refresh must reuse the historical mdtraj reference")
-    md_validation_full_rerun = md_validation_manifest.get("full_rerun", {})
-    if md_validation_full_rerun.get("source_kind") != "full_rerun":
-        fail("MD validation manifest must define the native full_rerun source kind")
-    if md_validation_full_rerun.get("run_id_default") != "v0_6_0_full":
-        fail("MD validation full_rerun must define the default run id")
-    expected_md_validation_tools = [
-        "mdtraj",
-        "zsasa_mdtraj",
-        "zsasa_mdanalysis",
-        "zig",
-        "zig_bitmask",
-    ]
-    if md_validation_full_rerun.get("tools") != expected_md_validation_tools:
-        fail("MD validation full_rerun must list native mdtraj, zsasa wrappers, and CLI tools")
-    if md_validation_full_rerun.get("include_hydrogens") is not True:
-        fail("MD validation full_rerun must include explicit hydrogens")
-    if md_validation_full_rerun.get("classifier") != "naccess":
-        fail("MD validation full_rerun must use the trajectory naccess classifier")
-    if md_validation_full_rerun.get("n_points") != [100, 200, 500, 1000]:
-        fail("MD validation full_rerun must preserve the representative point counts")
-    if md_validation_full_rerun.get("rerun_zsasa") is not True:
-        fail("MD validation full_rerun must rerun zsasa")
-    if md_validation_full_rerun.get("rerun_comparators") is not True:
-        fail("MD validation full_rerun must rerun comparators")
-
-    phase1_runner_files = [
+    for path in [
+        "README.md",
+        "docs/benchmark-policy.md",
+        "docs/database.md",
         "scripts/run_validation.py",
         "scripts/run_batch.py",
         "scripts/run_trajectory_validation.py",
         "scripts/run_trajectory.py",
-        "scripts/benchlib/commands.py",
-        "scripts/benchlib/trajectory_tools.py",
-        "scripts/benchlib/manifest.py",
-        "scripts/benchlib/paths.py",
-        "scripts/benchlib/runner.py",
-        "scripts/benchlib/tools.py",
-    ]
-    # Final native runner guard: Phase 1 runner files must not call old benchmark scripts.
-    legacy_script_markers = ["benchmarks/scripts/"]
-    trajectory_runner_markers = ["scripts/validation_md.py", "scripts/bench_md.py"]
-    for path in phase1_runner_files:
-        text = ROOT.joinpath(path).read_text(encoding="utf-8")
-        banned_markers = legacy_script_markers
-        if path in {"scripts/run_trajectory_validation.py", "scripts/run_trajectory.py"}:
-            banned_markers = [*legacy_script_markers, *trajectory_runner_markers]
-        for marker in banned_markers:
-            if marker in text:
-                fail(f"Phase 1 native runner file references legacy runner marker {marker}: {path}")
-
-    batch_manifest = read_toml(ROOT.joinpath("manifests/batch-ecoli.toml"))
-    refresh = batch_manifest.get("planned_refresh", {})
-    if refresh.get("source_kind") != "zsasa_v0.6.0_refresh":
-        fail("batch manifest must identify the zsasa v0.6.0 refresh source kind")
-    if refresh.get("tools") != ["zig", "zig_bitmask"]:
-        fail("batch manifest must restrict the first refresh to zsasa tools")
-    if refresh.get("threads") != [1, 2, 4, 8, 10] or refresh.get("n_points") != 128:
-        fail("batch manifest must describe the refreshed E. coli scaling settings")
-    batch_full_rerun = batch_manifest.get("full_rerun", {})
-    if batch_full_rerun.get("source_kind") != "full_rerun":
-        fail("batch manifest must define the native full_rerun source kind")
-    if batch_full_rerun.get("threads") != [1, 2, 4, 8, 10]:
-        fail("batch full_rerun must preserve the E. coli scaling threads")
-    if batch_full_rerun.get("n_points") != 128:
-        fail("batch full_rerun must define the 128-point batch setting")
-
-    batch_plan = ROOT.joinpath("docs/batch-rerun-plan.md").read_text(encoding="utf-8")
-    for phrase in [
-        "do not rerun FreeSASA",
-        "zsasa_v0.6.0_refresh",
-        "4,370 PDB files",
-        "Closing Codex",
-        "--tool zig_bitmask",
     ]:
-        if phrase not in batch_plan:
-            fail(f"batch rerun plan missing phrase: {phrase}")
-
-    batch_log = ROOT.joinpath("docs/batch-rerun-log.md").read_text(encoding="utf-8")
-    for phrase in [
-        "bench_zsasa_f64_2t.json",
-        "normalized by hand",
-        "2,984",
-        "Comparator tools were not rerun",
-    ]:
-        if phrase not in batch_log:
-            fail(f"batch rerun log missing phrase: {phrase}")
-
-    human_manifest = read_toml(ROOT.joinpath("manifests/batch-human.toml"))
-    human_dataset = human_manifest.get("dataset", {})
-    if human_dataset.get("expected_count") != 23586:
-        fail("human batch manifest must describe the 23,586-structure dataset")
-    human_refresh = human_manifest.get("refresh", {})
-    if human_refresh.get("threads") != [10] or human_refresh.get("runs") != 10:
-        fail("human batch manifest must describe the completed t10 refresh")
-    if human_refresh.get("tools") != ["zig", "zig_bitmask"]:
-        fail("human batch manifest must restrict the refresh to zsasa tools")
-    human_full_rerun = human_manifest.get("full_rerun", {})
-    if human_full_rerun.get("source_kind") != "full_rerun":
-        fail("human batch manifest must define the native full_rerun source kind")
-    if human_full_rerun.get("threads") != [10] or human_full_rerun.get("runs") != 3:
-        fail("human batch full_rerun must use t10 with three runs")
-
-    human_log = ROOT.joinpath("docs/batch-human-rerun-log.md").read_text(encoding="utf-8")
-    for phrase in [
-        "23,586 PDB files",
-        "Comparator tools were not rerun",
-        "1,667",
-        "thermal or background-state effects",
-    ]:
-        if phrase not in human_log:
-            fail(f"human batch rerun log missing phrase: {phrase}")
-
-    single_manifest = read_toml(ROOT.joinpath("manifests/single-file-sample.toml"))
-    if single_manifest.get("status") != "planning":
-        fail("single-file manifest must record the curated subset planning status")
-    single_subset = single_manifest.get("subset", {}).get("selection", [])
-    if len(single_subset) != 12:
-        fail("single-file subset must contain 12 representative structures")
-    for required_structure in ["9fqr", "5vyc", "8fon", "8rbs", "af-q6zs30-f1-model_v6"]:
-        if required_structure not in single_subset:
-            fail(f"single-file subset missing required structure: {required_structure}")
-
-    single_plan = ROOT.joinpath("docs/single-file-subset-plan.md").read_text(encoding="utf-8")
-    for phrase in [
-        "maximum structure",
-        "RustSASA parse-time outlier maximum",
-        "FreeSASA total-runtime outlier",
-        "Lahuta is not part of this single-file historical set",
-    ]:
-        if phrase not in single_plan:
-            fail(f"single-file subset plan missing phrase: {phrase}")
-
-    trajectory_manifest = read_toml(ROOT.joinpath("manifests/trajectory.toml"))
-    if trajectory_manifest.get("status") != "completed":
-        fail("trajectory manifest must record the completed rerun")
-    trajectory_datasets = trajectory_manifest.get("datasets", [])
-    if len(trajectory_datasets) != 3:
-        fail("trajectory manifest must describe the three benchmark datasets")
-    if {dataset.get("id") for dataset in trajectory_datasets} != {
-        "5wvo_C_analysis",
-        "6sup_A_analysis",
-        "5vz0_A_protein",
-    }:
-        fail("trajectory manifest has unexpected dataset ids")
-    if any(dataset.get("refresh_threads") != [10] for dataset in trajectory_datasets):
-        fail("trajectory manifest must describe t10-only refresh threads for all datasets")
-    dataset_tools = {
-        dataset.get("id"): dataset.get("refresh_tools") for dataset in trajectory_datasets
-    }
-    expected_cli_and_wrappers = [
-        "zig",
-        "zig_bitmask",
-        "zsasa_mdtraj",
-        "zsasa_mdtraj_bitmask",
-        "zsasa_mdanalysis",
-        "zsasa_mdanalysis_bitmask",
-    ]
-    if dataset_tools.get("5wvo_C_analysis") != expected_cli_and_wrappers:
-        fail("5wvo trajectory refresh must include zsasa CLI and Python wrappers")
-    if dataset_tools.get("6sup_A_analysis") != expected_cli_and_wrappers:
-        fail("6sup trajectory refresh must include zsasa CLI and Python wrappers")
-    if dataset_tools.get("5vz0_A_protein") != ["zig", "zig_bitmask"]:
-        fail("5vz0 trajectory refresh must be CLI-only")
-    trajectory_refresh = trajectory_manifest.get("refresh", {})
-    if trajectory_refresh.get("default_tools") != expected_cli_and_wrappers:
-        fail("trajectory refresh default tools must include zsasa CLI and Python wrappers")
-    if trajectory_refresh.get("large_trajectory_tools") != ["zig", "zig_bitmask"]:
-        fail("trajectory refresh must define CLI-only tools for 5vz0")
-    if trajectory_refresh.get("external_comparators_not_rerun") != ["mdtraj", "mdsasa_bolt"]:
-        fail("trajectory refresh must leave external comparators as historical baselines")
-    if trajectory_refresh.get("n_points") != 100:
-        fail("trajectory refresh must describe the t10 100-point rerun")
-    trajectory_full_rerun = trajectory_manifest.get("full_rerun", {})
-    if trajectory_full_rerun.get("source_kind") != "full_rerun":
-        fail("trajectory manifest must define the native full_rerun source kind")
-    if trajectory_full_rerun.get("run_id_default") != "v0_6_0_full":
-        fail("trajectory full_rerun must define the default run id")
-    expected_full_tools = [*expected_cli_and_wrappers, "mdtraj", "mdsasa_bolt"]
-    if trajectory_full_rerun.get("default_tools") != expected_full_tools:
-        fail("trajectory full_rerun default tools must include native comparators")
-    if trajectory_full_rerun.get("large_trajectory_tools") != ["zig", "zig_bitmask", "mdsasa_bolt"]:
-        fail("trajectory full_rerun must define large trajectory tools")
-    if trajectory_full_rerun.get("n_points") != 100:
-        fail("trajectory full_rerun must define the 100-point setting")
-    if trajectory_full_rerun.get("threads") != [10]:
-        fail("trajectory full_rerun must define t10 execution")
-    if trajectory_full_rerun.get("cli_precisions") != ["f64", "f32"]:
-        fail("trajectory full_rerun must keep f64/f32 CLI precision variants")
-    if trajectory_full_rerun.get("include_hydrogens") is not True:
-        fail("trajectory full_rerun must include explicit hydrogens")
-    if trajectory_full_rerun.get("classifier") != "naccess":
-        fail("trajectory full_rerun must use the trajectory naccess classifier")
-    if trajectory_full_rerun.get("rerun_zsasa") is not True:
-        fail("trajectory full_rerun must rerun zsasa")
-    if trajectory_full_rerun.get("rerun_comparators") is not True:
-        fail("trajectory full_rerun must rerun comparators")
-
-    trajectory_plan = ROOT.joinpath("docs/trajectory-rerun-plan.md").read_text(encoding="utf-8")
-    for phrase in [
-        "Do not rerun",
-        "zsasa_mdtraj_bitmask",
-        "5vz0_A_protein` dataset is CLI only",
-        "5vz0_A_protein",
-        "--tool zig_bitmask",
-        "Remove `--dry-run`",
-    ]:
-        if phrase not in trajectory_plan:
-            fail(f"trajectory rerun plan missing phrase: {phrase}")
-
-    trajectory_log = ROOT.joinpath("docs/trajectory-rerun-log.md").read_text(encoding="utf-8")
-    for phrase in [
-        "External comparators were not rerun",
-        "5vz0_A_protein` | 17,910 | 10,001 | CLI only",
-        "CLI bitmask f32 | 37.388",
-        "zsasa Python wrapper paths for the two 1K-frame datasets",
-    ]:
-        if phrase not in trajectory_log:
-            fail(f"trajectory rerun log missing phrase: {phrase}")
-
-    md_validation_log = ROOT.joinpath("docs/trajectory-validation-rerun-log.md").read_text(
-        encoding="utf-8"
-    )
-    for phrase in [
-        "Native MDTraj rerun: no",
-        "0.999539",
-        "mdtraj.shrake_rupley` was not rerun",
-        "zsasa_cli_bitmask_f32",
-    ]:
-        if phrase not in md_validation_log:
-            fail(f"trajectory validation rerun log missing phrase: {phrase}")
+        require_no_legacy_markers(path)
 
     print("benchmark scaffold checks passed")
 

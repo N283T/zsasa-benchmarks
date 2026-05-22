@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Export validation summary statistics from the benchmark DuckDB database."""
+
 from __future__ import annotations
 
 import argparse
@@ -40,8 +41,7 @@ def summarize_pair(
         }
 
     rel_errors = [
-        relative_error_percent(obs, ref)
-        for obs, ref in zip(observed, reference, strict=True)
+        relative_error_percent(obs, ref) for obs, ref in zip(observed, reference, strict=True)
     ]
     return {
         "n": len(shared),
