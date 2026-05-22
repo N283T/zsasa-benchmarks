@@ -86,6 +86,8 @@ def test_rustsasa_single_command() -> None:
         "out.json",
         "-n",
         "100",
+        "-f",
+        "json",
         "-t",
         "2",
         "-o",

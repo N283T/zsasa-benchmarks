@@ -136,7 +136,7 @@ def rustsasa_validation_command(
         "-n",
         str(n_points),
         "-f",
-        "pdb",
+        "json",
         "-t",
         str(threads),
         "-o",

@@ -95,6 +95,8 @@ def rustsasa_single_command(
         str(output_path),
         "-n",
         str(n_points),
+        "-f",
+        "json",
         "-t",
         str(threads),
         "-o",
