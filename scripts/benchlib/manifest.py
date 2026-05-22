@@ -45,6 +45,6 @@ def expect_string(mapping: dict[str, Any], key: str) -> str:
 
 def expect_int(mapping: dict[str, Any], key: str) -> int:
     value = mapping.get(key)
-    if not isinstance(value, int):
+    if isinstance(value, bool) or not isinstance(value, int):
         raise ManifestError(f"{key} must be an integer")
     return value

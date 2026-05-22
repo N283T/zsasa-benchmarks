@@ -3,7 +3,13 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from scripts.benchlib.manifest import ManifestError, expect_dict, expect_list, load_manifest
+from scripts.benchlib.manifest import (
+    ManifestError,
+    expect_dict,
+    expect_int,
+    expect_list,
+    load_manifest,
+)
 
 
 def test_load_manifest_reads_toml(tmp_path: Path) -> None:
@@ -26,3 +32,12 @@ def test_expect_dict_rejects_missing_key() -> None:
 def test_expect_list_rejects_string() -> None:
     with pytest.raises(ManifestError, match="must be a list"):
         expect_list({"threads": "10"}, "threads")
+
+
+def test_expect_int_accepts_integer() -> None:
+    assert expect_int({"runs": 3}, "runs") == 3
+
+
+def test_expect_int_rejects_boolean() -> None:
+    with pytest.raises(ManifestError, match="must be an integer"):
+        expect_int({"runs": True}, "runs")
