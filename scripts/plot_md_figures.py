@@ -141,16 +141,20 @@ def md_rss_label_style(dataset_id: str, variant: str) -> dict[str, Any]:
             x, y, ha, va = styles[variant]
             return {"xytext": (x, y), "ha": ha, "va": va, "arrowprops": arrowprops}
 
+    if dataset_id == "6sup_A_analysis":
+        if variant.endswith("_f32"):
+            return {"xytext": (8, 7), "ha": "left", "va": "bottom", "arrowprops": arrowprops}
+        if variant.endswith("_f64"):
+            return {"xytext": (8, -7), "ha": "left", "va": "top", "arrowprops": arrowprops}
+        if variant.startswith("zsasa_mdanalysis"):
+            return {"xytext": (8, -7), "ha": "left", "va": "top", "arrowprops": arrowprops}
+        if variant.startswith("zsasa_mdtraj") or variant == "mdtraj":
+            return {"xytext": (8, 7), "ha": "left", "va": "bottom", "arrowprops": arrowprops}
+
     if variant.endswith("_f32"):
         return {"xytext": (8, 7), "ha": "left", "va": "bottom"}
     if variant.endswith("_f64"):
         return {"xytext": (8, -7), "ha": "left", "va": "top"}
-
-    if dataset_id == "6sup_A_analysis":
-        if variant.startswith("zsasa_mdanalysis"):
-            return {"xytext": (8, -7), "ha": "left", "va": "top"}
-        if variant.startswith("zsasa_mdtraj") or variant == "mdtraj":
-            return {"xytext": (8, 7), "ha": "left", "va": "bottom"}
 
     return {"xytext": (8, 0), "ha": "left", "va": "center"}
 
@@ -392,7 +396,8 @@ def plot_throughput_vs_rss_grid(
         ax.set_title(dataset_label(dataset_id))
         ax.set_xlabel("peak RSS (MiB)")
         ax.set_ylabel("frames / sec")
-    fig.legend(handles=handles, loc="outside lower center", ncol=5)
+    if not log_x:
+        fig.legend(handles=handles, loc="outside lower center", ncol=5)
     name = "md_throughput_vs_peak_rss_logx_grid" if log_x else "md_throughput_vs_peak_rss_grid"
     return save_figure(fig, out_dir, name)
 

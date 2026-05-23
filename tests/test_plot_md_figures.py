@@ -72,11 +72,19 @@ def test_md_rss_label_style_matches_manual_offsets() -> None:
         "xytext": (8, -7),
         "ha": "left",
         "va": "top",
+        "arrowprops": arrow,
     }
     assert md_rss_label_style("6sup_A_analysis", "zsasa_mdtraj") == {
         "xytext": (8, 7),
         "ha": "left",
         "va": "bottom",
+        "arrowprops": arrow,
+    }
+    assert md_rss_label_style("6sup_A_analysis", "zsasa_cli_f32") == {
+        "xytext": (8, 7),
+        "ha": "left",
+        "va": "bottom",
+        "arrowprops": arrow,
     }
     assert md_rss_label_style("5vz0_A_protein", "zsasa_cli_bitmask_f64") == {
         "xytext": (24, -12),
@@ -91,3 +99,33 @@ def test_md_display_names_omit_xtc_suffix() -> None:
     assert display_name("zsasa_mdtraj_bitmask") == "zsasa + MDTraj bitmask"
     assert display_name("zsasa_mdanalysis") == "zsasa + MDAnalysis"
     assert display_name("zsasa_mdanalysis_bitmask") == "zsasa + MDAnalysis bitmask"
+
+
+
+def test_plot_rss_grid_uses_legend_only_for_unlabeled_linear_plot(tmp_path) -> None:
+    import matplotlib.pyplot as plt
+    from scripts.plot_md_figures import plot_throughput_vs_rss_grid
+
+    legend_calls: list[dict[str, object]] = []
+    original_legend = plt.Figure.legend
+
+    def recording_legend(self, *args, **kwargs):  # type: ignore[no-untyped-def]
+        legend_calls.append(kwargs)
+        return original_legend(self, *args, **kwargs)
+
+    rows = [
+        {
+            "dataset_id": "5wvo_C_analysis",
+            "variant": "zsasa_cli_f64",
+            "rss_mib": 10.0,
+            "fps": 20.0,
+        }
+    ]
+    try:
+        plt.Figure.legend = recording_legend  # type: ignore[method-assign]
+        plot_throughput_vs_rss_grid(rows, tmp_path / "linear", log_x=False)
+        plot_throughput_vs_rss_grid(rows, tmp_path / "log", log_x=True)
+    finally:
+        plt.Figure.legend = original_legend  # type: ignore[method-assign]
+
+    assert len(legend_calls) == 1
