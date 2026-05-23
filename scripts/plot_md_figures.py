@@ -1,0 +1,453 @@
+#!/usr/bin/env python3
+"""Generate trajectory/MD performance figures from the benchmark DuckDB database."""
+
+from __future__ import annotations
+
+import argparse
+import re
+from collections import defaultdict
+from pathlib import Path
+from typing import Any
+
+import duckdb
+import matplotlib.pyplot as plt
+
+ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_DB = ROOT.joinpath("results", "benchmark.duckdb")
+DEFAULT_OUT_DIR = ROOT.joinpath("results", "figures", "md")
+
+DATASET_ORDER = ["5wvo_C_analysis", "6sup_A_analysis", "5vz0_A_protein"]
+VARIANT_ORDER = [
+    "zsasa_cli_f64",
+    "zsasa_cli_f32",
+    "zsasa_cli_bitmask_f64",
+    "zsasa_cli_bitmask_f32",
+    "zsasa_mdtraj",
+    "zsasa_mdtraj_bitmask",
+    "zsasa_mdanalysis",
+    "zsasa_mdanalysis_bitmask",
+    "mdtraj",
+    "mdsasa_bolt",
+]
+COLORS = {
+    "zsasa_cli_f64": "#f39c12",
+    "zsasa_cli_f32": "#f6c85f",
+    "zsasa_cli_bitmask_f64": "#e67e22",
+    "zsasa_cli_bitmask_f32": "#ffb347",
+    "zsasa_mdtraj": "#d35400",
+    "zsasa_mdtraj_bitmask": "#a04000",
+    "zsasa_mdanalysis": "#b9770e",
+    "zsasa_mdanalysis_bitmask": "#7e5109",
+    "mdtraj": "#3498db",
+    "mdsasa_bolt": "#2ecc71",
+}
+MARKERS = {
+    "zsasa_cli_f64": "o",
+    "zsasa_cli_f32": "o",
+    "zsasa_cli_bitmask_f64": "o",
+    "zsasa_cli_bitmask_f32": "o",
+    "zsasa_mdtraj": "^",
+    "zsasa_mdtraj_bitmask": "^",
+    "zsasa_mdanalysis": "s",
+    "zsasa_mdanalysis_bitmask": "s",
+    "mdtraj": "^",
+    "mdsasa_bolt": "s",
+}
+DISPLAY_NAMES = {
+    "zsasa_cli_f64": "zsasa CLI f64",
+    "zsasa_cli_f32": "zsasa CLI f32",
+    "zsasa_cli_bitmask_f64": "zsasa CLI bitmask f64",
+    "zsasa_cli_bitmask_f32": "zsasa CLI bitmask f32",
+    "zsasa_mdtraj": "zsasa + MDTraj XTC",
+    "zsasa_mdtraj_bitmask": "zsasa + MDTraj XTC bitmask",
+    "zsasa_mdanalysis": "zsasa + MDAnalysis XTC",
+    "zsasa_mdanalysis_bitmask": "zsasa + MDAnalysis XTC bitmask",
+    "mdtraj": "MDTraj",
+    "mdsasa_bolt": "mdsasa-bolt",
+}
+DATASET_LABELS = {
+    "5wvo_C_analysis": "5wvo_C (1,001 frames, 3,858 atoms)",
+    "6sup_A_analysis": "6sup_A (1,001 frames, 33,377 atoms)",
+    "5vz0_A_protein": "5vz0_A (10,001 frames, 17,910 atoms)",
+}
+
+
+def md_variant_name(run: dict[str, Any]) -> str:
+    tool_id = str(run.get("tool_id") or "")
+    precision = str(run.get("precision") or "")
+    mode = str(run.get("mode") or "")
+    if tool_id == "zig":
+        return f"zsasa_cli_{precision}"
+    if tool_id == "zig_bitmask":
+        return f"zsasa_cli_bitmask_{precision}"
+    if tool_id in {
+        "zsasa_mdtraj",
+        "zsasa_mdtraj_bitmask",
+        "zsasa_mdanalysis",
+        "zsasa_mdanalysis_bitmask",
+        "mdtraj",
+        "mdsasa_bolt",
+    }:
+        return tool_id
+    if mode == "bitmask":
+        return f"{tool_id}_bitmask"
+    return tool_id
+
+
+def milliseconds_per_frame(mean_s: float, frame_count: int) -> float:
+    if frame_count <= 0:
+        raise ValueError("frame_count must be positive")
+    return mean_s * 1000.0 / frame_count
+
+
+def atom_frames_per_second(frame_count: int, atom_count: int, mean_s: float) -> float:
+    if mean_s <= 0:
+        raise ValueError("mean_s must be positive")
+    return frame_count * atom_count / mean_s
+
+
+def frames_per_second(frame_count: int, mean_s: float) -> float:
+    if mean_s <= 0:
+        raise ValueError("mean_s must be positive")
+    return frame_count / mean_s
+
+
+def display_name(variant: str) -> str:
+    return DISPLAY_NAMES.get(variant, variant)
+
+
+def color_for(variant: str) -> str:
+    return COLORS.get(variant, "#7f8c8d")
+
+
+def marker_for(variant: str) -> str:
+    return MARKERS.get(variant, "o")
+
+
+def variant_sort_key(variant: str) -> tuple[int, str]:
+    try:
+        return (VARIANT_ORDER.index(variant), variant)
+    except ValueError:
+        return (len(VARIANT_ORDER), variant)
+
+
+def dataset_sort_key(dataset_id: str) -> tuple[int, str]:
+    try:
+        return (DATASET_ORDER.index(dataset_id), dataset_id)
+    except ValueError:
+        return (len(DATASET_ORDER), dataset_id)
+
+
+def dataset_label(dataset_id: str) -> str:
+    return DATASET_LABELS.get(dataset_id, dataset_id)
+
+
+def parse_atom_count(notes: str | None) -> int | None:
+    if not notes:
+        return None
+    match = re.search(r"atoms=(\d+)", notes)
+    return int(match.group(1)) if match else None
+
+
+def setup_style() -> None:
+    plt.rcParams.update(
+        {
+            "font.family": "sans-serif",
+            "font.size": 9,
+            "axes.titlesize": 10,
+            "axes.labelsize": 9,
+            "xtick.labelsize": 8,
+            "ytick.labelsize": 8,
+            "legend.fontsize": 8,
+            "figure.dpi": 140,
+            "savefig.dpi": 200,
+            "axes.grid": True,
+            "grid.alpha": 0.25,
+            "axes.spines.top": False,
+            "axes.spines.right": False,
+        }
+    )
+
+
+def save_figure(fig: plt.Figure, out_dir: Path, name: str) -> list[Path]:
+    written: list[Path] = []
+    for ext in ("png", "svg"):
+        path = out_dir.joinpath(ext, f"{name}.{ext}")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(path, bbox_inches="tight")
+        written.append(path)
+    plt.close(fig)
+    return written
+
+
+def load_md_rows(db_path: Path) -> list[dict[str, Any]]:
+    con = duckdb.connect(str(db_path), read_only=True)
+    try:
+        columns = [
+            "run_id",
+            "dataset_id",
+            "tool_id",
+            "precision",
+            "mode",
+            "threads",
+            "n_points",
+            "frame_count",
+            "notes",
+        ]
+        run_rows = con.execute(
+            """
+            SELECT r.run_id, r.dataset_id, r.tool_id, r.precision, r.mode, r.threads,
+                   r.n_points, d.expected_count, d.notes
+            FROM benchmark_runs r
+            JOIN datasets d USING (dataset_id)
+            WHERE r.benchmark_kind = 'trajectory'
+            ORDER BY r.dataset_id, r.tool_id, r.mode, r.precision
+            """
+        ).fetchall()
+        rows: list[dict[str, Any]] = []
+        for raw in run_rows:
+            run = dict(zip(columns, raw, strict=True))
+            stats = {
+                (metric, statistic): value
+                for metric, statistic, value in con.execute(
+                    """
+                    SELECT metric, statistic, value
+                    FROM performance_results
+                    WHERE run_id = ?
+                    """,
+                    [run["run_id"]],
+                ).fetchall()
+            }
+            mean_s = float(stats[("runtime", "mean")])
+            stddev_s = float(stats.get(("runtime", "stddev")) or 0.0)
+            frame_count = int(run["frame_count"])
+            atom_count = parse_atom_count(run.get("notes")) or 0
+            rss_bytes = float(stats.get(("peak_rss", "mean")) or 0.0)
+            rss_stddev_bytes = float(stats.get(("peak_rss", "stddev")) or 0.0)
+            variant = md_variant_name(run)
+            fps = frames_per_second(frame_count, mean_s)
+            rows.append(
+                {
+                    "dataset_id": run["dataset_id"],
+                    "variant": variant,
+                    "threads": run["threads"],
+                    "n_points": run["n_points"],
+                    "mean_s": mean_s,
+                    "stddev_s": stddev_s,
+                    "frame_count": frame_count,
+                    "atom_count": atom_count,
+                    "fps": fps,
+                    "fps_stddev": frame_count * stddev_s / (mean_s**2),
+                    "ms_per_frame": milliseconds_per_frame(mean_s, frame_count),
+                    "atom_frames_per_sec": atom_frames_per_second(frame_count, atom_count, mean_s)
+                    if atom_count
+                    else 0.0,
+                    "rss_mib": rss_bytes / (1024 * 1024),
+                    "rss_stddev_mib": rss_stddev_bytes / (1024 * 1024),
+                    "fps_per_mib": fps / (rss_bytes / (1024 * 1024)) if rss_bytes else 0.0,
+                    "user_time_s": float(stats.get(("user_time", "mean")) or 0.0),
+                    "system_time_s": float(stats.get(("system_time", "mean")) or 0.0),
+                }
+            )
+        return sorted(
+            rows,
+            key=lambda row: (dataset_sort_key(row["dataset_id"]), variant_sort_key(row["variant"])),
+        )
+    finally:
+        con.close()
+
+
+def group_by_dataset(rows: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+    grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for row in rows:
+        grouped[row["dataset_id"]].append(row)
+    return {
+        key: sorted(value, key=lambda row: variant_sort_key(row["variant"]))
+        for key, value in grouped.items()
+    }
+
+
+def plot_bar_grid(
+    rows: list[dict[str, Any]],
+    *,
+    metric: str,
+    ylabel: str,
+    title: str,
+    out_dir: Path,
+    name: str,
+    lower_is_better: bool = False,
+) -> list[Path]:
+    grouped = group_by_dataset(rows)
+    datasets = sorted(grouped, key=dataset_sort_key)
+    fig, axes = plt.subplots(
+        1,
+        len(datasets),
+        figsize=(6.4 * len(datasets), 5.2),
+        squeeze=False,
+        layout="constrained",
+    )
+    fig.suptitle(title)
+    for ax, dataset_id in zip(axes[0], datasets, strict=True):
+        items = sorted(
+            grouped[dataset_id], key=lambda row: row[metric], reverse=not lower_is_better
+        )
+        ax.bar(
+            [display_name(row["variant"]) for row in items],
+            [row[metric] for row in items],
+            color=[color_for(row["variant"]) for row in items],
+        )
+        ax.set_title(dataset_label(dataset_id))
+        ax.set_ylabel(ylabel)
+        ax.tick_params(axis="x", rotation=45)
+    return save_figure(fig, out_dir, name)
+
+
+def plot_throughput_vs_rss_grid(
+    rows: list[dict[str, Any]], out_dir: Path, *, log_x: bool = False
+) -> list[Path]:
+    grouped = group_by_dataset(rows)
+    datasets = sorted(grouped, key=dataset_sort_key)
+    fig, axes = plt.subplots(
+        1,
+        len(datasets),
+        figsize=(6.2 * len(datasets), 5.2),
+        squeeze=False,
+        layout="constrained",
+    )
+    suffix = "log-x" if log_x else "linear-x"
+    fig.suptitle(f"MD throughput vs peak RSS ({suffix})")
+    variants = sorted({row["variant"] for row in rows}, key=variant_sort_key)
+    handles = [
+        plt.Line2D(
+            [0],
+            [0],
+            marker=marker_for(variant),
+            markeredgecolor="#333333",
+            markeredgewidth=0.4,
+            color="w",
+            markerfacecolor=color_for(variant),
+            label=display_name(variant),
+            markersize=7,
+        )
+        for variant in variants
+    ]
+    for ax, dataset_id in zip(axes[0], datasets, strict=True):
+        for row in grouped[dataset_id]:
+            ax.scatter(
+                row["rss_mib"],
+                row["fps"],
+                s=70,
+                color=color_for(row["variant"]),
+                marker=marker_for(row["variant"]),
+                edgecolor="#333333",
+                linewidth=0.4,
+            )
+        if log_x:
+            ax.set_xscale("log")
+        ax.set_title(dataset_label(dataset_id))
+        ax.set_xlabel("peak RSS (MiB)")
+        ax.set_ylabel("frames / sec")
+    fig.legend(handles=handles, loc="outside lower center", ncol=5)
+    name = "md_throughput_vs_peak_rss_logx_grid" if log_x else "md_throughput_vs_peak_rss_grid"
+    return save_figure(fig, out_dir, name)
+
+
+def plot_cpu_utilization_grid(rows: list[dict[str, Any]], out_dir: Path) -> list[Path]:
+    for row in rows:
+        row["cpu_utilization"] = (row["user_time_s"] + row["system_time_s"]) / row["mean_s"]
+    return plot_bar_grid(
+        rows,
+        metric="cpu_utilization",
+        ylabel="(user + system) / wall time",
+        title="MD CPU utilization proxy",
+        out_dir=out_dir,
+        name="md_cpu_utilization_bar_grid",
+    )
+
+
+def write_index(out_dir: Path, outputs: list[Path]) -> Path:
+    index = out_dir.joinpath("index.md")
+    pngs = sorted(path for path in outputs if path.suffix == ".png")
+    lines = ["# MD performance figures", "", f"Generated {len(pngs)} PNG figures.", ""]
+    for path in pngs:
+        lines.append(f"- `{path.relative_to(out_dir)}`")
+    index.parent.mkdir(parents=True, exist_ok=True)
+    index.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return index
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--db", type=Path, default=DEFAULT_DB)
+    parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
+    return parser.parse_args()
+
+
+def main() -> None:
+    args = parse_args()
+    setup_style()
+    rows = load_md_rows(args.db)
+    outputs: list[Path] = []
+    outputs.extend(
+        plot_bar_grid(
+            rows,
+            metric="fps",
+            ylabel="frames / sec",
+            title="MD throughput",
+            out_dir=args.out_dir,
+            name="md_frames_per_sec_bar_grid",
+        )
+    )
+    outputs.extend(
+        plot_bar_grid(
+            rows,
+            metric="mean_s",
+            ylabel="runtime (s), lower is better",
+            title="MD runtime",
+            out_dir=args.out_dir,
+            name="md_runtime_bar_grid",
+            lower_is_better=True,
+        )
+    )
+    outputs.extend(
+        plot_bar_grid(
+            rows,
+            metric="rss_mib",
+            ylabel="peak RSS (MiB), lower is better",
+            title="MD peak RSS",
+            out_dir=args.out_dir,
+            name="md_peak_rss_bar_grid",
+            lower_is_better=True,
+        )
+    )
+    outputs.extend(plot_throughput_vs_rss_grid(rows, args.out_dir))
+    outputs.extend(plot_throughput_vs_rss_grid(rows, args.out_dir, log_x=True))
+    outputs.extend(
+        plot_bar_grid(
+            rows,
+            metric="fps_per_mib",
+            ylabel="frames / sec / MiB",
+            title="MD throughput per peak RSS",
+            out_dir=args.out_dir,
+            name="md_frames_per_sec_per_mib_bar_grid",
+        )
+    )
+    outputs.extend(
+        plot_bar_grid(
+            rows,
+            metric="atom_frames_per_sec",
+            ylabel="atom-frames / sec",
+            title="MD atom-frame throughput",
+            out_dir=args.out_dir,
+            name="md_atom_frames_per_sec_bar_grid",
+        )
+    )
+    outputs.extend(plot_cpu_utilization_grid(rows, args.out_dir))
+    index = write_index(args.out_dir, outputs)
+    png_count = sum(1 for path in outputs if path.suffix == ".png")
+    print(f"wrote {png_count} PNG figures under {args.out_dir}")
+    print(f"wrote {index}")
+
+
+if __name__ == "__main__":
+    main()

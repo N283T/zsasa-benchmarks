@@ -118,3 +118,71 @@ def test_smoke_import_full_rerun_fixture(tmp_path: Path) -> None:
         assert conn.execute("SELECT count(*) FROM validation_results").fetchone()[0] == 4
     finally:
         conn.close()
+
+
+def test_import_hyperfine_directory_imports_memory_and_cpu_metrics(tmp_path: Path) -> None:
+    from scripts.import_full_rerun import import_hyperfine_directory
+
+    db = tmp_path.joinpath("benchmark.duckdb")
+    reset_database(db)
+    root = tmp_path.joinpath("batch", "ecoli")
+    root.joinpath("hyperfine").mkdir(parents=True)
+    root.joinpath("hyperfine", "zsasa_batch_f64_standard_1t_128p.json").write_text(
+        json.dumps(
+            {
+                "results": [
+                    {
+                        "command": "zsasa_batch_f64_standard_1t_128p",
+                        "mean": 10.0,
+                        "stddev": 1.0,
+                        "median": 9.5,
+                        "min": 9.0,
+                        "max": 11.0,
+                        "times": [9.0, 10.0, 11.0],
+                        "user": 20.0,
+                        "system": 3.0,
+                        "memory_usage_byte": [100, 200, 300],
+                        "exit_codes": [0, 0, 0],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    conn = duckdb.connect(str(db))
+    try:
+        conn.execute(
+            """
+            INSERT INTO datasets (dataset_id, name, role, expected_count)
+            VALUES ('UP000000625_83333_ECOLI_v6_pdb', 'ecoli', 'batch', 1)
+            """
+        )
+        conn.execute("INSERT INTO tools (tool_id, name) VALUES ('zsasa', 'zsasa')")
+        import_hyperfine_directory(
+            conn,
+            base=root,
+            run_label="run",
+            benchmark_kind="batch",
+            dataset_id="UP000000625_83333_ECOLI_v6_pdb",
+            manifest_id="batch-ecoli-full-rerun",
+            name_parser=parse_batch_record_name,
+        )
+        metrics = {
+            (metric, statistic): (value, unit, n)
+            for metric, statistic, value, unit, n in conn.execute(
+                """
+                SELECT metric, statistic, value, unit, n
+                FROM performance_results
+                ORDER BY metric, statistic
+                """
+            ).fetchall()
+        }
+    finally:
+        conn.close()
+
+    assert metrics[("runtime", "run_2")] == (10.0, "s", 3)
+    assert metrics[("peak_rss", "mean")] == (200.0, "bytes", 3)
+    assert metrics[("peak_rss", "run_3")] == (300.0, "bytes", 3)
+    assert metrics[("user_time", "mean")] == (20.0, "s", 3)
+    assert metrics[("system_time", "mean")] == (3.0, "s", 3)

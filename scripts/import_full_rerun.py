@@ -9,6 +9,7 @@ import re
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
+from statistics import median
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -359,11 +360,35 @@ def import_hyperfine_directory(
             ("runtime", "median", result.get("median"), "s"),
             ("runtime", "min", result.get("min"), "s"),
             ("runtime", "max", result.get("max"), "s"),
+            ("user_time", "mean", result.get("user"), "s"),
+            ("system_time", "mean", result.get("system"), "s"),
         ]
         times = result.get("times", [])
         metrics.extend(
             ("runtime", f"run_{idx}", float(value), "s") for idx, value in enumerate(times, start=1)
         )
+        memory_values = [float(value) for value in result.get("memory_usage_byte", [])]
+        if memory_values:
+            metrics.extend(
+                [
+                    ("peak_rss", "mean", sum(memory_values) / len(memory_values), "bytes"),
+                    ("peak_rss", "median", median(memory_values), "bytes"),
+                    ("peak_rss", "min", min(memory_values), "bytes"),
+                    ("peak_rss", "max", max(memory_values), "bytes"),
+                ]
+            )
+            metrics.extend(
+                ("peak_rss", f"run_{idx}", value, "bytes")
+                for idx, value in enumerate(memory_values, start=1)
+            )
+            if len(memory_values) > 1:
+                mean_memory = sum(memory_values) / len(memory_values)
+                variance = sum((value - mean_memory) ** 2 for value in memory_values) / (
+                    len(memory_values) - 1
+                )
+                metrics.append(("peak_rss", "stddev", variance**0.5, "bytes"))
+            else:
+                metrics.append(("peak_rss", "stddev", 0.0, "bytes"))
         conn.executemany(
             """
             INSERT INTO performance_results

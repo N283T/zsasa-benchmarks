@@ -1,66 +1,33 @@
-# Draft figure inventory
+# Figure inventory
 
-Draft list of expected figure outputs. Overview/schematic figures are deferred.
+Exploratory figures are generated from `results/benchmark.duckdb` and written under
+`results/figures/`. The top-level entry point is:
 
-## `validation_sr_scatter_grid`
+- `results/figures/index.md`
 
-E. coli SASA agreement scatter plots
+## Generation scripts
 
-- `results/figures/png/validation_sr_scatter_grid.png`
-- `results/figures/svg/validation_sr_scatter_grid.svg`
+Run these from the repository root after importing benchmark results into the DuckDB database:
 
-## `validation_md_scatter_grid`
+```bash
+uv run python scripts/plot_validation_figures.py --db results/benchmark.duckdb --out-dir results/figures/validation
+uv run python scripts/plot_batch_figures.py --db results/benchmark.duckdb --out-dir results/figures --dataset-id all
+uv run python scripts/plot_md_figures.py --db results/benchmark.duckdb --out-dir results/figures/md
+uv run python scripts/plot_overview_figures.py --db results/benchmark.duckdb --figures-dir results/figures
+```
 
-5wvo trajectory agreement scatter plots
+## Current sections
 
-- `results/figures/png/validation_md_scatter_grid.png`
-- `results/figures/svg/validation_md_scatter_grid.svg`
+- `results/figures/overview/` — cross-cutting speedup summaries.
+- `results/figures/validation/` — static and MD SASA agreement figures.
+- `results/figures/batch_ecoli/` — E. coli batch throughput, runtime, memory, CPU, and scaling figures.
+- `results/figures/batch_human/` — Human batch 10-thread throughput, runtime, memory, and CPU figures.
+- `results/figures/batch_t10_comparison/` — E. coli vs Human 10-thread comparison figures.
+- `results/figures/md/` — trajectory throughput, runtime, memory, throughput/RSS, and CPU figures.
 
-## `batch_ecoli_t10_competitors`
+Each section includes PNG and SVG outputs plus a section-level `index.md`.
+MD scatter-style summaries use marker families in addition to color:
 
-E. coli AFDB batch throughput comparison
-
-- `results/figures/png/batch_ecoli_t10_competitors.png`
-- `results/figures/svg/batch_ecoli_t10_competitors.svg`
-
-## `batch_human_t10_competitors`
-
-Human AFDB batch throughput comparison
-
-- `results/figures/png/batch_human_t10_competitors.png`
-- `results/figures/svg/batch_human_t10_competitors.svg`
-
-## `trajectory_competitor_fps`
-
-Trajectory throughput versus MDTraj and mdsasa-bolt
-
-- `results/figures/png/trajectory_competitor_fps.png`
-- `results/figures/svg/trajectory_competitor_fps.svg`
-
-## `trajectory_memory`
-
-Trajectory peak memory usage
-
-- `results/figures/png/trajectory_memory.png`
-- `results/figures/svg/trajectory_memory.svg`
-
-## `single_file_runtime_vs_atoms`
-
-Single-file subset runtime versus atom count
-
-- `results/figures/png/single_file_runtime_vs_atoms.png`
-- `results/figures/svg/single_file_runtime_vs_atoms.svg`
-
-## `single_file_outlier_runtime`
-
-Runtime on selected parser/runtime outlier structures
-
-- `results/figures/png/single_file_outlier_runtime.png`
-- `results/figures/svg/single_file_outlier_runtime.svg`
-
-## `single_file_timing_breakdown`
-
-Parser/SASA breakdown for selected structures
-
-- `results/figures/png/single_file_timing_breakdown.png`
-- `results/figures/svg/single_file_timing_breakdown.svg`
+- circles: native `zsasa` CLI runs
+- triangles: MDTraj-backed runs
+- squares: MDAnalysis-backed runs, including `mdsasa-bolt`
