@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 from scripts.benchlib.tools import (
+    PROFILES,
     ToolError,
     ToolSpec,
     load_tool_specs,
@@ -16,6 +17,11 @@ def test_load_tool_specs_reads_known_tools() -> None:
     assert "zsasa" in specs
     assert specs["zsasa"].repository == "https://github.com/N283T/zsasa"
     assert specs["zsasa"].binary == Path("zsasa")
+
+
+def test_single_file_profile_checks_native_single_file_tools() -> None:
+    assert PROFILES["single_file"] == ["zsasa", "freesasa", "rustsasa"]
+    assert "freesasa" in PROFILES["full"]
 
 
 def test_require_tools_reports_missing_binary(tmp_path: Path) -> None:

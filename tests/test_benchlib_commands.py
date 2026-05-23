@@ -7,6 +7,7 @@ import pytest
 from scripts.benchlib.commands import (
     batch_command,
     freesasa_batch_command,
+    freesasa_single_command,
     lahuta_batch_command,
     mdtraj_runner_command,
     rustsasa_single_command,
@@ -72,6 +73,24 @@ def test_freesasa_batch_command() -> None:
     ]
 
 
+def test_freesasa_single_command_with_timing() -> None:
+    cmd = freesasa_single_command(
+        binary=Path("/bin/freesasa"),
+        input_path=Path("input.pdb"),
+        n_points=100,
+        threads=4,
+        timing=True,
+    )
+    assert cmd == [
+        "/bin/freesasa",
+        "--shrake-rupley",
+        "--resolution=100",
+        "--n-threads=4",
+        "--timing",
+        "input.pdb",
+    ]
+
+
 def test_rustsasa_single_command() -> None:
     cmd = rustsasa_single_command(
         binary=Path("/bin/rust-sasa"),
@@ -79,6 +98,7 @@ def test_rustsasa_single_command() -> None:
         output_path=Path("out.json"),
         n_points=100,
         threads=2,
+        timing=True,
     )
     assert cmd == [
         "/bin/rust-sasa",
@@ -93,6 +113,7 @@ def test_rustsasa_single_command() -> None:
         "-o",
         "protein",
         "--allow-vdw-fallback",
+        "--timing",
     ]
 
 
@@ -159,6 +180,10 @@ def test_mdtraj_runner_command() -> None:
         (
             rustsasa_single_command,
             (Path("/bin/rust-sasa"), Path("input.pdb"), Path("out.json"), 100, 2),
+        ),
+        (
+            freesasa_single_command,
+            (Path("/bin/freesasa"), Path("input.pdb"), 100, 2, True),
         ),
         (
             lahuta_batch_command,

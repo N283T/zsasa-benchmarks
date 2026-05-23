@@ -123,5 +123,21 @@ notes = "Maximum PDB-derived structure in the historical 2013-structure set."
 [full_rerun]
 source_kind = "full_rerun"
 run_id_default = "v0_6_0_full"
+n_points = 100
+threads = [1, 4, 8, 10]
+runs = 3
+warmup = 1
+prepare = "sync"
+tools = [
+  "zsasa_f64",
+  "zsasa_f32",
+  "zsasa_f64_bitmask",
+  "zsasa_f32_bitmask",
+  "freesasa",
+  "rustsasa",
+]
+phases = ["wall", "timing"]
+excluded_tools = ["lahuta"]
+excluded_tools_notes = "Lahuta is excluded from single-file benchmarks because it targets AlphaFold-style inputs and is not expected to cover the mixed preprocessed AFDB/NVDA/PDB subset consistently."
 rerun_zsasa = true
 rerun_comparators = true

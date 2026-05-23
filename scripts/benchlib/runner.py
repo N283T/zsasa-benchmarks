@@ -25,7 +25,7 @@ def shell_join(argv: list[str]) -> str:
     return shlex.join(argv)
 
 
-def write_command_log(path: Path, records: list[CommandRecord]) -> None:
+def write_command_log(path: Path, records: Sequence[CommandRecord]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     lines: list[str] = []
     for record in records:
