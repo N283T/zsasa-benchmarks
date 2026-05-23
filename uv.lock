@@ -949,9 +949,11 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "duckdb" },
+    { name = "matplotlib" },
     { name = "mdanalysis" },
     { name = "mdsasa-bolt" },
     { name = "mdtraj" },
+    { name = "numpy" },
     { name = "pytest" },
     { name = "zsasa" },
 ]
@@ -959,9 +961,11 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "duckdb", specifier = "==1.5.3" },
+    { name = "matplotlib", specifier = "==3.10.9" },
     { name = "mdanalysis", specifier = "==2.10.0" },
     { name = "mdsasa-bolt", specifier = "==4.0.1" },
     { name = "mdtraj", specifier = "==1.11.1.post1" },
+    { name = "numpy", specifier = "==2.4.6" },
     { name = "pytest", specifier = ">=8.0" },
     { name = "zsasa", git = "https://github.com/N283T/zsasa?subdirectory=python&rev=v0.6.0" },
 ]

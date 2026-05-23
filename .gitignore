@@ -1,6 +1,8 @@
 # Generated benchmark outputs and archives
 /results/**
 !/results/.gitkeep
+!/results/figures/
+!/results/figures/**
 /archives/**
 !/archives/.gitkeep
 

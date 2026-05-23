@@ -5,7 +5,9 @@ description = "Benchmark harness for release-fixed zsasa manuscript evidence"
 requires-python = ">=3.12"
 dependencies = [
   "duckdb==1.5.3",
+  "matplotlib==3.10.9",
   "mdanalysis==2.10.0",
+  "numpy==2.4.6",
   "mdsasa-bolt==4.0.1",
   "mdtraj==1.11.1.post1",
   "pytest>=8.0",
