@@ -25,3 +25,6 @@ result-*
 
 # Logs
 *.log
+
+# Regenerated single-file benchmark PDB payloads (sources are tracked under datasets/)
+/datasets/single-file-large-structure/pdb/*.pdb

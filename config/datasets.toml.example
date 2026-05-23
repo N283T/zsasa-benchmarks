@@ -7,6 +7,12 @@ path = "$HOME/pdb/afdb/UP000000625_83333_ECOLI_v6/pdb"
 [UP000005640_9606_HUMAN_v6_pdb]
 path = "$HOME/pdb/afdb/UP000005640_9606_HUMAN_v6/pdb"
 
+[single_file_large_structure_sources]
+path = "datasets/single-file-large-structure-sources"
+
+[single_file_large_structure_subset]
+path = "datasets/single-file-large-structure/pdb"
+
 [single_file_stratified_sample]
 path = "$HOME/freesasa-zig/benchmarks/dataset/pdb"
 

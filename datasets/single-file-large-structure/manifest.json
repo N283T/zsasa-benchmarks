@@ -1,0 +1,77 @@
+{
+  "manifest_id": "single-file-large-structure-subset",
+  "structures": [
+    {
+      "id": "AF-P49792-F10-model_v6",
+      "role": "single-medium",
+      "source_kind": "afdb_pdb",
+      "source_dataset": "single_file_large_structure_sources",
+      "n_atoms": 10919,
+      "n_chains": 1,
+      "status": "copied"
+    },
+    {
+      "id": "AF-Q6ZS30-F1-model_v6",
+      "role": "single-large",
+      "source_kind": "afdb_pdb",
+      "source_dataset": "single_file_large_structure_sources",
+      "n_atoms": 21611,
+      "n_chains": 1,
+      "status": "copied"
+    },
+    {
+      "id": "AF-0000000066638622",
+      "role": "multi-medium-nvda",
+      "source_kind": "cif_zst",
+      "source_dataset": "single_file_large_structure_sources",
+      "n_atoms": 14618,
+      "n_chains": 2,
+      "status": "cleaned"
+    },
+    {
+      "id": "AF-0000000065781219",
+      "role": "multi-large-nvda",
+      "source_kind": "cif_zst",
+      "source_dataset": "single_file_large_structure_sources",
+      "n_atoms": 24140,
+      "n_chains": 2,
+      "status": "cleaned"
+    },
+    {
+      "id": "3jc8",
+      "role": "multi-100k-pdb",
+      "source_kind": "cif",
+      "source_dataset": "single_file_large_structure_sources",
+      "n_atoms": 107500,
+      "n_chains": 3,
+      "status": "cleaned"
+    },
+    {
+      "id": "5vyc",
+      "role": "rustsasa-parser-outlier",
+      "source_kind": "cif",
+      "source_dataset": "single_file_large_structure_sources",
+      "n_atoms": 249168,
+      "n_chains": 4,
+      "status": "cleaned"
+    },
+    {
+      "id": "8rbs",
+      "role": "freesasa-runtime-outlier",
+      "source_kind": "cif",
+      "source_dataset": "single_file_large_structure_sources",
+      "n_atoms": 164605,
+      "n_chains": 5,
+      "status": "cleaned"
+    },
+    {
+      "id": "9fqr",
+      "role": "multi-max-pdb",
+      "source_kind": "cif",
+      "source_dataset": "single_file_large_structure_sources",
+      "n_atoms": 4506416,
+      "n_chains": 57,
+      "status": "cleaned"
+    }
+  ]
+}

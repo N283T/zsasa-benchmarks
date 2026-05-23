@@ -23,6 +23,7 @@ python scripts/setup_external_tools.py --dry-run --reset freesasa freesasa_batch
 python scripts/run_validation.py --manifest manifests/validation-ecoli-smoke.toml --datasets config/datasets.toml.example --run-id smoke --dry-run
 python scripts/run_validation.py --manifest manifests/validation-ecoli.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
 python scripts/run_batch.py --manifest manifests/batch-ecoli.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
+python scripts/prepare_single_file_structures.py --manifest manifests/single-file-sample.toml --datasets config/datasets.toml.example --dry-run
 uv run python scripts/run_trajectory_validation.py --manifest manifests/validation-md-5wvo.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
 uv run python scripts/run_trajectory.py --manifest manifests/trajectory.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
 ```
@@ -48,3 +49,21 @@ it removes only the selected command outputs before execution and avoids stale-f
 FreeSASA has no native directory batch mode. This repository therefore tracks
 `tools/freesasa_batch/`, a small wrapper around the FreeSASA C API, and builds it
 against the pinned FreeSASA fork during external setup.
+
+## Single-file input preprocessing
+
+Single-file benchmark subsets use protein-only cleaned PDB inputs prepared by
+`scripts/prepare_single_file_structures.py` from tracked source files under
+`datasets/single-file-large-structure-sources/`. The prepared PDB payloads are
+regenerated locally under ignored `datasets/single-file-large-structure/pdb/`,
+and that path is registered as `single_file_large_structure_subset` in the
+dataset catalog. The preprocessing policy removes
+hydrogens, alternative conformations, ligands, waters, empty chains, and
+non-L-peptide chains. It also keeps generated PDB files compatible with
+comparator parsers by wrapping residue numbers and atom serials into PDB field
+limits and filling the `CRYST1` Z field when needed.
+
+Ligand support is intentionally outside the single-file benchmark scope. This
+keeps the benchmark focused on parser and SASA throughput for large protein
+structures and avoids mixing tool-specific ligand/classifier support into the
+throughput comparison.
