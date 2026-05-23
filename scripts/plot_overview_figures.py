@@ -64,7 +64,7 @@ REPRESENTATIVE_IMAGES = [
     ("E. coli throughput", "batch_ecoli/png/ecoli_throughput_vs_threads.png"),
     ("Human t10 throughput", "batch_human/png/human_t10_throughput_bar.png"),
     ("Batch t10 size comparison", "batch_t10_comparison/png/t10_ms_per_structure_ecoli_human.png"),
-    ("MD throughput vs RSS", "md/png/md_throughput_vs_peak_rss_grid.png"),
+    ("MD throughput vs RSS", "md/png/md_throughput_vs_peak_rss_logx_grid.png"),
     ("Batch speedup overview", "overview/png/batch_t10_speedup_vs_freesasa.png"),
     ("MD speedup overview", "overview/png/md_speedup_vs_mdtraj_grid.png"),
 ]

@@ -11,7 +11,7 @@ Exploratory figures generated from `results/benchmark.duckdb`.
 | [E. coli batch](batch_ecoli/index.md) | 11 |
 | [Human batch](batch_human/index.md) | 6 |
 | [Batch t10 comparison](batch_t10_comparison/index.md) | 3 |
-| [MD / trajectory](md/index.md) | 8 |
+| [MD / trajectory](md/index.md) | 9 |
 
 ## Database contents
 
@@ -72,7 +72,7 @@ Exploratory figures generated from `results/benchmark.duckdb`.
 
 ### MD throughput vs RSS
 
-![MD throughput vs RSS](md/png/md_throughput_vs_peak_rss_grid.png)
+![MD throughput vs RSS](md/png/md_throughput_vs_peak_rss_logx_grid.png)
 
 ### Batch speedup overview
 
