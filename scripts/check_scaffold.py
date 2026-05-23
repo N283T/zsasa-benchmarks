@@ -33,6 +33,7 @@ REQUIRED_FILES = [
     "scripts/export_validation_summary.py",
     "scripts/run_validation.py",
     "scripts/run_batch.py",
+    "scripts/run_single_file.py",
     "scripts/run_trajectory_validation.py",
     "scripts/run_trajectory.py",
     "scripts/benchlib/commands.py",

@@ -81,6 +81,26 @@ def freesasa_batch_command(
     ]
 
 
+def freesasa_single_command(
+    *,
+    binary: Path,
+    input_path: Path,
+    n_points: int,
+    threads: int,
+    timing: bool = False,
+) -> list[str]:
+    cmd = [
+        str(binary),
+        "--shrake-rupley",
+        f"--resolution={n_points}",
+        f"--n-threads={threads}",
+    ]
+    if timing:
+        cmd.append("--timing")
+    cmd.append(str(input_path))
+    return cmd
+
+
 def rustsasa_single_command(
     *,
     binary: Path,
@@ -88,8 +108,9 @@ def rustsasa_single_command(
     output_path: Path,
     n_points: int,
     threads: int,
+    timing: bool = False,
 ) -> list[str]:
-    return [
+    cmd = [
         str(binary),
         str(input_path),
         str(output_path),
@@ -103,6 +124,9 @@ def rustsasa_single_command(
         "protein",
         "--allow-vdw-fallback",
     ]
+    if timing:
+        cmd.append("--timing")
+    return cmd
 
 
 def lahuta_batch_command(

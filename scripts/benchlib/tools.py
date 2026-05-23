@@ -127,9 +127,11 @@ PROFILES: dict[str, list[str]] = {
     "minimal": ["zsasa"],
     "validation": ["zsasa", "freesasa_batch", "rustsasa", "lahuta"],
     "batch": ["zsasa", "freesasa_batch", "rustsasa", "lahuta"],
+    "single_file": ["zsasa", "freesasa", "rustsasa"],
     "trajectory": ["zsasa", "mdtraj", "mdanalysis", "mdsasa_bolt"],
     "full": [
         "zsasa",
+        "freesasa",
         "freesasa_batch",
         "rustsasa",
         "lahuta",

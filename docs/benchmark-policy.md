@@ -19,11 +19,13 @@ ignored `results/` tree.
 
 ```bash
 python scripts/check_tools.py --profile minimal --dry-run
+python scripts/check_tools.py --profile single_file --dry-run
 python scripts/setup_external_tools.py --dry-run --reset freesasa freesasa_batch rustsasa lahuta verify
 python scripts/run_validation.py --manifest manifests/validation-ecoli-smoke.toml --datasets config/datasets.toml.example --run-id smoke --dry-run
 python scripts/run_validation.py --manifest manifests/validation-ecoli.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
 python scripts/run_batch.py --manifest manifests/batch-ecoli.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
 python scripts/prepare_single_file_structures.py --manifest manifests/single-file-sample.toml --datasets config/datasets.toml.example --dry-run
+python scripts/run_single_file.py --manifest manifests/single-file-sample.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
 uv run python scripts/run_trajectory_validation.py --manifest manifests/validation-md-5wvo.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
 uv run python scripts/run_trajectory.py --manifest manifests/trajectory.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
 ```
@@ -38,6 +40,7 @@ The native runners support repeatable glob filters over command record names:
 python scripts/run_validation.py ... --only 'rustsasa_*' --execute
 python scripts/run_validation.py ... --only '*_sr_1000' --exclude '*bitmask*' --dry-run
 python scripts/run_batch.py ... --only 'rustsasa_10t_*' --replace --execute
+python scripts/run_single_file.py ... --only 'single_timing_freesasa_*_1t_100p' --dry-run
 ```
 
 Run filtered jobs with `--dry-run` first and inspect `selected_commands=N/M`. Use
@@ -67,3 +70,13 @@ Ligand support is intentionally outside the single-file benchmark scope. This
 keeps the benchmark focused on parser and SASA throughput for large protein
 structures and avoids mixing tool-specific ligand/classifier support into the
 throughput comparison.
+
+Single-file benchmark execution is split into two phases in
+`scripts/run_single_file.py`: `wall` records wrap each tool invocation in
+hyperfine for headline throughput, while `timing` records invoke the same native
+tool command with `--timing` where supported so parser and SASA component times
+can be inspected separately. Results are planned under
+`results/full_rerun/<run_id>/single/single_file_large_structure_subset/`.
+Lahuta is intentionally excluded from this benchmark because it targets
+AlphaFold-style inputs and is not expected to cover the mixed preprocessed
+AFDB/NVDA/PDB subset consistently.
