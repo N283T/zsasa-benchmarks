@@ -6,8 +6,16 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from benchlib.datasets import DEFAULT_DATASETS_CONFIG, dataset_path, load_dataset_catalog
-from db_common import DEFAULT_DB, apply_schema, connect, load_toml, resolve
+if __package__:
+    from scripts.benchlib.datasets import (
+        DEFAULT_DATASETS_CONFIG,
+        dataset_path,
+        load_dataset_catalog,
+    )
+    from scripts.db_common import DEFAULT_DB, apply_schema, connect, load_toml, resolve
+else:
+    from benchlib.datasets import DEFAULT_DATASETS_CONFIG, dataset_path, load_dataset_catalog
+    from db_common import DEFAULT_DB, apply_schema, connect, load_toml, resolve
 
 ROOT = Path(__file__).resolve().parents[1]
 
