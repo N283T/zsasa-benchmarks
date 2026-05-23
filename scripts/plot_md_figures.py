@@ -311,13 +311,14 @@ def plot_bar_grid(
     out_dir: Path,
     name: str,
     lower_is_better: bool = False,
+    yscale: str = "linear",
 ) -> list[Path]:
     grouped = group_by_dataset(rows)
     datasets = sorted(grouped, key=dataset_sort_key)
     fig, axes = plt.subplots(
         1,
         len(datasets),
-        figsize=(6.4 * len(datasets), 5.2),
+        figsize=(6.4 * len(datasets), 5.8),
         squeeze=False,
         layout="constrained",
     )
@@ -333,8 +334,14 @@ def plot_bar_grid(
         )
         ax.set_title(dataset_label(dataset_id))
         ax.set_ylabel(ylabel)
-        ax.tick_params(axis="x", rotation=45)
+        if yscale != "linear":
+            ax.set_yscale(yscale)
+        plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
     return save_figure(fig, out_dir, name)
+
+
+def zsasa_only_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [row for row in rows if row["variant"].startswith("zsasa")]
 
 
 def plot_throughput_vs_rss_grid(
@@ -349,8 +356,7 @@ def plot_throughput_vs_rss_grid(
         squeeze=False,
         layout="constrained",
     )
-    suffix = "log-x" if log_x else "linear-x"
-    fig.suptitle(f"MD throughput vs peak RSS ({suffix})")
+    fig.suptitle("MD throughput vs peak RSS")
     variants = sorted({row["variant"] for row in rows}, key=variant_sort_key)
     handles = [
         plt.Line2D(
@@ -452,25 +458,48 @@ def main() -> None:
         plot_bar_grid(
             rows,
             metric="mean_s",
-            ylabel="runtime (s), lower is better",
+            ylabel="runtime (s, log scale), lower is better",
             title="MD runtime",
             out_dir=args.out_dir,
             name="md_runtime_bar_grid",
             lower_is_better=True,
+            yscale="log",
         )
     )
     outputs.extend(
         plot_bar_grid(
             rows,
             metric="rss_mib",
-            ylabel="peak RSS (MiB), lower is better",
+            ylabel="peak RSS (MiB, log scale), lower is better",
             title="MD peak RSS",
             out_dir=args.out_dir,
             name="md_peak_rss_bar_grid",
             lower_is_better=True,
+            yscale="log",
         )
     )
-    outputs.extend(plot_throughput_vs_rss_grid(rows, args.out_dir))
+    outputs.extend(
+        plot_bar_grid(
+            zsasa_only_rows(rows),
+            metric="mean_s",
+            ylabel="runtime (s), lower is better",
+            title="MD runtime (zsasa variants)",
+            out_dir=args.out_dir,
+            name="md_zsasa_runtime_bar_grid",
+            lower_is_better=True,
+        )
+    )
+    outputs.extend(
+        plot_bar_grid(
+            zsasa_only_rows(rows),
+            metric="rss_mib",
+            ylabel="peak RSS (MiB), lower is better",
+            title="MD peak RSS (zsasa variants)",
+            out_dir=args.out_dir,
+            name="md_zsasa_peak_rss_bar_grid",
+            lower_is_better=True,
+        )
+    )
     outputs.extend(plot_throughput_vs_rss_grid(rows, args.out_dir, log_x=True))
     outputs.extend(
         plot_bar_grid(
