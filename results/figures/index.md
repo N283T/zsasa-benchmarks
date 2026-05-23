@@ -45,7 +45,7 @@ Exploratory figures generated from `results/benchmark.duckdb`.
 | dataset | best_throughput | frames_per_sec | lowest_rss | rss_mib |
 | --- | --- | --- | --- | --- |
 | 5wvo_C (1,001 frames, 3,858 atoms) | zsasa CLI bitmask f32 | 1230.5 | zsasa CLI f64 | 22.5 |
-| 6sup_A (1,001 frames, 33,377 atoms) | zsasa + MDTraj XTC bitmask | 153.6 | zsasa CLI f32 | 114.3 |
+| 6sup_A (1,001 frames, 33,377 atoms) | zsasa + MDTraj bitmask | 153.6 | zsasa CLI f32 | 114.3 |
 | 5vz0_A (10,001 frames, 17,910 atoms) | zsasa CLI bitmask f32 | 266.7 | zsasa CLI f32 | 62.7 |
 
 ## Representative figures

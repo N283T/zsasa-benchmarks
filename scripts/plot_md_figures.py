@@ -58,10 +58,10 @@ DISPLAY_NAMES = {
     "zsasa_cli_f32": "zsasa CLI f32",
     "zsasa_cli_bitmask_f64": "zsasa CLI bitmask f64",
     "zsasa_cli_bitmask_f32": "zsasa CLI bitmask f32",
-    "zsasa_mdtraj": "zsasa + MDTraj XTC",
-    "zsasa_mdtraj_bitmask": "zsasa + MDTraj XTC bitmask",
-    "zsasa_mdanalysis": "zsasa + MDAnalysis XTC",
-    "zsasa_mdanalysis_bitmask": "zsasa + MDAnalysis XTC bitmask",
+    "zsasa_mdtraj": "zsasa + MDTraj",
+    "zsasa_mdtraj_bitmask": "zsasa + MDTraj bitmask",
+    "zsasa_mdanalysis": "zsasa + MDAnalysis",
+    "zsasa_mdanalysis_bitmask": "zsasa + MDAnalysis bitmask",
     "mdtraj": "MDTraj",
     "mdsasa_bolt": "mdsasa-bolt",
 }
@@ -122,6 +122,37 @@ def color_for(variant: str) -> str:
 
 def marker_for(variant: str) -> str:
     return MARKERS.get(variant, "o")
+
+
+def md_rss_label_style(dataset_id: str, variant: str) -> dict[str, Any]:
+    arrowprops = {"arrowstyle": "-", "color": "0.35", "lw": 0.7}
+
+    if variant == "mdsasa_bolt":
+        return {"xytext": (-10, 0), "ha": "right", "va": "center", "arrowprops": arrowprops}
+
+    if dataset_id == "5vz0_A_protein":
+        styles = {
+            "zsasa_cli_f32": (24, 12, "left", "bottom"),
+            "zsasa_cli_f64": (24, -12, "left", "top"),
+            "zsasa_cli_bitmask_f32": (24, 4, "left", "bottom"),
+            "zsasa_cli_bitmask_f64": (24, -12, "left", "top"),
+        }
+        if variant in styles:
+            x, y, ha, va = styles[variant]
+            return {"xytext": (x, y), "ha": ha, "va": va, "arrowprops": arrowprops}
+
+    if variant.endswith("_f32"):
+        return {"xytext": (8, 7), "ha": "left", "va": "bottom"}
+    if variant.endswith("_f64"):
+        return {"xytext": (8, -7), "ha": "left", "va": "top"}
+
+    if dataset_id == "6sup_A_analysis":
+        if variant.startswith("zsasa_mdanalysis"):
+            return {"xytext": (8, -7), "ha": "left", "va": "top"}
+        if variant.startswith("zsasa_mdtraj") or variant == "mdtraj":
+            return {"xytext": (8, 7), "ha": "left", "va": "bottom"}
+
+    return {"xytext": (8, 0), "ha": "left", "va": "center"}
 
 
 def variant_sort_key(variant: str) -> tuple[int, str]:
@@ -342,8 +373,22 @@ def plot_throughput_vs_rss_grid(
                 edgecolor="#333333",
                 linewidth=0.4,
             )
+            if log_x:
+                label_style = md_rss_label_style(dataset_id, row["variant"])
+                ax.annotate(
+                    display_name(row["variant"]),
+                    (row["rss_mib"], row["fps"]),
+                    xytext=label_style["xytext"],
+                    textcoords="offset points",
+                    ha=label_style["ha"],
+                    va=label_style["va"],
+                    arrowprops=label_style.get("arrowprops"),
+                    fontsize=7.2,
+                )
         if log_x:
             ax.set_xscale("log")
+            ymax = max(row["fps"] for row in grouped[dataset_id])
+            ax.set_ylim(top=ymax * 1.14)
         ax.set_title(dataset_label(dataset_id))
         ax.set_xlabel("peak RSS (MiB)")
         ax.set_ylabel("frames / sec")
