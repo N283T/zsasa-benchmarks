@@ -562,10 +562,11 @@ def t10_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def batch_comparison_label_style(variant: str) -> dict[str, Any]:
+    arrowprops = {"arrowstyle": "-", "color": "0.35", "lw": 0.7}
     if variant in {"lahuta", "zsasa_f64"}:
-        return {"xytext": (-8, 8), "ha": "right", "va": "bottom"}
+        return {"xytext": (-8, 8), "ha": "right", "va": "bottom", "arrowprops": arrowprops}
     if variant == "zsasa_bitmask_f64":
-        return {"xytext": (8, -8), "ha": "left", "va": "top"}
+        return {"xytext": (-10, 0), "ha": "right", "va": "center", "arrowprops": arrowprops}
     return {"xytext": (5, 3), "ha": "left", "va": "baseline"}
 
 
@@ -711,6 +712,7 @@ def plot_t10_throughput_dataset_scatter(
             textcoords="offset points",
             ha=label_style["ha"],
             va=label_style["va"],
+            arrowprops=label_style.get("arrowprops"),
             fontsize=8,
         )
     hi = max(

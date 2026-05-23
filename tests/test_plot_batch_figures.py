@@ -84,14 +84,17 @@ def test_batch_comparison_label_style_places_selected_labels() -> None:
         "xytext": (-8, 8),
         "ha": "right",
         "va": "bottom",
+        "arrowprops": {"arrowstyle": "-", "color": "0.35", "lw": 0.7},
     }
     assert batch_comparison_label_style("zsasa_f64") == {
         "xytext": (-8, 8),
         "ha": "right",
         "va": "bottom",
+        "arrowprops": {"arrowstyle": "-", "color": "0.35", "lw": 0.7},
     }
     assert batch_comparison_label_style("zsasa_bitmask_f64") == {
-        "xytext": (8, -8),
-        "ha": "left",
-        "va": "top",
+        "xytext": (-10, 0),
+        "ha": "right",
+        "va": "center",
+        "arrowprops": {"arrowstyle": "-", "color": "0.35", "lw": 0.7},
     }
