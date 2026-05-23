@@ -1,28 +1,124 @@
-# Single-file benchmark subset manifest. Runner redesign is pending.
+# Single-file benchmark subset manifest. Inputs are prepared by
+# scripts/prepare_single_file_structures.py from local dataset roots declared in
+# config/datasets.local.toml.
 
-id = "single-file-stratified-sample"
+id = "single-file-large-structure-subset"
 status = "planning"
 
 [dataset]
-expected_count = 2013
-role = ["single-file-throughput"]
+id = "single_file_large_structure_subset"
+expected_count = 8
+role = ["single-file-throughput", "parser-stress"]
+notes = "Protein-only cleaned PDB inputs covering single-chain AFDB, two-chain NVDA AFDB complexes, large PDB assemblies, and comparator parser/runtime outliers."
 
 [subset]
 selection = [
-  "af-o00175-f1-model_v6",
-  "af-a8mxt2-f1-model_v6",
-  "af-q6zuj8-f1-model_v6",
-  "af-q6zs30-f1-model_v6",
-  "9mih",
+  "AF-P49792-F10-model_v6",
+  "AF-Q6ZS30-F1-model_v6",
+  "AF-0000000066638622",
+  "AF-0000000065781219",
   "3jc8",
-  "7qoi",
-  "9mog",
-  "9fqr",
   "5vyc",
-  "8fon",
   "8rbs",
+  "9fqr",
 ]
-selection_policy = "representative AFDB single-chain, PDB multi-chain cryo-EM scale, maximum structure, and parser/comparator outliers"
+selection_policy = "large-structure-oriented subset: single-chain medium/large human AFDB, two-chain NVDA human complexes, 100k-scale and maximum PDB assemblies, plus RustSASA/FreeSASA parser stress cases"
+
+[preprocess]
+output_dir_default = "datasets/single-file-large-structure"
+policy = "protein_only_clean_pdb"
+remove_hydrogens = true
+remove_alternative_conformations = true
+remove_ligands_and_waters = true
+keep_l_peptide_only = true
+wrap_pdb_residue_numbers = true
+wrap_pdb_atom_serials = true
+fix_cryst1_z = true
+ligand_scope = "excluded from benchmark inputs to keep comparator behavior aligned"
+
+[[structures]]
+id = "AF-P49792-F10-model_v6"
+role = "single-medium"
+source_kind = "afdb_pdb"
+source_dataset = "single_file_large_structure_sources"
+source_file = "afdb_pdb/AF-P49792-F10-model_v6.pdb"
+expected_atoms = 10919
+expected_chains = 1
+notes = "Human AFDB single-chain structure near the upper tail of the proteome-size distribution."
+
+[[structures]]
+id = "AF-Q6ZS30-F1-model_v6"
+role = "single-large"
+source_kind = "afdb_pdb"
+source_dataset = "single_file_large_structure_sources"
+source_file = "afdb_pdb/AF-Q6ZS30-F1-model_v6.pdb"
+expected_atoms = 21611
+expected_chains = 1
+notes = "Human AFDB single-chain maximum-scale structure."
+
+[[structures]]
+id = "AF-0000000066638622"
+role = "multi-medium-nvda"
+source_kind = "cif_zst"
+source_dataset = "single_file_large_structure_sources"
+source_file = "nvda_cif_zst/AF-0000000066638622-model_v1.cif.zst"
+expected_atoms = 14618
+expected_chains = 2
+uniprot = "Q6ZXV5-2"
+gene = "TMTC3"
+notes = "Two-chain NVDA human complex selected as a medium multi-chain case with low clash count."
+
+[[structures]]
+id = "AF-0000000065781219"
+role = "multi-large-nvda"
+source_kind = "cif_zst"
+source_dataset = "single_file_large_structure_sources"
+source_file = "nvda_cif_zst/AF-0000000065781219-model_v1.cif.zst"
+expected_atoms = 24140
+expected_chains = 2
+uniprot = "O60306"
+gene = "AQR"
+notes = "Two-chain NVDA human complex from the largest compressed CIF candidates."
+
+[[structures]]
+id = "3jc8"
+role = "multi-100k-pdb"
+source_kind = "cif"
+source_dataset = "single_file_large_structure_sources"
+source_file = "pdb_mmcif/3jc8.cif.gz"
+expected_atoms = 107500
+expected_chains = 3
+notes = "100k-scale multi-chain PDB assembly from the historical 2013-structure set."
+
+[[structures]]
+id = "5vyc"
+role = "rustsasa-parser-outlier"
+source_kind = "cif"
+source_dataset = "single_file_large_structure_sources"
+source_file = "pdb_mmcif/5vyc.cif.gz"
+expected_atoms = 249168
+expected_chains = 4
+notes = "Historical RustSASA parser outlier included to stress parser cleanliness."
+
+[[structures]]
+id = "8rbs"
+role = "freesasa-runtime-outlier"
+source_kind = "cif"
+source_dataset = "single_file_large_structure_sources"
+source_file = "pdb_mmcif/8rbs.cif.gz"
+expected_atoms = 164605
+expected_chains = 5
+notes = "Historical FreeSASA total-runtime outlier versus zsasa."
+
+[[structures]]
+id = "9fqr"
+role = "multi-max-pdb"
+source_kind = "cif"
+source_dataset = "single_file_large_structure_sources"
+source_file = "pdb_mmcif/9fqr.cif.gz"
+expected_atoms = 4506416
+expected_chains = 57
+notes = "Maximum PDB-derived structure in the historical 2013-structure set."
 
 [full_rerun]
 source_kind = "full_rerun"

@@ -23,6 +23,7 @@ python scripts/setup_external_tools.py --dry-run --reset freesasa freesasa_batch
 python scripts/run_validation.py --manifest manifests/validation-ecoli-smoke.toml --datasets config/datasets.toml.example --run-id smoke --dry-run
 python scripts/run_validation.py --manifest manifests/validation-ecoli.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
 python scripts/run_batch.py --manifest manifests/batch-ecoli.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
+python scripts/prepare_single_file_structures.py --manifest manifests/single-file-sample.toml --datasets config/datasets.toml.example --dry-run
 uv run python scripts/run_trajectory_validation.py --manifest manifests/validation-md-5wvo.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
 uv run python scripts/run_trajectory.py --manifest manifests/trajectory.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
 ```
@@ -32,6 +33,16 @@ The native Phase 1 runner examples above are dry-runs. They print the commands a
 The `nix develop` shell provides the pinned `zsasa` CLI from `github:N283T/zsasa/v0.6.0` and exports `ZSASA_CLI` to that Nix-store binary so uv-installed Python console scripts cannot shadow the CLI benchmark target. Python trajectory backends and the `zsasa` Python package are pinned in `pyproject.toml`/`uv.lock`; do not import `zsasa` from a local source checkout for manuscript reruns. External comparator binaries are built under the ignored `external/` tree by `scripts/setup_external_tools.py` from pinned commits, then referenced through `external/bin/*`.
 
 Local dataset paths are centralized in `config/datasets.local.toml` (ignored). Copy `config/datasets.toml.example` and adjust paths before real runs.
+
+Single-file subset source files are tracked under
+`datasets/single-file-large-structure-sources/`; prepared benchmark PDB inputs
+are regenerated under ignored `datasets/single-file-large-structure/pdb/` and
+registered as `single_file_large_structure_subset` in the dataset catalog.
+Rebuild them with `scripts/prepare_single_file_structures.py`. The preparation step copies
+already-clean AFDB PDB inputs where appropriate and converts NVDA `.cif.zst`
+plus PDB mmCIF `.cif.gz` structures to protein-only cleaned PDB files. Ligands,
+waters, hydrogens, alternative conformations, and non-L-peptide chains are
+excluded from these benchmark inputs so comparator behavior remains aligned.
 
 ## Selective reruns
 

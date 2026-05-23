@@ -189,6 +189,8 @@ def main() -> None:
         "ecoli_smoke_pdb",
         "UP000000625_83333_ECOLI_v6_pdb",
         "UP000005640_9606_HUMAN_v6_pdb",
+        "single_file_large_structure_sources",
+        "single_file_large_structure_subset",
         "single_file_stratified_sample",
     ]:
         if "path" not in dataset_catalog.get(dataset_id, {}):
