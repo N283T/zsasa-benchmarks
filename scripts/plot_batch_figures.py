@@ -561,6 +561,14 @@ def t10_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [row for row in rows if row["threads"] == 10]
 
 
+def batch_comparison_label_style(variant: str) -> dict[str, Any]:
+    if variant in {"lahuta", "zsasa_f64"}:
+        return {"xytext": (-8, 8), "ha": "right", "va": "bottom"}
+    if variant == "zsasa_bitmask_f64":
+        return {"xytext": (8, -8), "ha": "left", "va": "top"}
+    return {"xytext": (5, 3), "ha": "left", "va": "baseline"}
+
+
 def plot_t10_runtime_bar_for_dataset(
     rows: list[dict[str, Any]], out_dir: Path, slug: str, label: str
 ) -> list[Path]:
@@ -695,8 +703,15 @@ def plot_t10_throughput_dataset_scatter(
         x = ecoli[variant]["throughput"]
         y = human[variant]["throughput"]
         ax.scatter(x, y, s=70, color=color_for(variant))
+        label_style = batch_comparison_label_style(variant)
         ax.annotate(
-            display_name(variant), (x, y), xytext=(5, 3), textcoords="offset points", fontsize=8
+            display_name(variant),
+            (x, y),
+            xytext=label_style["xytext"],
+            textcoords="offset points",
+            ha=label_style["ha"],
+            va=label_style["va"],
+            fontsize=8,
         )
     hi = max(
         [ecoli[v]["throughput"] for v in variants] + [human[v]["throughput"] for v in variants]

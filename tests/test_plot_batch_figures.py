@@ -74,3 +74,24 @@ def test_milliseconds_per_structure() -> None:
     from scripts.plot_batch_figures import milliseconds_per_structure
 
     assert milliseconds_per_structure(2.0, 1000) == 2.0
+
+
+
+def test_batch_comparison_label_style_places_selected_labels() -> None:
+    from scripts.plot_batch_figures import batch_comparison_label_style
+
+    assert batch_comparison_label_style("lahuta") == {
+        "xytext": (-8, 8),
+        "ha": "right",
+        "va": "bottom",
+    }
+    assert batch_comparison_label_style("zsasa_f64") == {
+        "xytext": (-8, 8),
+        "ha": "right",
+        "va": "bottom",
+    }
+    assert batch_comparison_label_style("zsasa_bitmask_f64") == {
+        "xytext": (8, -8),
+        "ha": "left",
+        "va": "top",
+    }
