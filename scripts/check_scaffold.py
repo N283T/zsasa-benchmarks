@@ -31,11 +31,13 @@ REQUIRED_FILES = [
     "scripts/db_common.py",
     "scripts/init_db.py",
     "scripts/export_validation_summary.py",
+    "scripts/import_full_rerun.py",
     "scripts/run_validation.py",
     "scripts/run_batch.py",
     "scripts/run_single_file.py",
     "scripts/run_trajectory_validation.py",
     "scripts/run_trajectory.py",
+    "scripts/run_remaining_benchmarks.py",
     "scripts/benchlib/commands.py",
     "scripts/benchlib/datasets.py",
     "scripts/benchlib/hyperfine.py",
@@ -151,18 +153,20 @@ def main() -> None:
     tools = read_toml(ROOT.joinpath("config/tool-versions.toml"))
     if tools.get("zsasa", {}).get("tag") != "v0.6.0":
         fail("tool-versions.toml must pin zsasa to v0.6.0 for the current rerun")
-    expected_external_bins = {
-        "freesasa": "external/bin/freesasa",
-        "freesasa_batch": "external/bin/freesasa_batch",
-        "rustsasa": "external/bin/rust-sasa",
-        "lahuta": "external/bin/lahuta",
+    expected_nix_path_bins = {
+        "freesasa": "freesasa",
+        "freesasa_batch": "freesasa_batch",
+        "rustsasa": "rust-sasa",
+        "lahuta": "lahuta",
     }
-    for tool, expected_binary in expected_external_bins.items():
+    for tool, expected_binary in expected_nix_path_bins.items():
         spec = tools.get(tool, {})
         if spec.get("binary") != expected_binary:
-            fail(f"{tool} binary must resolve through the benchmark repo external/bin tree")
+            fail(f"{tool} binary must resolve from the Nix dev shell PATH")
         if "pinned" not in spec.get("policy", ""):
             fail(f"{tool} policy must require pinned reruns")
+        if "Nix" not in spec.get("policy", ""):
+            fail(f"{tool} policy must require Nix-managed comparator builds")
     if (
         tools.get("freesasa_batch", {}).get("source_path")
         != "tools/freesasa_batch/freesasa_batch.cc"

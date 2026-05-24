@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Set up pinned external comparator tools under the ignored external/ tree."""
+"""legacy fallback for setting up comparator tools under the ignored external/ tree.
+
+The primary manuscript rerun path is the Nix dev shell, which builds pinned
+comparator binaries directly from flake.nix. Keep this script for manual
+debugging outside Nix-managed reruns.
+"""
 
 from __future__ import annotations
 
@@ -25,6 +30,7 @@ class ToolPlan:
     repo: str | None
     ref: str | None
     commit: str | None
+    patch: Path | None
     directory: Path
     binary: Path
     link_name: str
@@ -36,6 +42,7 @@ TOOLS: Final[dict[str, ToolPlan]] = {
         repo="https://github.com/N283T/freesasa.git",
         ref="feat/add-timing",
         commit="9c9f204fd990ba2f50f47be8d4b96a61355f7a10",
+        patch=None,
         directory=EXTERNAL.joinpath("freesasa"),
         binary=EXTERNAL.joinpath("freesasa", "src", "freesasa"),
         link_name="freesasa",
@@ -45,15 +52,17 @@ TOOLS: Final[dict[str, ToolPlan]] = {
         repo=None,
         ref=None,
         commit=None,
+        patch=None,
         directory=EXTERNAL.joinpath("freesasa_batch"),
         binary=EXTERNAL.joinpath("freesasa_batch", "freesasa_batch"),
         link_name="freesasa_batch",
     ),
     "rustsasa": ToolPlan(
         name="rustsasa",
-        repo="https://github.com/N283T/RustSASA.git",
-        ref="feat/add-timing",
-        commit="530277785533d0336bbdb43b041fb7de2f7e23f3",
+        repo="https://github.com/maxall41/RustSASA.git",
+        ref="main",
+        commit="c3c9c4da021c2d0a8822ca5b8c8b14fede1e6da1",
+        patch=ROOT.joinpath("nix", "patches", "rustsasa-add-timing.patch"),
         directory=EXTERNAL.joinpath("rustsasa"),
         binary=EXTERNAL.joinpath("rustsasa", "target", "release", "rust-sasa"),
         link_name="rust-sasa",
@@ -61,8 +70,9 @@ TOOLS: Final[dict[str, ToolPlan]] = {
     "lahuta": ToolPlan(
         name="lahuta",
         repo="https://github.com/bisejdiu/lahuta.git",
-        ref=None,
-        commit="4b5d6f9ae2bc13bcf897b1df3483b9c1e3da1de9",
+        ref="main",
+        commit="136411ee6ac797cab84a35d8183e6be6e6a270b2",
+        patch=None,
         directory=EXTERNAL.joinpath("lahuta"),
         binary=EXTERNAL.joinpath("lahuta", "build", "cli", "lahuta"),
         link_name="lahuta",
@@ -166,6 +176,8 @@ def clone_checkout(plan: ToolPlan, *, dry_run: bool, assume_missing: bool = Fals
     run(
         ["git", "submodule", "update", "--init", "--recursive"], cwd=plan.directory, dry_run=dry_run
     )
+    if plan.patch is not None:
+        run(["git", "apply", str(plan.patch)], cwd=plan.directory, dry_run=dry_run)
 
 
 def build_freesasa(plan: ToolPlan, *, jobs: int, reset: bool, dry_run: bool) -> None:
@@ -239,7 +251,8 @@ def build_lahuta(plan: ToolPlan, *, jobs: int, reset: bool, dry_run: bool) -> No
                 "-DLAHUTA_BUILD_SHARED_CORE=OFF",
                 "-DLAHUTA_BUILD_EXAMPLES=OFF",
                 "-DBUILD_TESTING=OFF",
-                "-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF",
+                "-DLAHUTA_ENABLE_LTO=OFF",
+                "-DLAHUTA_NATIVE_ARCH=OFF",
             ],
             cwd=plan.directory,
             dry_run=dry_run,

@@ -24,6 +24,26 @@ def test_single_file_profile_checks_native_single_file_tools() -> None:
     assert "freesasa" in PROFILES["full"]
 
 
+def test_native_comparator_tools_resolve_from_nix_path() -> None:
+    specs = load_tool_specs(Path("config/tool-versions.toml"))
+    expected_binaries = {
+        "freesasa": Path("freesasa"),
+        "freesasa_batch": Path("freesasa_batch"),
+        "rustsasa": Path("rust-sasa"),
+        "lahuta": Path("lahuta"),
+    }
+    for tool_id, expected_binary in expected_binaries.items():
+        assert specs[tool_id].binary == expected_binary
+
+
+def test_flake_exposes_comparator_packages_to_dev_shell() -> None:
+    flake = Path("flake.nix").read_text(encoding="utf-8")
+    for package_name in ["freesasa", "freesasaBatch", "rustsasa", "lahuta"]:
+        assert f"packages.{package_name}" in flake
+    for shell_package in ["freesasaCli", "freesasaBatch", "rustsasaCli", "lahutaCli"]:
+        assert shell_package in flake
+
+
 def test_require_tools_reports_missing_binary(tmp_path: Path) -> None:
     specs = {
         "fake": ToolSpec(
