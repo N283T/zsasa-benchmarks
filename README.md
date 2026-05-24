@@ -18,9 +18,9 @@ This repository is a clean benchmark workspace for the `zsasa` manuscript. It in
 ```bash
 nix develop
 python scripts/check_scaffold.py
-python scripts/check_tools.py --profile minimal --dry-run
-python scripts/check_tools.py --profile single_file --dry-run
-python scripts/setup_external_tools.py --dry-run --reset freesasa freesasa_batch rustsasa lahuta verify
+python scripts/check_tools.py --profile minimal
+python scripts/check_tools.py --profile single_file
+uv run python scripts/check_tools.py --profile full
 python scripts/run_validation.py --manifest manifests/validation-ecoli-smoke.toml --datasets config/datasets.toml.example --run-id smoke --dry-run
 python scripts/run_validation.py --manifest manifests/validation-ecoli.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
 python scripts/run_batch.py --manifest manifests/batch-ecoli.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
@@ -32,7 +32,7 @@ uv run python scripts/run_trajectory.py --manifest manifests/trajectory.toml --d
 
 The native Phase 1 runner examples above are dry-runs. They print the commands and `results/full_rerun/<run_id>/...` layout without running benchmarks; do not remove `--dry-run` until a real rerun is explicitly approved. Trajectory runners now route execution through `scripts.benchlib.trajectory_tools`, including explicit hydrogens and the `naccess` trajectory classifier for `zsasa traj` CLI commands.
 
-The `nix develop` shell provides the pinned `zsasa` CLI from `github:N283T/zsasa/v0.6.0` and exports `ZSASA_CLI` to that Nix-store binary so uv-installed Python console scripts cannot shadow the CLI benchmark target. Python trajectory backends and the `zsasa` Python package are pinned in `pyproject.toml`/`uv.lock`; do not import `zsasa` from a local source checkout for manuscript reruns. External comparator binaries are built under the ignored `external/` tree by `scripts/setup_external_tools.py` from pinned commits, then referenced through `external/bin/*`.
+The `nix develop` shell provides the pinned `zsasa` CLI from `github:N283T/zsasa/v0.6.0` and exports `ZSASA_CLI` to that Nix-store binary so uv-installed Python console scripts cannot shadow the CLI benchmark target. The same shell also builds and exposes the pinned native comparator CLIs (`freesasa`, `freesasa_batch`, `rust-sasa`, and `lahuta`) from `flake.nix`; `config/tool-versions.toml` intentionally resolves those tools from `PATH` instead of the ignored `external/bin` tree. Python trajectory backends and the `zsasa` Python package are pinned in `pyproject.toml`/`uv.lock`; do not import `zsasa` from a local source checkout for manuscript reruns.
 
 Local dataset paths are centralized in `config/datasets.local.toml` (ignored). Copy `config/datasets.toml.example` and adjust paths before real runs.
 
@@ -47,6 +47,16 @@ waters, hydrogens, alternative conformations, and non-L-peptide chains are
 excluded from these benchmark inputs so comparator behavior remains aligned.
 Run them with `scripts/run_single_file.py`, which records both hyperfine wall-clock
 commands and tool `--timing` component commands for parse/SASA timing.
+
+## Remaining benchmark rerun
+
+After validation, run the remaining benchmark suites (E. coli batch, human batch, trajectory throughput, and single-file) with:
+
+```bash
+uv run python scripts/run_remaining_benchmarks.py --run-id nix_full_20260524 --execute
+```
+
+The script auto-enters `nix develop`, prepares the single-file inputs, and then invokes the existing native runners. Omit `--execute` to dry-run the full command plan first. Add `--import-db --validation-run-id nix_validation_20260524` to import a split validation/benchmark rerun into DuckDB after the remaining benchmarks finish.
 
 ## Selective reruns
 

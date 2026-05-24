@@ -1,0 +1,99 @@
+From 530277785533d0336bbdb43b041fb7de2f7e23f3 Mon Sep 17 00:00:00 2001
+From: N283T <w255508b@yokohama-cu.ac.jp>
+Date: Sat, 7 Mar 2026 14:50:56 +0900
+Subject: [PATCH] feat: add --timing flag for SASA-only timing output
+
+Output PARSE_TIME_MS, SASA_TIME_MS, and TOTAL_TIME_MS to stderr
+when --timing flag is passed. Uses std::time::Instant.
+---
+ src/main.rs | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+
+diff --git a/src/main.rs b/src/main.rs
+index 7026a9ad..3aaef65c 100644
+--- a/src/main.rs
++++ b/src/main.rs
+@@ -103,6 +103,10 @@ struct Args {
+     /// When enabled, RustSASA will read Van der Waals radii from occupancy values in the PDB file. This overrides the radii file if provided.
+     #[arg(short = 'R', long, default_value_t = false)]
+     read_radii_from_occupancy: bool,
++
++    /// Print timing breakdown (parse, SASA, total) to stderr.
++    #[arg(long, default_value_t = false)]
++    timing: bool,
+ }
+ 
+ #[derive(Debug, Snafu)]
+@@ -181,11 +185,14 @@ fn process(
+     allow_vdw_fallback: bool,
+     include_hetatms: bool,
+     read_radii_from_occupancy: bool,
++    timing: bool,
+ ) -> Result<(), CLIError> {
++    let t0 = std::time::Instant::now();
+     let (pdb, _) = ReadOptions::default()
+         .set_level(pdbtbx::StrictnessLevel::Loose)
+         .read(input_file)
+         .map_err(|errors| CLIError::InputFileRead { errors })?;
++    let t1 = std::time::Instant::now();
+     let result = calculate_sasa_and_wrap(
+         &pdb,
+         &output_depth,
+@@ -199,6 +206,7 @@ fn process(
+         read_radii_from_occupancy,
+     )
+     .context(SASACalculationSnafu)?;
++    let t2 = std::time::Instant::now();
+ 
+     match format {
+         OutputFormat::Xml => {
+@@ -224,6 +232,14 @@ fn process(
+                 .map_err(|errors| CLIError::MMCIFWrite { errors })?;
+         }
+     }
++    if timing {
++        let parse_ms = t1.duration_since(t0).as_secs_f64() * 1000.0;
++        let sasa_ms = t2.duration_since(t1).as_secs_f64() * 1000.0;
++        let total_ms = parse_ms + sasa_ms;
++        eprintln!("PARSE_TIME_MS:{parse_ms:.2}");
++        eprintln!("SASA_TIME_MS:{sasa_ms:.2}");
++        eprintln!("TOTAL_TIME_MS:{total_ms:.2}");
++    }
+     Ok(())
+ }
+ 
+@@ -442,6 +458,7 @@ fn process_directory(
+                     allow_vdw_fallback,
+                     include_hetatms,
+                     read_radii_from_occupancy,
++                    false, // timing disabled for directory processing
+                 ) {
+                     Ok(_) => pb.inc(1),
+                     Err(e) => {
+@@ -492,6 +509,7 @@ fn process_single_file(
+     include_hetatms: bool,
+     read_radii_from_occupancy: bool,
+     threads: isize,
++    timing: bool,
+ ) -> Result<(), CLIError> {
+     println!("Processing single file...");
+ 
+@@ -517,6 +535,7 @@ fn process_single_file(
+         allow_vdw_fallback,
+         include_hetatms,
+         read_radii_from_occupancy,
++        timing,
+     )?;
+     println!("Finished!");
+     Ok(())
+@@ -583,6 +602,7 @@ fn run(args: Args) -> Result<(), CLIError> {
+             args.include_hetatms,
+             args.read_radii_from_occupancy,
+             args.threads,
++            args.timing,
+         )
+     }
+ }
+-- 
+2.53.0
+
