@@ -11,6 +11,7 @@ from typing import Any
 import duckdb
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.patches import Patch
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DB = ROOT.joinpath("results", "benchmark.duckdb")
@@ -28,6 +29,13 @@ VARIANT_ORDER = [
     "lahuta",
     "lahuta_bitmask",
 ]
+ZSASA_BATCH_VARIANTS = [
+    "zsasa_f64",
+    "zsasa_f32",
+    "zsasa_bitmask_f64",
+    "zsasa_bitmask_f32",
+]
+BATCH_COMPARATOR_VARIANTS = ["freesasa_batch", "rustsasa", "lahuta_bitmask"]
 COLORS = {
     "zsasa_f64": "#f39c12",
     "zsasa_f32": "#f6c85f",
@@ -693,6 +701,101 @@ def plot_t10_throughput_memory_for_dataset(
     return save_figure(fig, out_dir, f"{slug}_t10_throughput_vs_peak_rss")
 
 
+def plot_t10_comparator_ratio_for_dataset(
+    rows: list[dict[str, Any]],
+    out_dir: Path,
+    slug: str,
+    label: str,
+    *,
+    metric: str,
+    ylabel: str,
+    title_metric: str,
+    name_metric: str,
+) -> list[Path]:
+    selected = {row["variant"]: row for row in t10_rows(rows)}
+    candidates = [variant for variant in ZSASA_BATCH_VARIANTS if variant in selected]
+    if not candidates:
+        return []
+    x = np.arange(len(candidates))
+    width = 0.25
+    fig, ax = plt.subplots(figsize=(10.5, 5.5), layout="constrained")
+    comparator_styles = {
+        "freesasa_batch": {
+            "color": color_for("freesasa_batch"),
+            "edgecolor": "#1f5f8f",
+            "hatch": "",
+        },
+        "rustsasa": {
+            "color": color_for("rustsasa"),
+            "edgecolor": "#992d22",
+            "hatch": "///",
+        },
+        "lahuta_bitmask": {
+            "color": color_for("lahuta_bitmask"),
+            "edgecolor": "#7d3c98",
+            "hatch": "\\\\\\",
+        },
+    }
+    all_values: list[float] = []
+    for index, comparator in enumerate(BATCH_COMPARATOR_VARIANTS):
+        baseline = selected.get(comparator)
+        if baseline is None:
+            continue
+        values = []
+        for variant in candidates:
+            if variant == comparator or selected[variant][metric] <= 0:
+                values.append(np.nan)
+            else:
+                values.append(baseline[metric] / selected[variant][metric])
+        all_values.extend(value for value in values if value > 0)
+        positions = x + (index - 1) * width
+        ax.bar(
+            positions,
+            values,
+            width=width,
+            linewidth=1.2,
+            label=f"vs {display_name(comparator)}",
+            alpha=0.75,
+            **comparator_styles[comparator],
+        )
+    ax.axhline(1.0, color="0.35", linestyle="--", linewidth=0.8, alpha=0.45)
+    if all_values and max(all_values) / min(all_values) > 20:
+        ax.set_yscale("log")
+    ax.set_title(
+        f"{label} batch {title_metric}: zsasa vs FreeSASA/RustSASA/Lahuta bitmask at 10 threads"
+    )
+    ax.set_ylabel(ylabel)
+    ax.set_xticks(x, [display_name(variant) for variant in candidates])
+    plt.setp(ax.get_xticklabels(), rotation=35, ha="right", rotation_mode="anchor")
+    handles = [
+        Patch(
+            facecolor=color_for("freesasa_batch"),
+            edgecolor="#1f5f8f",
+            linewidth=1.2,
+            label="vs FreeSASA batch",
+            alpha=0.75,
+        ),
+        Patch(
+            facecolor=color_for("rustsasa"),
+            edgecolor="#992d22",
+            linewidth=1.2,
+            hatch="///",
+            label="vs RustSASA",
+            alpha=0.75,
+        ),
+        Patch(
+            facecolor=color_for("lahuta_bitmask"),
+            edgecolor="#7d3c98",
+            linewidth=1.2,
+            hatch="\\\\\\",
+            label="vs Lahuta bitmask",
+            alpha=0.75,
+        ),
+    ]
+    ax.legend(handles=handles, loc="best", ncol=3)
+    return save_figure(fig, out_dir, f"{slug}_t10_{name_metric}_vs_comparators")
+
+
 def plot_t10_throughput_dataset_scatter(
     ecoli_rows: list[dict[str, Any]], human_rows: list[dict[str, Any]], out_dir: Path
 ) -> list[Path]:
@@ -805,6 +908,30 @@ def generate_ecoli(rows: list[dict[str, Any]], out_dir: Path) -> tuple[list[Path
     outputs.extend(plot_memory(rows, out_dir))
     outputs.extend(plot_t10_memory_bar(rows, out_dir))
     outputs.extend(plot_t10_throughput_memory(rows, out_dir))
+    outputs.extend(
+        plot_t10_comparator_ratio_for_dataset(
+            rows,
+            out_dir,
+            "ecoli",
+            "E. coli",
+            metric="mean_s",
+            ylabel="runtime speedup, higher is better",
+            title_metric="runtime speedup",
+            name_metric="runtime_speedup",
+        )
+    )
+    outputs.extend(
+        plot_t10_comparator_ratio_for_dataset(
+            rows,
+            out_dir,
+            "ecoli",
+            "E. coli",
+            metric="memory_mean_mb",
+            ylabel="RSS reduction, higher is better",
+            title_metric="RSS reduction",
+            name_metric="rss_reduction",
+        )
+    )
     outputs.extend(plot_throughput_per_mib(rows, out_dir))
     outputs.extend(plot_cpu_utilization(rows, out_dir))
     outputs.extend(plot_efficiency_heatmap(rows, out_dir))
@@ -817,6 +944,30 @@ def generate_human(rows: list[dict[str, Any]], out_dir: Path) -> tuple[list[Path
     outputs.extend(plot_t10_runtime_bar_for_dataset(rows, out_dir, "human", "Human"))
     outputs.extend(plot_t10_memory_bar_for_dataset(rows, out_dir, "human", "Human"))
     outputs.extend(plot_t10_throughput_memory_for_dataset(rows, out_dir, "human", "Human"))
+    outputs.extend(
+        plot_t10_comparator_ratio_for_dataset(
+            rows,
+            out_dir,
+            "human",
+            "Human",
+            metric="mean_s",
+            ylabel="runtime speedup, higher is better",
+            title_metric="runtime speedup",
+            name_metric="runtime_speedup",
+        )
+    )
+    outputs.extend(
+        plot_t10_comparator_ratio_for_dataset(
+            rows,
+            out_dir,
+            "human",
+            "Human",
+            metric="memory_mean_mb",
+            ylabel="RSS reduction, higher is better",
+            title_metric="RSS reduction",
+            name_metric="rss_reduction",
+        )
+    )
     outputs.extend(plot_t10_throughput_per_mib_bar_for_dataset(rows, out_dir, "human", "Human"))
     outputs.extend(plot_t10_cpu_utilization_bar_for_dataset(rows, out_dir, "human", "Human"))
     return outputs, write_index(out_dir, outputs, "Human batch figures")
