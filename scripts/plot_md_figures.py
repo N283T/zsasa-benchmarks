@@ -11,6 +11,8 @@ from typing import Any
 
 import duckdb
 import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.patches import Patch
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DB = ROOT.joinpath("results", "benchmark.duckdb")
@@ -29,6 +31,17 @@ VARIANT_ORDER = [
     "mdtraj",
     "mdsasa_bolt",
 ]
+ZSASA_MD_VARIANTS = [
+    "zsasa_cli_f64",
+    "zsasa_cli_f32",
+    "zsasa_cli_bitmask_f64",
+    "zsasa_cli_bitmask_f32",
+    "zsasa_mdtraj",
+    "zsasa_mdtraj_bitmask",
+    "zsasa_mdanalysis",
+    "zsasa_mdanalysis_bitmask",
+]
+MD_COMPARATOR_VARIANTS = ["mdtraj", "mdsasa_bolt"]
 COLORS = {
     "zsasa_cli_f64": "#f39c12",
     "zsasa_cli_f32": "#f6c85f",
@@ -63,7 +76,7 @@ DISPLAY_NAMES = {
     "zsasa_mdanalysis": "zsasa + MDAnalysis",
     "zsasa_mdanalysis_bitmask": "zsasa + MDAnalysis bitmask",
     "mdtraj": "MDTraj",
-    "mdsasa_bolt": "mdsasa-bolt",
+    "mdsasa_bolt": "mdsasa-bolt (Rust)",
 }
 DATASET_LABELS = {
     "5wvo_C_analysis": "5wvo_C (1,001 frames, 3,858 atoms)",
@@ -344,6 +357,101 @@ def zsasa_only_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [row for row in rows if row["variant"].startswith("zsasa")]
 
 
+def plot_comparator_ratio_grid(
+    rows: list[dict[str, Any]],
+    out_dir: Path,
+    *,
+    metric: str,
+    ylabel: str,
+    title: str,
+    name: str,
+) -> list[Path]:
+    grouped = group_by_dataset(rows)
+    datasets = sorted(grouped, key=dataset_sort_key)
+    fig, axes = plt.subplots(
+        1,
+        len(datasets),
+        figsize=(7.0 * len(datasets), 5.8),
+        squeeze=False,
+        layout="constrained",
+    )
+    fig.suptitle(title)
+    comparator_styles = {
+        "mdtraj": {
+            "color": color_for("mdtraj"),
+            "edgecolor": "#1f5f8f",
+            "hatch": "",
+        },
+        "mdsasa_bolt": {
+            "color": color_for("mdsasa_bolt"),
+            "edgecolor": "#1e8449",
+            "hatch": "///",
+        },
+    }
+    for ax, dataset_id in zip(axes[0], datasets, strict=True):
+        by_variant = {row["variant"]: row for row in grouped[dataset_id]}
+        candidates = [
+            variant
+            for variant in ZSASA_MD_VARIANTS
+            if variant in by_variant
+        ]
+        if "mdtraj" in by_variant and "mdsasa_bolt" in by_variant:
+            candidates.append("mdsasa_bolt")
+        comparators = [
+            comparator
+            for comparator in MD_COMPARATOR_VARIANTS
+            if comparator in by_variant
+        ]
+        x = np.arange(len(candidates))
+        width = 0.36 if len(comparators) > 1 else 0.48
+        start_offset = (len(comparators) - 1) / 2
+        all_values: list[float] = []
+        for index, comparator in enumerate(comparators):
+            baseline = by_variant[comparator]
+            values = []
+            for variant in candidates:
+                if variant == comparator or by_variant[variant][metric] <= 0:
+                    values.append(np.nan)
+                else:
+                    values.append(baseline[metric] / by_variant[variant][metric])
+            all_values.extend(value for value in values if value > 0)
+            ax.bar(
+                x + (index - start_offset) * width,
+                values,
+                width=width,
+                linewidth=1.2,
+                alpha=0.75,
+                label=f"vs {display_name(comparator)}",
+                **comparator_styles[comparator],
+            )
+        ax.axhline(1.0, color="0.35", linestyle="--", linewidth=0.8, alpha=0.45)
+        if all_values and max(all_values) / min(all_values) > 20:
+            ax.set_yscale("log")
+        ax.set_title(dataset_label(dataset_id))
+        ax.set_ylabel(ylabel)
+        ax.set_xticks(x, [display_name(variant) for variant in candidates])
+        plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
+    handles = [
+        Patch(
+            facecolor=color_for("mdtraj"),
+            edgecolor="#1f5f8f",
+            linewidth=1.2,
+            label="vs MDTraj",
+            alpha=0.75,
+        ),
+        Patch(
+            facecolor=color_for("mdsasa_bolt"),
+            edgecolor="#1e8449",
+            linewidth=1.2,
+            hatch="///",
+            label="vs mdsasa-bolt (Rust)",
+            alpha=0.75,
+        ),
+    ]
+    fig.legend(handles=handles, loc="outside lower center", ncol=2)
+    return save_figure(fig, out_dir, name)
+
+
 def plot_throughput_vs_rss_grid(
     rows: list[dict[str, Any]], out_dir: Path, *, log_x: bool = False
 ) -> list[Path]:
@@ -498,6 +606,26 @@ def main() -> None:
             out_dir=args.out_dir,
             name="md_zsasa_peak_rss_bar_grid",
             lower_is_better=True,
+        )
+    )
+    outputs.extend(
+        plot_comparator_ratio_grid(
+            rows,
+            args.out_dir,
+            metric="mean_s",
+            ylabel="runtime speedup, higher is better",
+            title="MD runtime speedup: zsasa vs MDTraj/mdsasa-bolt (Rust)",
+            name="md_runtime_speedup_vs_comparators_grid",
+        )
+    )
+    outputs.extend(
+        plot_comparator_ratio_grid(
+            rows,
+            args.out_dir,
+            metric="rss_mib",
+            ylabel="RSS reduction, higher is better",
+            title="MD RSS reduction: zsasa vs MDTraj/mdsasa-bolt (Rust)",
+            name="md_rss_reduction_vs_comparators_grid",
         )
     )
     outputs.extend(plot_throughput_vs_rss_grid(rows, args.out_dir, log_x=True))
