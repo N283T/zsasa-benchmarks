@@ -199,6 +199,7 @@ def load_batch_rows(db_path: Path, dataset_id: str) -> list[dict[str, Any]]:
                 ).fetchall()
             }
             mean_s = float(stats[("runtime", "mean")])
+            median_s = float(stats.get(("runtime", "median")) or mean_s)
             stddev_s = float(stats.get(("runtime", "stddev")) or 0.0)
             expected_count = int(run["expected_count"])
             memory_mean_bytes = stats.get(("peak_rss", "mean"))
@@ -209,6 +210,7 @@ def load_batch_rows(db_path: Path, dataset_id: str) -> list[dict[str, Any]]:
                 "variant": batch_column_name(run),
                 "threads": int(run["threads"]),
                 "mean_s": mean_s,
+                "median_s": median_s,
                 "stddev_s": stddev_s,
                 "throughput": throughput_per_second(expected_count, mean_s),
                 "throughput_stddev": expected_count * stddev_s / (mean_s**2),
@@ -235,11 +237,15 @@ def cpu_utilization_proxy(row: dict[str, Any]) -> float:
     return (float(row.get("user_time_s") or 0.0) + float(row.get("system_time_s") or 0.0)) / mean_s
 
 
+def thread_scaling_runtime(row: dict[str, Any]) -> float:
+    return float(row.get("median_s") or row["mean_s"])
+
+
 def speedup_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     baseline = {
-        row["variant"]: float(row["mean_s"])
+        row["variant"]: thread_scaling_runtime(row)
         for row in rows
-        if int(row["threads"]) == 1 and float(row["mean_s"]) > 0
+        if int(row["threads"]) == 1 and thread_scaling_runtime(row) > 0
     }
     output: list[dict[str, Any]] = []
     for row in rows:
@@ -247,7 +253,7 @@ def speedup_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if variant not in baseline:
             continue
         threads = int(row["threads"])
-        speedup = baseline[variant] / float(row["mean_s"])
+        speedup = baseline[variant] / thread_scaling_runtime(row)
         output.append(
             {
                 "variant": variant,
@@ -336,11 +342,11 @@ def plot_speedup(rows: list[dict[str, Any]], out_dir: Path) -> list[Path]:
         if metric == "speedup":
             max_thread = max(row["threads"] for row in rows)
             ax.plot([1, max_thread], [1, max_thread], linestyle="--", color="0.3", alpha=0.4)
-            ax.set_ylabel("speedup vs 1 thread")
+            ax.set_ylabel("speedup vs 1 thread (median runtime)")
             ax.set_title("Thread speedup")
         else:
             ax.axhline(1.0, linestyle="--", color="0.3", alpha=0.4)
-            ax.set_ylabel("parallel efficiency")
+            ax.set_ylabel("parallel efficiency (median runtime)")
             ax.set_title("Thread efficiency")
     axes[1].legend(loc="best", ncol=1)
     return save_figure(fig, out_dir, "ecoli_thread_scaling")
@@ -463,16 +469,15 @@ def plot_t10_throughput_memory(rows: list[dict[str, Any]], out_dir: Path) -> lis
             color=color_for(row["variant"]),
             label=display_name(row["variant"]),
         )
-        label_offsets = {
-            "zsasa_f64": (12, 0),
-            "zsasa_f32": (6, 7),
-        }
+        label_style = throughput_memory_label_style(row["variant"])
         ax.annotate(
             display_name(row["variant"]),
             (row["memory_mean_mb"], row["throughput"]),
-            xytext=label_offsets.get(row["variant"], (5, 3)),
+            xytext=label_style["xytext"],
             textcoords="offset points",
-            va="center" if row["variant"] == "zsasa_f64" else "baseline",
+            ha=label_style["ha"],
+            va=label_style["va"],
+            arrowprops=label_style.get("arrowprops"),
             fontsize=8,
         )
     ax.set_title("E. coli batch throughput vs peak RSS at 10 threads")
@@ -503,6 +508,17 @@ def plot_throughput_per_mib(rows: list[dict[str, Any]], out_dir: Path) -> list[P
     ax.set_xticks(sorted({row["threads"] for row in memory_rows}))
     ax.legend(loc="best", ncol=2)
     return save_figure(fig, out_dir, "ecoli_throughput_per_mib_vs_threads")
+
+
+def throughput_memory_label_style(variant: str) -> dict[str, Any]:
+    arrowprops = {"arrowstyle": "-", "color": "0.35", "lw": 0.7}
+    if variant in {"zsasa_bitmask_f64", "lahuta"}:
+        return {"xytext": (14, -10), "ha": "left", "va": "top", "arrowprops": arrowprops}
+    if variant == "zsasa_f64":
+        return {"xytext": (14, -2), "ha": "left", "va": "center", "arrowprops": arrowprops}
+    if variant == "zsasa_f32":
+        return {"xytext": (6, 7), "ha": "left", "va": "baseline"}
+    return {"xytext": (5, 3), "ha": "left", "va": "baseline"}
 
 
 def plot_cpu_utilization(rows: list[dict[str, Any]], out_dir: Path) -> list[Path]:
@@ -561,7 +577,7 @@ def plot_efficiency_heatmap(rows: list[dict[str, Any]], out_dir: Path) -> list[P
                     fontsize=8,
                 )
     cbar = fig.colorbar(image, ax=ax)
-    cbar.set_label("speedup / threads")
+    cbar.set_label("speedup / threads (median runtime)")
     return save_figure(fig, out_dir, "ecoli_parallel_efficiency_heatmap")
 
 
@@ -686,13 +702,15 @@ def plot_t10_throughput_memory_for_dataset(
     fig, ax = plt.subplots(figsize=(7.2, 5.6), layout="constrained")
     for row in selected:
         ax.scatter(row["memory_mean_mb"], row["throughput"], s=70, color=color_for(row["variant"]))
-        label_offsets = {"zsasa_f64": (12, 0), "zsasa_f32": (6, 7)}
+        label_style = throughput_memory_label_style(row["variant"])
         ax.annotate(
             display_name(row["variant"]),
             (row["memory_mean_mb"], row["throughput"]),
-            xytext=label_offsets.get(row["variant"], (5, 3)),
+            xytext=label_style["xytext"],
             textcoords="offset points",
-            va="center" if row["variant"] == "zsasa_f64" else "baseline",
+            ha=label_style["ha"],
+            va=label_style["va"],
+            arrowprops=label_style.get("arrowprops"),
             fontsize=8,
         )
     ax.set_title(f"{label} throughput vs peak RSS at 10 threads")
@@ -759,8 +777,7 @@ def plot_t10_comparator_ratio_for_dataset(
             **comparator_styles[comparator],
         )
     ax.axhline(1.0, color="0.35", linestyle="--", linewidth=0.8, alpha=0.45)
-    if all_values and max(all_values) / min(all_values) > 20:
-        ax.set_yscale("log")
+    ax.set_ylim(bottom=0)
     ax.set_title(
         f"{label} batch {title_metric}: zsasa vs FreeSASA/RustSASA/Lahuta bitmask at 10 threads"
     )

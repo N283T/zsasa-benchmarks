@@ -4,4 +4,4 @@ dataset_id,name,role,expected_count,path_or_uri,redistribution_status,notes
 6sup_A_analysis,6sup_A_analysis,trajectory-throughput,1001,"{'xtc': '$HOME/freesasa-zig/benchmarks/md_data/6sup_A_analysis/6sup_A_R1.xtc', 'pdb': '$HOME/freesasa-zig/benchmarks/md_data/6sup_A_analysis/6sup_A.pdb'}",,atoms=33377; frames=1001
 UP000000625_83333_ECOLI_v6_pdb,UP000000625_83333_ECOLI_v6_pdb,batch-throughput,4370,/Users/nagaet/pdb/afdb/UP000000625_83333_ECOLI_v6/pdb,,planning
 UP000005640_9606_HUMAN_v6_pdb,UP000005640_9606_HUMAN_v6_pdb,batch-throughput,23586,/Users/nagaet/pdb/afdb/UP000005640_9606_HUMAN_v6/pdb,,planning
-single_file_large_structure_subset,single_file_large_structure_subset,"single-file-throughput,parser-stress",8,datasets/single-file-large-structure/pdb,,"Protein-only cleaned PDB inputs covering single-chain AFDB, two-chain NVDA AFDB complexes, large PDB assemblies, and comparator parser/runtime outliers."
+single_file_large_structure_subset,single_file_large_structure_subset,"single-file-throughput,parser-stress",8,/Users/nagaet/ghq/github.com/N283T/zsasa-benchmarks/datasets/single-file-large-structure/pdb,,planning
