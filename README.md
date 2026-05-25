@@ -13,6 +13,16 @@ This repository is a clean benchmark workspace for the `zsasa` manuscript. It in
 - Keep generated results out of git; archive final outputs separately after review.
 - Store generated evidence in DuckDB when result import/export is needed.
 
+## Benchmark system
+
+The benchmark results were collected on this local machine:
+
+- Model: MacBook Pro (`Mac16,1`)
+- Chip: Apple M4
+- CPU cores: 10 total (4 performance, 6 efficiency)
+- Memory: 32 GB
+- Operating system: macOS 26.2 (`25C56`)
+
 ## Quick start
 
 ```bash
