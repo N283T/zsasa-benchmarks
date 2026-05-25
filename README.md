@@ -23,6 +23,32 @@ The benchmark results were collected on this local machine:
 - Memory: 32 GB
 - Operating system: macOS 26.2 (`25C56`)
 
+Tool and dependency versions are pinned by the Nix development shell, project lock files,
+and `config/tool-versions.toml`.
+
+## Hyperfine timing conditions
+
+Wall-clock benchmark timings are collected with `hyperfine` 1.20.0, as pinned in
+`config/tool-versions.toml`. Native runners build commands through
+`scripts/benchlib/hyperfine.py`, which uses:
+
+```text
+hyperfine --warmup <warmup> --runs <runs> --export-json <path> --command-name <name> [--prepare sync] <command>
+```
+
+Current full-rerun manifests use these timing settings:
+
+| Benchmark suite | Manifest | Hyperfine settings | Benchmark settings |
+| --- | --- | --- | --- |
+| E. coli batch throughput | `manifests/batch-ecoli.toml` | 3 warmups, 3 measured runs, `--prepare sync` | 128 points; threads 1, 4, 8, and 10; `f64` and `f32` `zsasa` variants |
+| Human batch throughput | `manifests/batch-human.toml` | 3 warmups, 3 measured runs, `--prepare sync` | 128 points; 10 threads; `f64` and `f32` `zsasa` variants |
+| Single-file wall-clock throughput | `manifests/single-file-sample.toml` | 1 warmup, 3 measured runs, `--prepare sync` | 100 points; threads 1, 4, 8, and 10; Lahuta excluded |
+| Trajectory throughput | `manifests/trajectory.toml` | 1 warmup, 3 measured runs, `--prepare sync` | 100 points; stride 1; 10 threads; `naccess` classifier; explicit hydrogens included |
+
+Validation runs are not Hyperfine timing runs; they record output agreement for the
+configured validation datasets. The single-file `timing` phase records tool component
+timings directly, while the single-file `wall` phase is the Hyperfine-measured phase.
+
 ## Quick start
 
 ```bash
