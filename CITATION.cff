@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+message: "If you use these benchmark results or analysis artifacts, please cite this dataset."
+type: dataset
+title: "Benchmark dataset and analysis artifacts for zsasa v0.6.0"
+authors:
+  - family-names: Nagae
+    given-names: Tsubasa
+repository-code: "https://github.com/N283T/zsasa-benchmarks"
+abstract: >-
+  Benchmark evidence, validation summaries, plotting outputs, and reproducibility
+  configuration for zsasa v0.6.0, a high-throughput solvent-accessible surface
+  area analysis engine for structural bioinformatics workflows.
+keywords:
+  - solvent accessible surface area
+  - structural bioinformatics
+  - benchmark
+  - protein structure
+  - molecular dynamics
+  - Zig
+license: MIT
+version: "v0.6.0-benchmark-archive"
+date-released: "2026-06-07"
+references:
+  - type: software
+    title: "zsasa"
+    authors:
+      - family-names: Nagae
+        given-names: Tsubasa
+    repository-code: "https://github.com/N283T/zsasa"
+  - type: article
+    title: "zsasa: high-throughput solvent accessible surface area analysis for structural bioinformatics"
+    authors:
+      - family-names: Nagae
+        given-names: Tsubasa
+    repository-code: "https://github.com/N283T/zsasa-paper"
