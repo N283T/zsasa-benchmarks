@@ -2,6 +2,8 @@ cff-version: 1.2.0
 message: "If you use these benchmark results or analysis artifacts, please cite this dataset."
 type: dataset
 title: "Benchmark dataset and analysis artifacts for zsasa v0.6.0"
+doi: 10.5281/zenodo.20577561
+url: "https://doi.org/10.5281/zenodo.20577561"
 authors:
   - family-names: Nagae
     given-names: Tsubasa

@@ -1,7 +1,7 @@
 # Zenodo benchmark archive guide
 
-This repository is prepared for a Zenodo DOI record covering benchmark evidence
-and analysis artifacts for `zsasa` v0.6.0.
+This repository is prepared for the Zenodo DOI record [10.5281/zenodo.20577561](https://doi.org/10.5281/zenodo.20577561),
+covering benchmark evidence and analysis artifacts for `zsasa` v0.6.0.
 
 ## Recommended Zenodo metadata
 
@@ -9,6 +9,7 @@ and analysis artifacts for `zsasa` v0.6.0.
 - **Title:** Benchmark dataset and analysis artifacts for zsasa v0.6.0
 - **Creators:** Tsubasa Nagae
 - **Version:** v0.6.0-benchmark-archive
+- **DOI:** [10.5281/zenodo.20577561](https://doi.org/10.5281/zenodo.20577561)
 - **Language:** English
 - **License:** Creative Commons Attribution 4.0 International (CC-BY-4.0)
 - **Keywords:** solvent accessible surface area; structural bioinformatics;
@@ -70,15 +71,9 @@ uv run python scripts/build_zenodo_archive.py \
 Upload the generated tarball and `SHA256SUMS` from `archives/zenodo/` to Zenodo.
 `archives/` is intentionally ignored by git.
 
-## DOI reservation workflow
+## Published DOI
 
-1. Create a new Zenodo upload.
-2. Select **Dataset** as the resource type.
-3. In the DOI field, answer **No** to existing DOI and click **Get a DOI now!**.
-4. Add the reserved DOI to the manuscript or repository metadata if needed.
-5. Rebuild the upload archive after any DOI text changes.
-6. Upload the tarball and `SHA256SUMS`.
-7. Preview and publish the Zenodo record.
+The curated benchmark archive DOI is [10.5281/zenodo.20577561](https://doi.org/10.5281/zenodo.20577561).
 
-Zenodo registers the DOI only after publication. If the draft upload is deleted,
-its reserved DOI is lost.
+For future updates, create a new Zenodo version and rebuild the upload archive
+after updating DOI/version metadata in this repository.
