@@ -10,7 +10,7 @@ and analysis artifacts for `zsasa` v0.6.0.
 - **Creators:** Tsubasa Nagae
 - **Version:** v0.6.0-benchmark-archive
 - **Language:** English
-- **License:** MIT, unless a different license is selected for the Zenodo record
+- **License:** Creative Commons Attribution 4.0 International (CC-BY-4.0)
 - **Keywords:** solvent accessible surface area; structural bioinformatics;
   benchmark; protein structure; molecular dynamics; Zig
 - **Related identifiers:**
