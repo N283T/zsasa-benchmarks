@@ -104,15 +104,18 @@ def parse_validation_zsasa_name(filename: str) -> dict[str, Any]:
             "n_points": None,
             "n_slices": int(n_slices),
         }
-    raise ValueError(f"unrecognized zSASA validation file name: {filename}")
+    raise ValueError(f"unrecognized zsasa validation file name: {filename}")
 
 
 def parse_batch_record_name(name: str) -> dict[str, Any]:
-    zsasa = re.fullmatch(r"zsasa_batch_(f32|f64)_(standard|bitmask)_(\d+)t_(\d+)p", name)
+    zsasa = re.fullmatch(
+        r"(zsasa(?:_\d+_\d+_\d+)?)_batch_(f32|f64)_(standard|bitmask)_(\d+)t_(\d+)p",
+        name,
+    )
     if zsasa:
-        precision, mode, threads, n_points = zsasa.groups()
+        tool_id, precision, mode, threads, n_points = zsasa.groups()
         return {
-            "tool_id": "zsasa",
+            "tool_id": tool_id,
             "algorithm": "sr",
             "precision": precision,
             "mode": mode,
@@ -177,14 +180,14 @@ def split_dataset_prefix(name: str) -> tuple[str, str]:
 
 
 def parse_single_tool_label(tool_label: str) -> dict[str, Any]:
-    if tool_label.startswith("zsasa_"):
-        suffix = tool_label.removeprefix("zsasa_")
-        precision = suffix.removesuffix("_bitmask")
+    zsasa = re.fullmatch(r"(zsasa(?:_\d+_\d+_\d+)?)_(f32|f64)(_bitmask)?", tool_label)
+    if zsasa:
+        tool_id, precision, bitmask_suffix = zsasa.groups()
         return {
-            "tool_id": "zsasa",
+            "tool_id": tool_id,
             "algorithm": "sr",
             "precision": precision,
-            "mode": "bitmask" if suffix.endswith("_bitmask") else "standard",
+            "mode": "bitmask" if bitmask_suffix else "standard",
         }
     if tool_label in {"freesasa", "rustsasa"}:
         return {

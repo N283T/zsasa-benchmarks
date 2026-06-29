@@ -44,6 +44,14 @@ def test_parse_batch_record_name() -> None:
         "threads": 10,
         "n_points": 128,
     }
+    assert parse_batch_record_name("zsasa_0_7_0_batch_f64_standard_10t_128p") == {
+        "tool_id": "zsasa_0_7_0",
+        "algorithm": "sr",
+        "precision": "f64",
+        "mode": "standard",
+        "threads": 10,
+        "n_points": 128,
+    }
     assert parse_batch_record_name("lahuta_bitmask_4t_128p") == {
         "tool_id": "lahuta",
         "algorithm": "sr",
@@ -53,6 +61,23 @@ def test_parse_batch_record_name() -> None:
         "n_points": 128,
     }
     assert parse_batch_record_name("freesasa_batch_1t_128p")["tool_id"] == "freesasa_batch"
+
+
+def test_parse_single_tool_label_accepts_versioned_zsasa() -> None:
+    from scripts.import_full_rerun import parse_single_tool_label
+
+    assert parse_single_tool_label("zsasa_0_7_0_f64") == {
+        "tool_id": "zsasa_0_7_0",
+        "algorithm": "sr",
+        "precision": "f64",
+        "mode": "standard",
+    }
+    assert parse_single_tool_label("zsasa_0_7_0_f64_bitmask") == {
+        "tool_id": "zsasa_0_7_0",
+        "algorithm": "sr",
+        "precision": "f64",
+        "mode": "bitmask",
+    }
 
 
 def test_reset_database_removes_existing_rows(tmp_path: Path) -> None:

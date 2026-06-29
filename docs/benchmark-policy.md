@@ -8,7 +8,7 @@ ignored `results/` tree.
 ## Rerun principles
 
 1. Build comparator tools under `external/` from pinned commits with `scripts/setup_external_tools.py`.
-2. Resolve `zsasa` CLI from the Nix dev shell (`github:N283T/zsasa/v0.6.0`).
+2. Resolve the compatibility `zsasa` CLI from the Nix dev shell (`github:N283T/zsasa/v0.6.0`) for manuscript reruns, and use versioned tool IDs such as `zsasa_0_6_0` and `zsasa_0_7_0` for release-refresh comparisons.
 3. Resolve Python trajectory backends from the uv environment pinned by `pyproject.toml` and `uv.lock`.
 4. Write generated outputs under `results/full_rerun/<run_id>/...`; review before staging archives.
 5. Keep raw generated results, local DB files, and external source/build trees out of git.
@@ -28,9 +28,26 @@ python scripts/prepare_single_file_structures.py --manifest manifests/single-fil
 python scripts/run_single_file.py --manifest manifests/single-file-sample.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
 uv run python scripts/run_trajectory_validation.py --manifest manifests/validation-md-5wvo.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
 uv run python scripts/run_trajectory.py --manifest manifests/trajectory.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
+uv run python scripts/check_tools.py --profile version_refresh_batch --dry-run
+uv run python scripts/check_tools.py --profile version_refresh_single --dry-run
+uv run python scripts/run_batch.py --manifest manifests/batch-swissprot-version-refresh.toml --datasets config/datasets.toml.example --run-id version_refresh_20260629 --dry-run
+uv run python scripts/run_single_file.py --manifest manifests/single-file-mmcif-sample.toml --datasets config/datasets.toml.example --run-id version_refresh_20260629 --dry-run
 ```
 
 Remove `--dry-run` / use `--execute` only when a real benchmark run is explicitly approved.
+
+## Version-refresh benchmarks
+
+Release-refresh manifests compare multiple `zsasa` versions without replacing the
+compatibility `zsasa` tool used by the manuscript rerun. Keep versioned tool IDs
+in command names and output directories so `0.6.0` and `0.7.0` results cannot be
+accidentally mixed. The SwissProt-scale manifest intentionally runs only
+`zsasa_0_6_0`, `zsasa_0_7_0`, and Lahuta with one measured run because the full
+500k-structure workload is too expensive for slower comparators.
+
+The native mmCIF single-file manifest is separate from the cleaned-PDB
+single-file manifest. Do not merge those result sets unless the analysis clearly
+labels the input format.
 
 ## Selective rerun policy
 

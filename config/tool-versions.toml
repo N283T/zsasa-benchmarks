@@ -10,6 +10,26 @@ zig = "0.16.0"
 binary = "zsasa"
 check_args = ["--version"]
 
+[zsasa_0_6_0]
+policy = "versioned zsasa baseline for release-refresh benchmarks"
+repository = "https://github.com/N283T/zsasa"
+version = "0.6.0"
+tag = "v0.6.0"
+commit = "94fdc1ee0ba27063d7cfe69e915e8425474316e1"
+zig = "0.16.0"
+binary = "zsasa-0.6.0"
+check_args = ["--version"]
+
+[zsasa_0_7_0]
+policy = "versioned zsasa candidate for release-refresh benchmarks"
+repository = "https://github.com/N283T/zsasa"
+version = "0.7.0"
+tag = "v0.7.0"
+commit = "80d5f0c5f2ff102627d8f94fcc41882dc51dab7b"
+zig = "0.16.0"
+binary = "zsasa-0.7.0"
+check_args = ["--version"]
+
 [freesasa]
 policy = "rerun from pinned Nix comparator build for manuscript benchmarks"
 repository = "https://github.com/N283T/freesasa"

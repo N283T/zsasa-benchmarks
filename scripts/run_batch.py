@@ -109,6 +109,7 @@ def full_rerun_settings(manifest: dict[str, Any]) -> dict[str, Any]:
     full_rerun.setdefault("runs", 3)
     full_rerun.setdefault("warmup", 3)
     full_rerun.setdefault("precisions", ["f64", "f32"])
+    full_rerun.setdefault("modes", ["standard", "bitmask"])
     full_rerun.setdefault("prepare", "sync")
     full_rerun.setdefault("rerun_zsasa", True)
     full_rerun.setdefault("rerun_comparators", True)
@@ -123,7 +124,22 @@ def dataset_name(manifest_path: Path, manifest: dict[str, Any]) -> str:
         return "ecoli"
     if "human" in dataset_id or "human" in manifest_stem:
         return "human"
+    if "swissprot" in dataset_id or "swissprot" in manifest_stem:
+        return "swissprot"
     return manifest_stem.removeprefix("batch-")
+
+
+def is_zsasa_tool(tool_id: str) -> bool:
+    return tool_id == "zsasa" or tool_id.startswith("zsasa_")
+
+
+def zsasa_batch_record_name(
+    *, tool_id: str, precision: str, mode: str, threads: int, n_points: int
+) -> str:
+    suffix = f"batch_{precision}_{mode}_{threads}t_{n_points}p"
+    if tool_id == "zsasa":
+        return f"zsasa_{suffix}"
+    return f"{tool_id}_{suffix}"
 
 
 def rustsasa_batch_command(
@@ -164,19 +180,35 @@ def build_native_records(
     runs = int(settings["runs"])
     warmup = int(settings["warmup"])
     prepare = str(settings["prepare"]) if settings.get("prepare") else None
+    tools = [str(tool) for tool in settings.get("tools", [])]
+    if not tools:
+        tools = []
+        if settings.get("rerun_zsasa", True):
+            tools.append("zsasa")
+        if settings.get("rerun_comparators", True):
+            tools.extend(["freesasa_batch", "rustsasa", "lahuta"])
+    modes = [str(mode) for mode in settings.get("modes", ["standard", "bitmask"])]
 
-    if settings.get("rerun_zsasa", True):
-        zsasa = require_binary(specs, "zsasa")
+    for tool_id in [tool for tool in tools if is_zsasa_tool(tool)]:
+        zsasa = require_binary(specs, tool_id)
         for thread in threads:
             for precision in [str(value) for value in settings["precisions"]]:
-                for bitmask in [False, True]:
-                    suffix = "bitmask" if bitmask else "standard"
-                    name = f"zsasa_batch_{precision}_{suffix}_{thread}t_{n_points}p"
+                for mode in modes:
+                    if mode not in {"standard", "bitmask"}:
+                        raise ValueError(f"unsupported zsasa batch mode: {mode}")
+                    bitmask = mode == "bitmask"
+                    name = zsasa_batch_record_name(
+                        tool_id=tool_id,
+                        precision=precision,
+                        mode=mode,
+                        threads=thread,
+                        n_points=n_points,
+                    )
                     native = batch_command(
                         binary=zsasa,
                         input_dir=input_dir,
                         output_jsonl=output_base.joinpath(
-                            "zsasa", f"{precision}_{suffix}_{thread}t_{n_points}p.jsonl"
+                            tool_id, f"{precision}_{mode}_{thread}t_{n_points}p.jsonl"
                         ),
                         precision=precision,
                         n_points=n_points,
@@ -188,7 +220,7 @@ def build_native_records(
                             name=name,
                             outputs=[
                                 output_base.joinpath(
-                                    "zsasa", f"{precision}_{suffix}_{thread}t_{n_points}p.jsonl"
+                                    tool_id, f"{precision}_{mode}_{thread}t_{n_points}p.jsonl"
                                 ),
                                 output_base.joinpath("hyperfine", f"{name}.json"),
                             ],
@@ -203,50 +235,57 @@ def build_native_records(
                         )
                     )
 
-    if settings.get("rerun_comparators", True):
-        freesasa_batch = require_binary(specs, "freesasa_batch")
-        lahuta = require_binary(specs, "lahuta")
-        rustsasa = require_binary(specs, "rustsasa")
+    comparator_tools = [tool for tool in tools if not is_zsasa_tool(tool)]
+    if comparator_tools:
+        binaries = {tool_id: require_binary(specs, tool_id) for tool_id in comparator_tools}
         for thread in threads:
-            comparator_commands = [
-                (
+            comparator_commands: list[tuple[str, list[str]]] = []
+            if "freesasa_batch" in binaries:
+                comparator_commands.append(
+                    (
                     f"freesasa_batch_{thread}t_{n_points}p",
                     freesasa_batch_command(
-                        binary=freesasa_batch,
+                        binary=binaries["freesasa_batch"],
                         input_dir=input_dir,
                         output_dir=output_base.joinpath("freesasa_batch", f"{thread}t_{n_points}p"),
                         n_points=n_points,
                         threads=thread,
                     ),
-                ),
-                (
+                    )
+                )
+            if "rustsasa" in binaries:
+                comparator_commands.append(
+                    (
                     f"rustsasa_{thread}t_{n_points}p",
                     rustsasa_batch_command(
-                        binary=rustsasa,
+                        binary=binaries["rustsasa"],
                         input_dir=input_dir,
                         output_dir=output_base.joinpath("rustsasa", f"{thread}t_{n_points}p"),
                         n_points=n_points,
                         threads=thread,
                     ),
-                ),
-            ]
-            for bitmask in [False, True]:
-                suffix = "bitmask" if bitmask else "standard"
-                comparator_commands.append(
-                    (
-                        f"lahuta_{suffix}_{thread}t_{n_points}p",
-                        lahuta_batch_command(
-                            binary=lahuta,
-                            input_dir=input_dir,
-                            output_dir=output_base.joinpath(
-                                "lahuta", f"{suffix}_{thread}t_{n_points}p"
-                            ),
-                            n_points=n_points,
-                            threads=thread,
-                            bitmask=bitmask,
-                        ),
                     )
                 )
+            if "lahuta" in binaries:
+                for mode in modes:
+                    if mode not in {"standard", "bitmask"}:
+                        raise ValueError(f"unsupported Lahuta batch mode: {mode}")
+                    bitmask = mode == "bitmask"
+                    comparator_commands.append(
+                        (
+                            f"lahuta_{mode}_{thread}t_{n_points}p",
+                            lahuta_batch_command(
+                                binary=binaries["lahuta"],
+                                input_dir=input_dir,
+                                output_dir=output_base.joinpath(
+                                    "lahuta", f"{mode}_{thread}t_{n_points}p"
+                                ),
+                                n_points=n_points,
+                                threads=thread,
+                                bitmask=bitmask,
+                            ),
+                        )
+                    )
             for name, native in comparator_commands:
                 output_stem = name.removeprefix("lahuta_")
                 lahuta_outputs = [
@@ -284,22 +323,30 @@ def prepare_output_directories(*, output_base: Path, settings: dict[str, Any]) -
     threads = [int(thread) for thread in settings["threads"]]
     n_points = int(settings["n_points"])
     directories = [output_base, output_base.joinpath("hyperfine")]
+    tools = [str(tool) for tool in settings.get("tools", [])]
+    if not tools:
+        tools = []
+        if settings.get("rerun_zsasa", True):
+            tools.append("zsasa")
+        if settings.get("rerun_comparators", True):
+            tools.extend(["freesasa_batch", "rustsasa", "lahuta"])
+    modes = [str(mode) for mode in settings.get("modes", ["standard", "bitmask"])]
 
-    if settings.get("rerun_zsasa", True):
-        directories.append(output_base.joinpath("zsasa"))
+    for tool_id in [tool for tool in tools if is_zsasa_tool(tool)]:
+        directories.append(output_base.joinpath(tool_id))
 
-    if settings.get("rerun_comparators", True):
+    comparator_tools = [tool for tool in tools if not is_zsasa_tool(tool)]
+    if comparator_tools:
         for thread in threads:
-            directories.extend(
-                [
-                    output_base.joinpath("freesasa_batch", f"{thread}t_{n_points}p"),
-                    output_base.joinpath("rustsasa", f"{thread}t_{n_points}p"),
-                ]
-            )
-            for suffix in ["standard", "bitmask"]:
-                directories.append(
-                    output_base.joinpath("lahuta", f"{suffix}_{thread}t_{n_points}p")
-                )
+            if "freesasa_batch" in comparator_tools:
+                directories.append(output_base.joinpath("freesasa_batch", f"{thread}t_{n_points}p"))
+            if "rustsasa" in comparator_tools:
+                directories.append(output_base.joinpath("rustsasa", f"{thread}t_{n_points}p"))
+            if "lahuta" in comparator_tools:
+                for mode in modes:
+                    directories.append(
+                        output_base.joinpath("lahuta", f"{mode}_{thread}t_{n_points}p")
+                    )
 
     for directory in directories:
         directory.mkdir(parents=True, exist_ok=True)

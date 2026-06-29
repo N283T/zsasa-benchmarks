@@ -1,0 +1,25 @@
+# SwissProt-scale batch benchmark for zsasa release-refresh checks.
+
+id = "batch-swissprot-version-refresh"
+status = "planning"
+
+[dataset]
+id = "swissprot_500k_pdb"
+expected_count = 500000
+role = ["batch-throughput", "version-refresh", "io-wait-stress"]
+notes = "Large SwissProt-scale PDB directory intended to stress zsasa batch I/O and CPU scheduling behavior."
+
+[full_rerun]
+source_kind = "full_rerun"
+run_id_default = "version_refresh_20260629"
+n_points = 128
+threads = [10]
+runs = 1
+warmup = 0
+precisions = ["f64"]
+modes = ["standard"]
+prepare = "sync"
+tools = ["zsasa_0_6_0", "zsasa_0_7_0", "lahuta"]
+rerun_zsasa = true
+rerun_comparators = true
+notes = "FreeSASA and RustSASA are excluded because the 500k-structure workload is too slow for those comparators on this machine."

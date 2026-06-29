@@ -1,0 +1,49 @@
+# Native mmCIF single-file benchmark subset for zsasa release-refresh checks.
+
+id = "single-file-mmcif-subset"
+status = "planning"
+
+[dataset]
+id = "single_file_large_structure_mmcif_subset"
+expected_count = 3
+role = ["single-file-throughput", "parser-stress", "mmcif-native"]
+notes = "Native mmCIF inputs kept separate from cleaned PDB single-file inputs so PDB field limits do not affect interpretation."
+
+[[structures]]
+id = "3jc8"
+role = "multi-100k-pdb"
+input_file = "3jc8.cif.gz"
+expected_atoms = 107500
+expected_chains = 3
+notes = "100k-scale multi-chain PDB assembly represented as native mmCIF."
+
+[[structures]]
+id = "5vyc"
+role = "rustsasa-parser-outlier"
+input_file = "5vyc.cif.gz"
+expected_atoms = 249168
+expected_chains = 4
+notes = "Historical parser outlier represented as native mmCIF."
+
+[[structures]]
+id = "8rbs"
+role = "freesasa-runtime-outlier"
+input_file = "8rbs.cif.gz"
+expected_atoms = 164605
+expected_chains = 5
+notes = "Historical runtime outlier represented as native mmCIF."
+
+[full_rerun]
+source_kind = "full_rerun"
+run_id_default = "version_refresh_20260629"
+n_points = 100
+threads = [10]
+runs = 1
+warmup = 0
+prepare = "sync"
+tools = ["zsasa_0_6_0_f64", "zsasa_0_7_0_f64"]
+phases = ["wall", "timing"]
+rerun_zsasa = true
+rerun_comparators = false
+excluded_tools = ["freesasa", "rustsasa", "lahuta"]
+excluded_tools_notes = "The initial mmCIF benchmark isolates native zsasa input behavior; comparator support can be added only after format compatibility is verified."

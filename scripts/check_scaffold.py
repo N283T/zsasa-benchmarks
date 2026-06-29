@@ -21,7 +21,9 @@ REQUIRED_FILES = [
     "manifests/validation-md-5wvo.toml",
     "manifests/batch-ecoli.toml",
     "manifests/batch-human.toml",
+    "manifests/batch-swissprot-version-refresh.toml",
     "manifests/single-file-sample.toml",
+    "manifests/single-file-mmcif-sample.toml",
     "manifests/trajectory.toml",
     "docs/benchmark-policy.md",
     "docs/database.md",
@@ -87,8 +89,10 @@ FULL_RERUN_MANIFESTS = [
     "manifests/validation-md-5wvo.toml",
     "manifests/batch-ecoli.toml",
     "manifests/batch-human.toml",
+    "manifests/batch-swissprot-version-refresh.toml",
     "manifests/trajectory.toml",
     "manifests/single-file-sample.toml",
+    "manifests/single-file-mmcif-sample.toml",
 ]
 
 
@@ -152,7 +156,18 @@ def main() -> None:
 
     tools = read_toml(ROOT.joinpath("config/tool-versions.toml"))
     if tools.get("zsasa", {}).get("tag") != "v0.6.0":
-        fail("tool-versions.toml must pin zsasa to v0.6.0 for the current rerun")
+        fail("tool-versions.toml must keep zsasa as the v0.6.0 compatibility alias")
+    expected_zsasa_versions = {
+        "zsasa_0_6_0": "v0.6.0",
+        "zsasa_0_7_0": "v0.7.0",
+    }
+    for tool, expected_tag in expected_zsasa_versions.items():
+        spec = tools.get(tool, {})
+        if spec.get("tag") != expected_tag:
+            fail(f"tool-versions.toml must define {tool} with tag {expected_tag}")
+        expected_binary = f"zsasa-{expected_tag.removeprefix('v')}"
+        if spec.get("binary") != expected_binary:
+            fail(f"{tool} binary must use a versioned zsasa-* command name")
     expected_nix_path_bins = {
         "freesasa": "freesasa",
         "freesasa_batch": "freesasa_batch",
@@ -180,7 +195,10 @@ def main() -> None:
             fail(f"{manifest_path} must define source_kind = full_rerun")
         if full_rerun.get("rerun_zsasa") is not True:
             fail(f"{manifest_path} must rerun zsasa")
-        if full_rerun.get("rerun_comparators") is not True:
+        if (
+            manifest_path != "manifests/single-file-mmcif-sample.toml"
+            and full_rerun.get("rerun_comparators") is not True
+        ):
             fail(f"{manifest_path} must rerun comparators")
 
     validation = read_toml(ROOT.joinpath("manifests/validation-ecoli.toml"))
@@ -194,8 +212,10 @@ def main() -> None:
         "ecoli_smoke_pdb",
         "UP000000625_83333_ECOLI_v6_pdb",
         "UP000005640_9606_HUMAN_v6_pdb",
+        "swissprot_500k_pdb",
         "single_file_large_structure_sources",
         "single_file_large_structure_subset",
+        "single_file_large_structure_mmcif_subset",
         "single_file_stratified_sample",
     ]:
         if "path" not in dataset_catalog.get(dataset_id, {}):
@@ -232,6 +252,21 @@ def main() -> None:
         fail("trajectory full_rerun must include mdsasa_bolt")
     if len(trajectory.get("datasets", [])) != 3:
         fail("trajectory manifest must describe the three benchmark datasets")
+
+    swissprot = read_toml(ROOT.joinpath("manifests/batch-swissprot-version-refresh.toml"))
+    swissprot_full = swissprot.get("full_rerun", {})
+    if swissprot.get("dataset", {}).get("id") != "swissprot_500k_pdb":
+        fail("SwissProt version-refresh manifest must use swissprot_500k_pdb")
+    if swissprot_full.get("tools") != ["zsasa_0_6_0", "zsasa_0_7_0", "lahuta"]:
+        fail("SwissProt version-refresh manifest must compare two zsasa versions and Lahuta")
+    if swissprot_full.get("runs") != 1 or swissprot_full.get("threads") != [10]:
+        fail("SwissProt version-refresh manifest must use one 10-thread measured run")
+
+    single_mmcif = read_toml(ROOT.joinpath("manifests/single-file-mmcif-sample.toml"))
+    if single_mmcif.get("dataset", {}).get("id") != "single_file_large_structure_mmcif_subset":
+        fail("mmCIF single-file manifest must use single_file_large_structure_mmcif_subset")
+    if not all("input_file" in item for item in single_mmcif.get("structures", [])):
+        fail("mmCIF single-file structures must specify input_file")
 
     schema = ROOT.joinpath("schemas/benchmark.sql").read_text(encoding="utf-8")
     for table in [

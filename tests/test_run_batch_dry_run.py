@@ -100,3 +100,33 @@ def test_run_batch_dry_run_filters_record_names() -> None:
     assert "# name: rustsasa_10t_128p" in proc.stdout
     assert "# name: rustsasa_1t_128p" not in proc.stdout
     assert "# name: zsasa_batch_f64_standard_10t_128p" not in proc.stdout
+
+
+def test_run_batch_swissprot_version_refresh_selects_only_feasible_tools() -> None:
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "scripts/run_batch.py",
+            "--manifest",
+            "manifests/batch-swissprot-version-refresh.toml",
+            "--run-id",
+            "test_swissprot_versions",
+            "--datasets",
+            "config/datasets.toml.example",
+            "--dry-run",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    assert "dataset=swissprot" in proc.stdout
+    assert "selected_commands=3/3" in proc.stdout
+    assert "# name: zsasa_0_6_0_batch_f64_standard_10t_128p" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f64_standard_10t_128p" in proc.stdout
+    assert "# name: lahuta_standard_10t_128p" in proc.stdout
+    assert "freesasa_batch" not in proc.stdout
+    assert "rustsasa" not in proc.stdout
+    assert "--warmup 0" in proc.stdout
+    assert "--runs 1" in proc.stdout
+    assert "--use-bitmask" not in proc.stdout
