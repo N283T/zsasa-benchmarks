@@ -63,7 +63,7 @@ class StructurePlan:
     structure_id: str
     role: str
     expected_atoms: int | None
-    pdb_path: Path
+    input_path: Path
 
 
 @dataclass(frozen=True)
@@ -155,6 +155,15 @@ def full_rerun_settings(manifest: dict[str, Any]) -> dict[str, Any]:
 
 
 def parse_tool_plan(tool: str) -> ToolPlan:
+    zsasa = re.fullmatch(r"(zsasa(?:_\d+_\d+_\d+)?)_(f64|f32)(_bitmask)?", tool)
+    if zsasa:
+        tool_id, precision, bitmask_suffix = zsasa.groups()
+        return ToolPlan(
+            name=tool,
+            tool_id=tool_id,
+            precision=precision,
+            bitmask=bitmask_suffix is not None,
+        )
     if tool.startswith("zsasa_"):
         suffix = tool.removeprefix("zsasa_")
         precision = suffix.removesuffix("_bitmask")
@@ -187,7 +196,9 @@ def structure_plans(manifest: dict[str, Any], input_dir: Path) -> list[Structure
                     if "expected_atoms" in raw_structure
                     else None
                 ),
-                pdb_path=input_dir.joinpath(f"{structure_id}.pdb"),
+                input_path=input_dir.joinpath(
+                    str(raw_structure.get("input_file", f"{structure_id}.pdb"))
+                ),
             )
         )
     return plans
@@ -203,7 +214,7 @@ def build_native_command(
     threads: int,
     timing: bool,
 ) -> list[str]:
-    if tool.tool_id == "zsasa":
+    if tool.tool_id == "zsasa" or tool.tool_id.startswith("zsasa_"):
         if tool.precision is None:
             raise ValueError("zsasa tool plan requires precision")
         return zsasa_calc_command(
@@ -274,7 +285,7 @@ def build_records(
                     native = build_native_command(
                         tool=tool,
                         binary=binary,
-                        input_path=structure.pdb_path,
+                        input_path=structure.input_path,
                         output_path=output_path,
                         n_points=n_points,
                         threads=thread,

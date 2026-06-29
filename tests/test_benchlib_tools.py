@@ -15,12 +15,18 @@ from scripts.benchlib.tools import (
 def test_load_tool_specs_reads_known_tools() -> None:
     specs = load_tool_specs(Path("config/tool-versions.toml"))
     assert "zsasa" in specs
+    assert "zsasa_0_6_0" in specs
+    assert "zsasa_0_7_0" in specs
     assert specs["zsasa"].repository == "https://github.com/N283T/zsasa"
     assert specs["zsasa"].binary == Path("zsasa")
+    assert specs["zsasa_0_6_0"].tag == "v0.6.0"
+    assert specs["zsasa_0_7_0"].tag == "v0.7.0"
 
 
 def test_single_file_profile_checks_native_single_file_tools() -> None:
     assert PROFILES["single_file"] == ["zsasa", "freesasa", "rustsasa"]
+    assert PROFILES["version_refresh_batch"] == ["zsasa_0_6_0", "zsasa_0_7_0", "lahuta"]
+    assert PROFILES["version_refresh_single"] == ["zsasa_0_6_0", "zsasa_0_7_0"]
     assert "freesasa" in PROFILES["full"]
 
 
@@ -42,6 +48,17 @@ def test_flake_exposes_comparator_packages_to_dev_shell() -> None:
         assert f"packages.{package_name}" in flake
     for shell_package in ["freesasaCli", "freesasaBatch", "rustsasaCli", "lahutaCli"]:
         assert shell_package in flake
+
+
+def test_flake_exposes_versioned_zsasa_wrappers_to_dev_shell() -> None:
+    flake = Path("flake.nix").read_text(encoding="utf-8")
+
+    assert "zsasa_0_6_0" in flake
+    assert "zsasa_0_7_0" in flake
+    assert 'writeShellScriptBin "zsasa-0.6.0"' in flake
+    assert 'writeShellScriptBin "zsasa-0.7.0"' in flake
+    assert "zsasaVersioned06" in flake
+    assert "zsasaVersioned07" in flake
 
 
 def test_require_tools_reports_missing_binary(tmp_path: Path) -> None:
@@ -150,3 +167,31 @@ def test_require_tools_prefers_zsasa_cli_env(
     }
     checked = require_tools(specs, ["zsasa"])
     assert checked["zsasa"].binary == env_binary
+
+
+def test_require_tools_does_not_override_versioned_zsasa_with_zsasa_cli(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    versioned_binary = tmp_path.joinpath("zsasa-0.7.0")
+    versioned_binary.write_text("#!/bin/sh\necho zsasa 0.7.0\n", encoding="utf-8")
+    versioned_binary.chmod(0o755)
+    env_binary = tmp_path.joinpath("nix-zsasa")
+    env_binary.write_text("#!/bin/sh\necho zsasa 0.6.0\n", encoding="utf-8")
+    env_binary.chmod(0o755)
+    monkeypatch.setenv("ZSASA_CLI", str(env_binary))
+    specs = {
+        "zsasa_0_7_0": ToolSpec(
+            tool_id="zsasa_0_7_0",
+            repository=None,
+            version="0.7.0",
+            tag="v0.7.0",
+            commit=None,
+            binary=versioned_binary,
+            check_args=["--version"],
+            policy="test",
+        )
+    }
+
+    checked = require_tools(specs, ["zsasa_0_7_0"])
+
+    assert checked["zsasa_0_7_0"].binary == versioned_binary

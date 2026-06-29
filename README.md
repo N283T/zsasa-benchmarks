@@ -11,7 +11,7 @@ This repository is a clean benchmark workspace for the `zsasa` manuscript. It in
 - Build all benchmark tools from pinned versions before collecting manuscript evidence.
 - Treat FreeSASA comparator values as `freesasa_batch` wrapper outputs, because upstream FreeSASA has no native directory batch mode.
 - Capture RustSASA protein-level outputs as JSON. Do not use protein-level PDB B-factors for totals, because the PDB B-factor field cannot represent large total SASA values reliably.
-- Use the fixed `zsasa` `v0.6.0` release for the current manuscript rerun.
+- Keep the compatibility `zsasa` tool pinned to `v0.6.0` for the current manuscript rerun, and use versioned tool IDs such as `zsasa_0_6_0` and `zsasa_0_7_0` for release-refresh comparisons.
 - Keep generated results out of git; archive final outputs separately after review.
 - Store generated evidence in DuckDB when result import/export is needed.
 
@@ -68,9 +68,20 @@ uv run python scripts/run_trajectory_validation.py --manifest manifests/validati
 uv run python scripts/run_trajectory.py --manifest manifests/trajectory.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
 ```
 
+Version-refresh preparation dry-runs:
+
+```bash
+uv run python scripts/check_tools.py --profile version_refresh_batch --dry-run
+uv run python scripts/check_tools.py --profile version_refresh_single --dry-run
+uv run python scripts/run_batch.py --manifest manifests/batch-swissprot-version-refresh.toml --datasets config/datasets.toml.example --run-id version_refresh_20260629 --dry-run
+uv run python scripts/run_single_file.py --manifest manifests/single-file-mmcif-sample.toml --datasets config/datasets.toml.example --run-id version_refresh_20260629 --dry-run
+```
+
 The native Phase 1 runner examples above are dry-runs. They print the commands and `results/full_rerun/<run_id>/...` layout without running benchmarks; do not remove `--dry-run` until a real rerun is explicitly approved. Trajectory runners now route execution through `scripts.benchlib.trajectory_tools`, including explicit hydrogens and the `naccess` trajectory classifier for `zsasa traj` CLI commands.
 
 The `nix develop` shell provides the pinned `zsasa` CLI from `github:N283T/zsasa/v0.6.0` and exports `ZSASA_CLI` to that Nix-store binary so uv-installed Python console scripts cannot shadow the CLI benchmark target. The same shell also builds and exposes the pinned native comparator CLIs (`freesasa`, `freesasa_batch`, `rust-sasa`, and `lahuta`) from `flake.nix`; `config/tool-versions.toml` intentionally resolves those tools from `PATH` instead of the ignored `external/bin` tree. Python trajectory backends and the `zsasa` Python package are pinned in `pyproject.toml`/`uv.lock`; do not import `zsasa` from a local source checkout for manuscript reruns.
+
+Version-refresh manifests can compare multiple `zsasa` releases in the same harness. `config/tool-versions.toml` now includes versioned tool IDs such as `zsasa_0_6_0` and `zsasa_0_7_0`; their command names are kept separate from the compatibility `ZSASA_CLI` alias so dry-runs, outputs, and DB imports preserve release identity.
 
 Local dataset paths are centralized in `config/datasets.local.toml` (ignored). Copy `config/datasets.toml.example` and adjust paths before real runs.
 
