@@ -13,6 +13,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.zig-overlay.follows = "zig-overlay";
     };
+    zsasa_0_7_0 = {
+      url = "github:N283T/zsasa/v0.7.0";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.zig-overlay.follows = "zig-overlay";
+    };
   };
 
   outputs =
@@ -21,6 +26,7 @@
       flake-utils,
       zig-overlay,
       zsasa,
+      zsasa_0_7_0,
       ...
     }:
     flake-utils.lib.eachDefaultSystem (
@@ -28,49 +34,72 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
         zig = zig-overlay.packages.${system}."0.16.0";
-        zsasaZigDeps = pkgs.runCommand "zsasa-zig-deps"
+        mkZsasaCli =
           {
-            src = zsasa;
+            version,
+            src,
+            zigDepsHash,
+          }:
+          let
+            zigDeps = pkgs.runCommand "zsasa-${version}-zig-deps"
+              {
+                inherit src;
+                nativeBuildInputs = [ zig ];
+                outputHashAlgo = "sha256";
+                outputHashMode = "recursive";
+                outputHash = zigDepsHash;
+              }
+              ''
+                export ZIG_GLOBAL_CACHE_DIR=$(mktemp -d)
+                cp -r $src/. .
+                zig build --fetch
+                mv $ZIG_GLOBAL_CACHE_DIR/p $out
+              '';
+          in
+          pkgs.stdenv.mkDerivation {
+            pname = "zsasa";
+            inherit version src;
             nativeBuildInputs = [ zig ];
-            outputHashAlgo = "sha256";
-            outputHashMode = "recursive";
-            outputHash = "sha256-30G6nwi2dPa3iqZT/xr4se2bRhigiaSC90JDswDjNmU=";
-          }
-          ''
-            export ZIG_GLOBAL_CACHE_DIR=$(mktemp -d)
-            cp -r $src/. .
-            zig build --fetch
-            mv $ZIG_GLOBAL_CACHE_DIR/p $out
-          '';
-        zsasaCli = pkgs.stdenv.mkDerivation {
-          pname = "zsasa";
+            dontConfigure = true;
+            dontFixup = true;
+            buildPhase = ''
+              export ZIG_GLOBAL_CACHE_DIR=$(mktemp -d)
+              mkdir -p "$ZIG_GLOBAL_CACHE_DIR"
+              cp -R ${zigDeps} "$ZIG_GLOBAL_CACHE_DIR/p"
+              chmod -R u+w "$ZIG_GLOBAL_CACHE_DIR/p"
+              zig build \
+                -Doptimize=ReleaseFast \
+                --global-cache-dir "$ZIG_GLOBAL_CACHE_DIR" \
+                --prefix $out \
+                -j$NIX_BUILD_CORES
+            '';
+            installPhase = ''
+              true
+            '';
+            meta = with pkgs.lib; {
+              description = "Pinned zsasa CLI for benchmark reruns";
+              homepage = "https://github.com/N283T/zsasa";
+              license = licenses.mit;
+              mainProgram = "zsasa";
+              platforms = platforms.unix;
+            };
+          };
+        zsasaCli = mkZsasaCli {
           version = "0.6.0";
           src = zsasa;
-          nativeBuildInputs = [ zig ];
-          dontConfigure = true;
-          dontFixup = true;
-          buildPhase = ''
-            export ZIG_GLOBAL_CACHE_DIR=$(mktemp -d)
-            mkdir -p "$ZIG_GLOBAL_CACHE_DIR"
-            cp -R ${zsasaZigDeps} "$ZIG_GLOBAL_CACHE_DIR/p"
-            chmod -R u+w "$ZIG_GLOBAL_CACHE_DIR/p"
-            zig build \
-              -Doptimize=ReleaseFast \
-              --global-cache-dir "$ZIG_GLOBAL_CACHE_DIR" \
-              --prefix $out \
-              -j$NIX_BUILD_CORES
-          '';
-          installPhase = ''
-            true
-          '';
-          meta = with pkgs.lib; {
-            description = "Pinned zsasa CLI for benchmark reruns";
-            homepage = "https://github.com/N283T/zsasa";
-            license = licenses.mit;
-            mainProgram = "zsasa";
-            platforms = platforms.unix;
-          };
+          zigDepsHash = "sha256-XgIsmn9/8bgfTkJP4+oosvl8nasl7MB4GcEtwYaP+eM=";
         };
+        zsasaCli07 = mkZsasaCli {
+          version = "0.7.0";
+          src = zsasa_0_7_0;
+          zigDepsHash = "sha256-XgIsmn9/8bgfTkJP4+oosvl8nasl7MB4GcEtwYaP+eM=";
+        };
+        zsasaVersioned06 = pkgs.writeShellScriptBin "zsasa-0.6.0" ''
+          exec ${zsasaCli}/bin/zsasa "$@"
+        '';
+        zsasaVersioned07 = pkgs.writeShellScriptBin "zsasa-0.7.0" ''
+          exec ${zsasaCli07}/bin/zsasa "$@"
+        '';
         freesasaCli = pkgs.stdenv.mkDerivation {
           pname = "freesasa";
           version = "2.1.3-9c9f204";
@@ -179,6 +208,8 @@
       in
       {
         packages.zsasa = zsasaCli;
+        packages.zsasa_0_6_0 = zsasaVersioned06;
+        packages.zsasa_0_7_0 = zsasaVersioned07;
         packages.freesasa = freesasaCli;
         packages.freesasaBatch = freesasaBatch;
         packages.rustsasa = rustsasaCli;
@@ -188,6 +219,8 @@
           packages = with pkgs; [
             zig
             zsasaCli
+            zsasaVersioned06
+            zsasaVersioned07
             freesasaCli
             freesasaBatch
             rustsasaCli
@@ -214,6 +247,7 @@
             export ZSASA_CLI="${zsasaCli}/bin/zsasa"
             echo "zsasa benchmark shell"
             echo "- zsasa CLI: $ZSASA_CLI"
+            echo "- versioned zsasa CLIs: zsasa-0.6.0, zsasa-0.7.0"
             echo "- Run: python scripts/check_scaffold.py"
             echo "- Dry run full validation: uv run python scripts/run_validation.py --manifest manifests/validation-ecoli.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run"
           '';

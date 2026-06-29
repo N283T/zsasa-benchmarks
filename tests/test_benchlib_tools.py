@@ -50,6 +50,17 @@ def test_flake_exposes_comparator_packages_to_dev_shell() -> None:
         assert shell_package in flake
 
 
+def test_flake_exposes_versioned_zsasa_wrappers_to_dev_shell() -> None:
+    flake = Path("flake.nix").read_text(encoding="utf-8")
+
+    assert "zsasa_0_6_0" in flake
+    assert "zsasa_0_7_0" in flake
+    assert 'writeShellScriptBin "zsasa-0.6.0"' in flake
+    assert 'writeShellScriptBin "zsasa-0.7.0"' in flake
+    assert "zsasaVersioned06" in flake
+    assert "zsasaVersioned07" in flake
+
+
 def test_require_tools_reports_missing_binary(tmp_path: Path) -> None:
     specs = {
         "fake": ToolSpec(
