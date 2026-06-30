@@ -34,10 +34,10 @@
 
 ### Task 2: Versioned batch runner tests
 
-- [ ] Add a dry-run test for `manifests/batch-swissprot-version-refresh.toml` expecting `zsasa_0_6_0_batch_f64_standard_10t_128p`, `zsasa_0_7_0_batch_f64_standard_10t_128p`, and `lahuta_standard_10t_128p` only.
+- [ ] Add a dry-run test for `manifests/batch-swissprot-version-refresh.toml` expecting 0.6.0 f32 standard/bitmask at 10 threads, 0.7.0 f32 standard/bitmask at 10/20/40 threads, and Lahuta bitmask at 10 threads.
 - [ ] Run the test and confirm it fails because the manifest and tool selection are missing.
 - [ ] Add the SwissProt manifest and dataset example entry.
-- [ ] Update `scripts/run_batch.py` to build records from manifest `tools`, `modes`, and `precisions`.
+- [ ] Update `scripts/run_batch.py` to build records from manifest `tools`/global matrix or per-tool `jobs`.
 - [ ] Re-run `uv run pytest tests/test_run_batch_dry_run.py` and confirm it passes.
 
 ### Task 3: Versioned import parser tests

@@ -263,10 +263,31 @@ def main() -> None:
     swissprot_full = swissprot.get("full_rerun", {})
     if swissprot.get("dataset", {}).get("id") != "swissprot_500k_pdb":
         fail("SwissProt version-refresh manifest must use swissprot_500k_pdb")
-    if swissprot_full.get("tools") != ["zsasa_0_6_0", "zsasa_0_7_0", "lahuta"]:
-        fail("SwissProt version-refresh manifest must compare two zsasa versions and Lahuta")
     if swissprot_full.get("runs") != 1 or swissprot_full.get("threads") != [10]:
         fail("SwissProt version-refresh manifest must use one 10-thread measured run")
+    if swissprot_full.get("precisions") != ["f32"]:
+        fail("SwissProt version-refresh manifest must use f32 only")
+    jobs = swissprot_full.get("jobs", [])
+    expected_jobs = [
+        {
+            "tool": "zsasa_0_6_0",
+            "threads": [10],
+            "precisions": ["f32"],
+            "modes": ["standard", "bitmask"],
+        },
+        {
+            "tool": "zsasa_0_7_0",
+            "threads": [10, 20, 40],
+            "precisions": ["f32"],
+            "modes": ["standard", "bitmask"],
+        },
+        {"tool": "lahuta", "threads": [10], "modes": ["bitmask"]},
+    ]
+    if jobs != expected_jobs:
+        fail(
+            "SwissProt version-refresh jobs must encode 0.6.0 10t, "
+            "0.7.0 10/20/40t, and Lahuta bitmask 10t"
+        )
 
     single_pdb = read_toml(ROOT.joinpath("manifests/single-file-sample.toml"))
     if "pdbtools_jl" not in single_pdb.get("full_rerun", {}).get("tools", []):

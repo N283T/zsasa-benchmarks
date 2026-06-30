@@ -102,7 +102,7 @@ def test_run_batch_dry_run_filters_record_names() -> None:
     assert "# name: zsasa_batch_f64_standard_10t_128p" not in proc.stdout
 
 
-def test_run_batch_swissprot_version_refresh_selects_only_feasible_tools() -> None:
+def test_run_batch_swissprot_version_refresh_targets_0_7_thread_overcommit() -> None:
     proc = subprocess.run(
         [
             sys.executable,
@@ -121,12 +121,21 @@ def test_run_batch_swissprot_version_refresh_selects_only_feasible_tools() -> No
     )
 
     assert "dataset=swissprot" in proc.stdout
-    assert "selected_commands=3/3" in proc.stdout
-    assert "# name: zsasa_0_6_0_batch_f64_standard_10t_128p" in proc.stdout
-    assert "# name: zsasa_0_7_0_batch_f64_standard_10t_128p" in proc.stdout
-    assert "# name: lahuta_standard_10t_128p" in proc.stdout
+    assert "selected_commands=9/9" in proc.stdout
+    assert "# name: zsasa_0_6_0_batch_f32_standard_10t_128p" in proc.stdout
+    assert "# name: zsasa_0_6_0_batch_f32_bitmask_10t_128p" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f32_standard_10t_128p" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f32_bitmask_10t_128p" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f32_standard_20t_128p" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f32_bitmask_20t_128p" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f32_standard_40t_128p" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f32_bitmask_40t_128p" in proc.stdout
+    assert "# name: lahuta_bitmask_10t_128p" in proc.stdout
+    assert "lahuta_standard" not in proc.stdout
+    assert "zsasa_0_6_0_batch_f32_standard_20t_128p" not in proc.stdout
+    assert "zsasa_0_6_0_batch_f32_bitmask_40t_128p" not in proc.stdout
     assert "freesasa_batch" not in proc.stdout
     assert "rustsasa" not in proc.stdout
     assert "--warmup 0" in proc.stdout
     assert "--runs 1" in proc.stdout
-    assert "--use-bitmask" not in proc.stdout
+    assert "--use-bitmask" in proc.stdout
