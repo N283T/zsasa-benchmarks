@@ -43,9 +43,11 @@ Remove `--dry-run` / use `--execute` only when a real benchmark run is explicitl
 Release-refresh manifests compare multiple `zsasa` versions without replacing the
 compatibility `zsasa` tool used by the manuscript rerun. Keep versioned tool IDs
 in command names and output directories so `0.6.0` and `0.7.0` results cannot be
-accidentally mixed. The SwissProt-scale manifest intentionally runs only
-`zsasa_0_6_0`, `zsasa_0_7_0`, and Lahuta with one measured run because the full
-500k-structure workload is too expensive for slower comparators.
+accidentally mixed. The SwissProt-scale manifest intentionally keeps the matrix
+small because the full 500k-structure workload is expensive: `zsasa_0_6_0` runs
+f32 standard/bitmask at 10 threads, `zsasa_0_7_0` runs f32 standard/bitmask at
+10, 20, and 40 threads, and Lahuta runs only the 10-thread bitmask comparator.
+This targets the 0.7.0 batch worker overcommit change for I/O-bound workloads.
 
 The native mmCIF single-file manifest is separate from the cleaned-PDB
 single-file manifest. It currently compares versioned `zsasa` with PDBTools.jl

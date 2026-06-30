@@ -43,15 +43,16 @@ For versioned `zsasa`, record names and output paths include the full tool label
 
 Add `manifests/batch-swissprot-version-refresh.toml` with dataset ID `swissprot_500k_pdb`, expected count `500000`, and:
 
-- `tools = ["zsasa_0_6_0", "zsasa_0_7_0", "lahuta"]`
-- `threads = [10]`
 - `runs = 1`
 - `warmup = 0`
 - `n_points = 128`
-- `precisions = ["f64"]`
-- `modes = ["standard"]`
+- `precisions = ["f32"]`
+- per-tool `jobs`:
+  - `zsasa_0_6_0`: 10 threads, standard and bitmask modes
+  - `zsasa_0_7_0`: 10, 20, and 40 threads, standard and bitmask modes
+  - `lahuta`: 10 threads, bitmask mode only
 
-This manifest prioritizes large-scale feasibility and direct version-refresh evidence over exhaustive parameter coverage.
+This manifest targets the 0.7.0 batch thread-overcommit change: 0.6.0 is kept at CPU-count threading because it caps explicit batch worker counts internally, while 0.7.0 is measured above CPU count to test I/O-bound throughput.
 
 ### Single-file mmCIF runner support
 
