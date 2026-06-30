@@ -120,6 +120,14 @@ def dataset_name(manifest_path: Path, manifest: dict[str, Any]) -> str:
     dataset = expect_dict(manifest, "dataset")
     dataset_id = str(dataset.get("id", "")).lower()
     manifest_stem = manifest_path.stem.lower()
+    if ("ecoli" in dataset_id or "ecoli" in manifest_stem) and (
+        dataset_id.endswith("_cif") or "cif" in manifest_stem
+    ):
+        return "ecoli_cif"
+    if ("human" in dataset_id or "human" in manifest_stem) and (
+        dataset_id.endswith("_cif") or "cif" in manifest_stem
+    ):
+        return "human_cif"
     if "ecoli" in dataset_id or "ecoli" in manifest_stem:
         return "ecoli"
     if "human" in dataset_id or "human" in manifest_stem:

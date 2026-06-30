@@ -201,3 +201,69 @@ def test_run_batch_human_overcommit_targets_zsasa_0_7_matrix() -> None:
     assert "lahuta" not in proc.stdout
     assert "--warmup 3" in proc.stdout
     assert "--runs 3" in proc.stdout
+
+
+def test_run_batch_human_cif_overcommit_targets_minimal_bitmask_matrix() -> None:
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "scripts/run_batch.py",
+            "--manifest",
+            "manifests/batch-human-cif-overcommit.toml",
+            "--run-id",
+            "test_human_cif_overcommit",
+            "--datasets",
+            "config/datasets.toml.example",
+            "--dry-run",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    assert "dataset=human_cif" in proc.stdout
+    assert "selected_commands=5/5" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f32_bitmask_10t_100p" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f32_bitmask_20t_100p" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f32_bitmask_40t_100p" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f32_bitmask_80t_100p" in proc.stdout
+    assert "# name: lahuta_bitmask_10t_100p" in proc.stdout
+    assert "standard" not in proc.stdout
+    assert "f64" not in proc.stdout
+    assert "freesasa_batch" not in proc.stdout
+    assert "rustsasa" not in proc.stdout
+    assert "--use-bitmask" in proc.stdout
+    assert "--warmup 3" in proc.stdout
+    assert "--runs 3" in proc.stdout
+
+
+def test_run_batch_ecoli_cif_overcommit_targets_minimal_bitmask_matrix() -> None:
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "scripts/run_batch.py",
+            "--manifest",
+            "manifests/batch-ecoli-cif-overcommit.toml",
+            "--run-id",
+            "test_ecoli_cif_overcommit",
+            "--datasets",
+            "config/datasets.toml.example",
+            "--dry-run",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    assert "dataset=ecoli_cif" in proc.stdout
+    assert "selected_commands=5/5" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f32_bitmask_10t_100p" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f32_bitmask_20t_100p" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f32_bitmask_40t_100p" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f32_bitmask_80t_100p" in proc.stdout
+    assert "# name: lahuta_bitmask_10t_100p" in proc.stdout
+    assert "standard" not in proc.stdout
+    assert "f64" not in proc.stdout
+    assert "freesasa_batch" not in proc.stdout
+    assert "rustsasa" not in proc.stdout
+    assert "--use-bitmask" in proc.stdout

@@ -255,6 +255,86 @@ def test_manifest_id_from_config_reads_batch_overcommit_manifest(tmp_path: Path)
     )
 
 
+def test_import_full_rerun_imports_human_cif_overcommit_batch(tmp_path: Path) -> None:
+    results_root = tmp_path.joinpath("full_rerun", "cif_overcommit")
+    human_cif = results_root.joinpath("batch", "human_cif")
+    hyperfine_dir = human_cif.joinpath("hyperfine")
+    hyperfine_dir.mkdir(parents=True)
+    human_cif.joinpath("config.json").write_text(
+        json.dumps({"manifest": "manifests/batch-human-cif-overcommit.toml"}),
+        encoding="utf-8",
+    )
+    hyperfine_dir.joinpath("zsasa_0_7_0_batch_f32_bitmask_40t_100p.json").write_text(
+        json.dumps(
+            {
+                "results": [
+                    {
+                        "command": "zsasa_0_7_0_batch_f32_bitmask_40t_100p",
+                        "mean": 23.0,
+                        "stddev": 0.0,
+                        "median": 23.0,
+                        "min": 23.0,
+                        "max": 23.0,
+                        "times": [23.0],
+                        "user": 190.0,
+                        "system": 10.0,
+                        "memory_usage_byte": [520 * 1024 * 1024],
+                        "exit_codes": [0],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    db = tmp_path.joinpath("benchmark.duckdb")
+    import_full_rerun(
+        db,
+        results_root,
+        "cif_overcommit",
+        Path("config/datasets.toml.example"),
+    )
+
+    conn = duckdb.connect(str(db), read_only=True)
+    try:
+        run = conn.execute(
+            """
+            SELECT benchmark_kind, dataset_id, tool_id, precision, mode, threads, n_points,
+                   manifest_id, notes
+            FROM benchmark_runs
+            WHERE dataset_id = 'UP000005640_9606_HUMAN_v6_cif'
+            """
+        ).fetchone()
+        runtime = conn.execute(
+            """
+            SELECT value
+            FROM performance_results
+            WHERE run_id = (
+              SELECT run_id
+              FROM benchmark_runs
+              WHERE dataset_id = 'UP000005640_9606_HUMAN_v6_cif'
+            )
+              AND metric = 'runtime'
+              AND statistic = 'mean'
+            """
+        ).fetchone()[0]
+    finally:
+        conn.close()
+
+    assert run == (
+        "batch",
+        "UP000005640_9606_HUMAN_v6_cif",
+        "zsasa_0_7_0",
+        "f32",
+        "bitmask",
+        40,
+        100,
+        "batch-human-cif-zsasa-0-7-overcommit",
+        "zsasa_0_7_0_batch_f32_bitmask_40t_100p",
+    )
+    assert runtime == 23.0
+
+
 def test_import_hyperfine_directory_imports_memory_and_cpu_metrics(tmp_path: Path) -> None:
     from scripts.import_full_rerun import import_hyperfine_directory
 
