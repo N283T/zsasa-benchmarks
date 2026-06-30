@@ -60,6 +60,14 @@ notes = "Nix builds upstream RustSASA main at the pinned commit and applies the 
 binary = "rust-sasa"
 check_args = ["--help"]
 
+[pdbtools_jl]
+policy = "single-file PDB/mmCIF SASA competitor through a repository Julia wrapper"
+repository = "https://github.com/m3g/PDBTools.jl"
+version = "3.33.2"
+notes = "PDBTools.jl is a Julia library, not a native batch CLI; benchmarks use scripts/benchlib/pdbtools_sasa.jl for single-file PDB and mmCIF runs only."
+binary = "julia"
+check_args = ["--version"]
+
 [lahuta]
 policy = "rerun from pinned Nix comparator build for manuscript benchmarks"
 repository = "https://github.com/bisejdiu/lahuta"

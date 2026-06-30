@@ -135,9 +135,11 @@ tools = [
   "zsasa_f32_bitmask",
   "freesasa",
   "rustsasa",
+  "pdbtools_jl",
 ]
 phases = ["wall", "timing"]
+timing_repeats = 3
 excluded_tools = ["lahuta"]
-excluded_tools_notes = "Lahuta is excluded from single-file benchmarks because it targets AlphaFold-style inputs and is not expected to cover the mixed preprocessed AFDB/NVDA/PDB subset consistently."
+excluded_tools_notes = "Lahuta is excluded from single-file benchmarks because it targets AlphaFold-style inputs and is not expected to cover the mixed preprocessed AFDB/NVDA/PDB subset consistently. PDBTools.jl is included through a Julia single-file wrapper, not as a native batch CLI."
 rerun_zsasa = true
 rerun_comparators = true

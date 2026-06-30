@@ -9,6 +9,7 @@ from scripts.import_full_rerun import (
     parse_validation_zsasa_name,
     parse_zsasa_jsonl_total,
     reset_database,
+    single_structure_metadata,
 )
 
 
@@ -78,6 +79,24 @@ def test_parse_single_tool_label_accepts_versioned_zsasa() -> None:
         "precision": "f64",
         "mode": "bitmask",
     }
+
+
+def test_parse_single_tool_label_accepts_pdbtools_jl() -> None:
+    from scripts.import_full_rerun import parse_single_tool_label
+
+    assert parse_single_tool_label("pdbtools_jl") == {
+        "tool_id": "pdbtools_jl",
+        "algorithm": "sr",
+        "precision": "f64",
+        "mode": "standard",
+    }
+
+
+def test_single_structure_metadata_can_read_mmcif_manifest() -> None:
+    metadata = single_structure_metadata(Path("manifests/single-file-mmcif-sample.toml"))
+
+    assert metadata["5vyc"]["role"] == "rustsasa-parser-outlier"
+    assert metadata["5vyc"]["n_atoms"] > 0
 
 
 def test_reset_database_removes_existing_rows(tmp_path: Path) -> None:

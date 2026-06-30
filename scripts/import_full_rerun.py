@@ -33,6 +33,7 @@ DEFAULT_DATASETS = ROOT.joinpath("config/datasets.local.toml")
 FALLBACK_DATASETS = ROOT.joinpath("config/datasets.toml.example")
 ZSASA_FILENAME_RE = re.compile(r'"filename":"([^"]+)"')
 ZSASA_TOTAL_RE = re.compile(r'"total_area":([-+0-9.eE]+)')
+DEFAULT_SINGLE_FILE_MANIFEST = ROOT.joinpath("manifests/single-file-sample.toml")
 
 
 def parse_args() -> argparse.Namespace:
@@ -189,7 +190,7 @@ def parse_single_tool_label(tool_label: str) -> dict[str, Any]:
             "precision": precision,
             "mode": "bitmask" if bitmask_suffix else "standard",
         }
-    if tool_label in {"freesasa", "rustsasa"}:
+    if tool_label in {"freesasa", "rustsasa", "pdbtools_jl"}:
         return {
             "tool_id": tool_label,
             "algorithm": "sr",
@@ -207,8 +208,10 @@ def parse_single_run_stem(stem: str) -> tuple[str, int, int]:
     return structure_id, int(threads), int(n_points)
 
 
-def single_structure_metadata() -> dict[str, dict[str, Any]]:
-    manifest = load_toml(ROOT.joinpath("manifests/single-file-sample.toml"))
+def single_structure_metadata(
+    manifest_path: Path = DEFAULT_SINGLE_FILE_MANIFEST,
+) -> dict[str, dict[str, Any]]:
+    manifest = load_toml(manifest_path)
     entries: dict[str, dict[str, Any]] = {}
     for entry in manifest.get("structures", []):
         if not isinstance(entry, dict):
@@ -563,10 +566,16 @@ def hyperfine_metrics(path: Path) -> list[tuple[str, str, float, str, int | None
     return metrics
 
 
-def import_single_file_results(conn, single_dir: Path, run_label: str) -> None:
-    dataset_id = "single_file_large_structure_subset"
-    manifest_id = "single-file-large-structure-subset"
-    metadata_by_structure = single_structure_metadata()
+def import_single_file_results(
+    conn,
+    single_dir: Path,
+    run_label: str,
+    *,
+    dataset_id: str = "single_file_large_structure_subset",
+    manifest_id: str = "single-file-large-structure-subset",
+    manifest_path: Path = DEFAULT_SINGLE_FILE_MANIFEST,
+) -> None:
+    metadata_by_structure = single_structure_metadata(manifest_path)
     if not single_dir.exists():
         return
 
@@ -687,6 +696,7 @@ def seed_all_datasets(conn, datasets_path: Path) -> None:
         ROOT.joinpath("manifests/batch-ecoli.toml"),
         ROOT.joinpath("manifests/batch-human.toml"),
         ROOT.joinpath("manifests/single-file-sample.toml"),
+        ROOT.joinpath("manifests/single-file-mmcif-sample.toml"),
     ]:
         seed_dataset_from_manifest(conn, load_toml(manifest_path), dataset_catalog)
 
@@ -786,6 +796,14 @@ def import_full_rerun(
             conn,
             results_root.joinpath("single", "single_file_large_structure_subset"),
             run_label,
+        )
+        import_single_file_results(
+            conn,
+            results_root.joinpath("single", "single_file_large_structure_mmcif_subset"),
+            run_label,
+            dataset_id="single_file_large_structure_mmcif_subset",
+            manifest_id="single-file-mmcif-subset",
+            manifest_path=ROOT.joinpath("manifests/single-file-mmcif-sample.toml"),
         )
     finally:
         conn.close()

@@ -37,6 +37,7 @@ SINGLE_VARIANT_ORDER = [
     "zsasa_bitmask_f32",
     "freesasa",
     "rustsasa",
+    "pdbtools_jl",
 ]
 MD_VARIANT_ORDER = [
     "zsasa_cli_f64",
@@ -59,6 +60,7 @@ DISPLAY_NAMES = {
     "freesasa": "FreeSASA",
     "freesasa_batch": "FreeSASA batch",
     "rustsasa": "RustSASA",
+    "pdbtools_jl": "PDBTools.jl",
     "lahuta": "Lahuta",
     "lahuta_bitmask": "Lahuta bitmask",
     "zsasa_cli_f64": "zsasa CLI f64",
@@ -163,6 +165,8 @@ def single_variant_name(row: dict[str, Any]) -> str:
         return "freesasa"
     if tool_id == "rustsasa":
         return "rustsasa"
+    if tool_id == "pdbtools_jl":
+        return "pdbtools_jl"
     return f"{tool_id}_{precision}" if precision else tool_id
 
 
@@ -596,7 +600,7 @@ def export_single_file_tables(rows: list[dict[str, Any]], out_dir: Path) -> list
                 "total_time_ms": row["total_time_ms"],
                 "cpu_utilization_proxy": row["cpu_utilization_proxy"],
             }
-            add_ratio_columns(out, t10, ["freesasa", "rustsasa"])
+            add_ratio_columns(out, t10, ["freesasa", "rustsasa", "pdbtools_jl"])
             t10_output.append(out)
     outputs = [
         out_dir.joinpath("single_file_t10_summary.csv"),
@@ -861,7 +865,7 @@ def export_comparator_ratios(rows: list[dict[str, Any]], out_dir: Path) -> list[
             target = by_variant.get(target_variant)
             if target is None:
                 continue
-            for comparator_variant in ["freesasa", "rustsasa"]:
+            for comparator_variant in ["freesasa", "rustsasa", "pdbtools_jl"]:
                 comparator = by_variant.get(comparator_variant)
                 if comparator is None:
                     continue

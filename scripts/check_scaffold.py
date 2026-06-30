@@ -41,6 +41,7 @@ REQUIRED_FILES = [
     "scripts/run_trajectory.py",
     "scripts/run_remaining_benchmarks.py",
     "scripts/benchlib/commands.py",
+    "scripts/benchlib/pdbtools_sasa.jl",
     "scripts/benchlib/datasets.py",
     "scripts/benchlib/hyperfine.py",
     "scripts/benchlib/importers.py",
@@ -49,6 +50,8 @@ REQUIRED_FILES = [
     "scripts/benchlib/paths.py",
     "scripts/benchlib/runner.py",
     "scripts/benchlib/tools.py",
+    "scripts/julia/pdbtools_sasa/Project.toml",
+    "scripts/julia/pdbtools_sasa/Manifest.toml",
     "scripts/benchlib/trajectory_tools.py",
     "tools/freesasa_batch/freesasa_batch.cc",
     "tools/freesasa_batch/Makefile",
@@ -174,6 +177,12 @@ def main() -> None:
         "rustsasa": "rust-sasa",
         "lahuta": "lahuta",
     }
+    pdbtools_spec = tools.get("pdbtools_jl", {})
+    if pdbtools_spec.get("binary") != "julia":
+        fail("pdbtools_jl binary must resolve through Julia in the Nix dev shell")
+    if "single-file" not in pdbtools_spec.get("policy", ""):
+        fail("pdbtools_jl policy must limit it to single-file benchmarks")
+
     for tool, expected_binary in expected_nix_path_bins.items():
         spec = tools.get(tool, {})
         if spec.get("binary") != expected_binary:
@@ -195,10 +204,7 @@ def main() -> None:
             fail(f"{manifest_path} must define source_kind = full_rerun")
         if full_rerun.get("rerun_zsasa") is not True:
             fail(f"{manifest_path} must rerun zsasa")
-        if (
-            manifest_path != "manifests/single-file-mmcif-sample.toml"
-            and full_rerun.get("rerun_comparators") is not True
-        ):
+        if full_rerun.get("rerun_comparators") is not True:
             fail(f"{manifest_path} must rerun comparators")
 
     validation = read_toml(ROOT.joinpath("manifests/validation-ecoli.toml"))
@@ -262,11 +268,17 @@ def main() -> None:
     if swissprot_full.get("runs") != 1 or swissprot_full.get("threads") != [10]:
         fail("SwissProt version-refresh manifest must use one 10-thread measured run")
 
+    single_pdb = read_toml(ROOT.joinpath("manifests/single-file-sample.toml"))
+    if "pdbtools_jl" not in single_pdb.get("full_rerun", {}).get("tools", []):
+        fail("PDB single-file manifest must include pdbtools_jl")
+
     single_mmcif = read_toml(ROOT.joinpath("manifests/single-file-mmcif-sample.toml"))
     if single_mmcif.get("dataset", {}).get("id") != "single_file_large_structure_mmcif_subset":
         fail("mmCIF single-file manifest must use single_file_large_structure_mmcif_subset")
     if not all("input_file" in item for item in single_mmcif.get("structures", [])):
         fail("mmCIF single-file structures must specify input_file")
+    if "pdbtools_jl" not in single_mmcif.get("full_rerun", {}).get("tools", []):
+        fail("mmCIF single-file manifest must include pdbtools_jl")
 
     schema = ROOT.joinpath("schemas/benchmark.sql").read_text(encoding="utf-8")
     for table in [

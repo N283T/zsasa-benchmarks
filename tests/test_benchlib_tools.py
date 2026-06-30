@@ -21,10 +21,12 @@ def test_load_tool_specs_reads_known_tools() -> None:
     assert specs["zsasa"].binary == Path("zsasa")
     assert specs["zsasa_0_6_0"].tag == "v0.6.0"
     assert specs["zsasa_0_7_0"].tag == "v0.7.0"
+    assert specs["pdbtools_jl"].binary == Path("julia")
 
 
 def test_single_file_profile_checks_native_single_file_tools() -> None:
     assert PROFILES["single_file"] == ["zsasa", "freesasa", "rustsasa"]
+    assert PROFILES["single_file_pdbtools"] == ["pdbtools_jl"]
     assert PROFILES["version_refresh_batch"] == ["zsasa_0_6_0", "zsasa_0_7_0", "lahuta"]
     assert PROFILES["version_refresh_single"] == ["zsasa_0_6_0", "zsasa_0_7_0"]
     assert "freesasa" in PROFILES["full"]
@@ -59,6 +61,13 @@ def test_flake_exposes_versioned_zsasa_wrappers_to_dev_shell() -> None:
     assert 'writeShellScriptBin "zsasa-0.7.0"' in flake
     assert "zsasaVersioned06" in flake
     assert "zsasaVersioned07" in flake
+
+
+def test_flake_exposes_julia_for_pdbtools_wrapper() -> None:
+    flake = Path("flake.nix").read_text(encoding="utf-8")
+
+    assert "julia" in flake
+    assert "pdbtools_sasa" in flake
 
 
 def test_require_tools_reports_missing_binary(tmp_path: Path) -> None:

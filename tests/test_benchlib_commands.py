@@ -10,6 +10,7 @@ from scripts.benchlib.commands import (
     freesasa_single_command,
     lahuta_batch_command,
     mdtraj_runner_command,
+    pdbtools_single_command,
     rustsasa_single_command,
     zsasa_calc_command,
 )
@@ -117,6 +118,34 @@ def test_rustsasa_single_command() -> None:
     ]
 
 
+def test_pdbtools_single_command_with_timing_repeats() -> None:
+    cmd = pdbtools_single_command(
+        binary=Path("/bin/julia"),
+        input_path=Path("input.cif"),
+        output_path=Path("out.json"),
+        n_points=100,
+        threads=10,
+        timing=True,
+        timing_repeats=5,
+    )
+    assert cmd == [
+        "/bin/julia",
+        "--threads",
+        "10",
+        "--project=scripts/julia/pdbtools_sasa",
+        "scripts/benchlib/pdbtools_sasa.jl",
+        "--input",
+        "input.cif",
+        "--output",
+        "out.json",
+        "--n-dots",
+        "100",
+        "--timing-repeats",
+        "5",
+        "--timing",
+    ]
+
+
 def test_lahuta_batch_command() -> None:
     cmd = lahuta_batch_command(
         binary=Path("/bin/lahuta"),
@@ -188,6 +217,10 @@ def test_mdtraj_runner_command() -> None:
         (
             lahuta_batch_command,
             (Path("/bin/lahuta"), Path("pdbs"), Path("out"), 128, 10, True),
+        ),
+        (
+            pdbtools_single_command,
+            (Path("/bin/julia"), Path("input.cif"), Path("out.json"), 100, 10),
         ),
         (mdtraj_runner_command, ("mdtraj", Path("traj.xtc"), Path("top.pdb"), 100, 1)),
     ],

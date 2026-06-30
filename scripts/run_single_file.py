@@ -18,6 +18,7 @@ if str(ROOT) not in sys.path:
 
 from scripts.benchlib.commands import (  # noqa: E402
     freesasa_single_command,
+    pdbtools_single_command,
     rustsasa_single_command,
     zsasa_calc_command,
 )
@@ -138,6 +139,7 @@ def full_rerun_settings(manifest: dict[str, Any]) -> dict[str, Any]:
     full_rerun.setdefault("threads", [1, 4, 8, 10])
     full_rerun.setdefault("runs", 3)
     full_rerun.setdefault("warmup", 1)
+    full_rerun.setdefault("timing_repeats", 3)
     full_rerun.setdefault("prepare", "sync")
     full_rerun.setdefault(
         "tools",
@@ -175,7 +177,7 @@ def parse_tool_plan(tool: str) -> ToolPlan:
             precision=precision,
             bitmask=suffix.endswith("_bitmask"),
         )
-    if tool in {"freesasa", "rustsasa"}:
+    if tool in {"freesasa", "rustsasa", "pdbtools_jl"}:
         return ToolPlan(name=tool, tool_id=tool)
     raise ValueError(f"unsupported single-file tool: {tool}")
 
@@ -213,6 +215,7 @@ def build_native_command(
     n_points: int,
     threads: int,
     timing: bool,
+    timing_repeats: int,
 ) -> list[str]:
     if tool.tool_id == "zsasa" or tool.tool_id.startswith("zsasa_"):
         if tool.precision is None:
@@ -245,6 +248,16 @@ def build_native_command(
             threads=threads,
             timing=timing,
         )
+    if tool.tool_id == "pdbtools_jl":
+        return pdbtools_single_command(
+            binary=binary,
+            input_path=input_path,
+            output_path=output_path,
+            n_points=n_points,
+            threads=threads,
+            timing=timing,
+            timing_repeats=timing_repeats,
+        )
     raise ValueError(f"unsupported tool id: {tool.tool_id}")
 
 
@@ -265,6 +278,7 @@ def build_records(
     n_points = int(settings["n_points"])
     runs = int(settings["runs"])
     warmup = int(settings["warmup"])
+    timing_repeats = int(settings["timing_repeats"])
     prepare = str(settings["prepare"]) if settings.get("prepare") else None
 
     binaries = {
@@ -290,6 +304,7 @@ def build_records(
                         n_points=n_points,
                         threads=thread,
                         timing=phase == "timing",
+                        timing_repeats=timing_repeats,
                     )
                     if phase == "wall":
                         hyperfine_json = output_base.joinpath(
@@ -498,6 +513,7 @@ def main() -> None:
             "output_base": str(output_base),
             "n_points": settings["n_points"],
             "threads": settings["threads"],
+            "timing_repeats": settings["timing_repeats"],
             "tools": settings["tools"],
             "phases": settings["phases"],
             "tool_versions": str(resolve_repo_path(args.tool_versions)),

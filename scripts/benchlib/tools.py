@@ -130,6 +130,7 @@ PROFILES: dict[str, list[str]] = {
     "version_refresh_batch": ["zsasa_0_6_0", "zsasa_0_7_0", "lahuta"],
     "version_refresh_single": ["zsasa_0_6_0", "zsasa_0_7_0"],
     "single_file": ["zsasa", "freesasa", "rustsasa"],
+    "single_file_pdbtools": ["pdbtools_jl"],
     "trajectory": ["zsasa", "mdtraj", "mdanalysis", "mdsasa_bolt"],
     "full": [
         "zsasa",
