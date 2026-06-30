@@ -6,6 +6,7 @@ from pathlib import Path
 import duckdb
 from scripts.import_full_rerun import (
     import_full_rerun,
+    manifest_id_from_config,
     parse_batch_record_name,
     parse_validation_zsasa_name,
     parse_zsasa_jsonl_total,
@@ -238,6 +239,20 @@ def test_import_full_rerun_imports_swissprot_version_refresh_batch(tmp_path: Pat
     )
     assert metrics[("runtime", "mean")] == 495.0
     assert metrics[("peak_rss", "mean")] == 466 * 1024 * 1024
+
+
+def test_manifest_id_from_config_reads_batch_overcommit_manifest(tmp_path: Path) -> None:
+    base = tmp_path.joinpath("full_rerun", "run", "batch", "human")
+    base.mkdir(parents=True)
+    base.joinpath("config.json").write_text(
+        json.dumps({"manifest": "manifests/batch-human-overcommit.toml"}),
+        encoding="utf-8",
+    )
+
+    assert (
+        manifest_id_from_config(base, "batch-human-full-rerun")
+        == "batch-human-zsasa-0-7-overcommit"
+    )
 
 
 def test_import_hyperfine_directory_imports_memory_and_cpu_metrics(tmp_path: Path) -> None:

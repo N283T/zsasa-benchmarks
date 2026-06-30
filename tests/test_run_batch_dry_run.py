@@ -139,3 +139,65 @@ def test_run_batch_swissprot_version_refresh_targets_0_7_thread_overcommit() -> 
     assert "--warmup 0" in proc.stdout
     assert "--runs 1" in proc.stdout
     assert "--use-bitmask" in proc.stdout
+
+
+def test_run_batch_ecoli_overcommit_targets_zsasa_0_7_matrix() -> None:
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "scripts/run_batch.py",
+            "--manifest",
+            "manifests/batch-ecoli-overcommit.toml",
+            "--run-id",
+            "test_ecoli_overcommit",
+            "--datasets",
+            "config/datasets.toml.example",
+            "--dry-run",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    assert "dataset=ecoli" in proc.stdout
+    assert "selected_commands=16/16" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f64_standard_10t_128p" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f64_bitmask_20t_128p" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f32_standard_40t_128p" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f32_bitmask_80t_128p" in proc.stdout
+    assert "freesasa_batch" not in proc.stdout
+    assert "rustsasa" not in proc.stdout
+    assert "lahuta" not in proc.stdout
+    assert "--warmup 3" in proc.stdout
+    assert "--runs 3" in proc.stdout
+
+
+def test_run_batch_human_overcommit_targets_zsasa_0_7_matrix() -> None:
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "scripts/run_batch.py",
+            "--manifest",
+            "manifests/batch-human-overcommit.toml",
+            "--run-id",
+            "test_human_overcommit",
+            "--datasets",
+            "config/datasets.toml.example",
+            "--dry-run",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    assert "dataset=human" in proc.stdout
+    assert "selected_commands=16/16" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f64_standard_10t_128p" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f64_bitmask_20t_128p" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f32_standard_40t_128p" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f32_bitmask_80t_128p" in proc.stdout
+    assert "freesasa_batch" not in proc.stdout
+    assert "rustsasa" not in proc.stdout
+    assert "lahuta" not in proc.stdout
+    assert "--warmup 3" in proc.stdout
+    assert "--runs 3" in proc.stdout
