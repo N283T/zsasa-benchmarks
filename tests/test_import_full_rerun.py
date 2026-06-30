@@ -264,12 +264,12 @@ def test_import_full_rerun_imports_human_cif_overcommit_batch(tmp_path: Path) ->
         json.dumps({"manifest": "manifests/batch-human-cif-overcommit.toml"}),
         encoding="utf-8",
     )
-    hyperfine_dir.joinpath("zsasa_0_7_0_batch_f32_bitmask_40t_100p.json").write_text(
+    hyperfine_dir.joinpath("zsasa_0_7_0_batch_f32_bitmask_40t_128p.json").write_text(
         json.dumps(
             {
                 "results": [
                     {
-                        "command": "zsasa_0_7_0_batch_f32_bitmask_40t_100p",
+                        "command": "zsasa_0_7_0_batch_f32_bitmask_40t_128p",
                         "mean": 23.0,
                         "stddev": 0.0,
                         "median": 23.0,
@@ -328,9 +328,9 @@ def test_import_full_rerun_imports_human_cif_overcommit_batch(tmp_path: Path) ->
         "f32",
         "bitmask",
         40,
-        100,
+        128,
         "batch-human-cif-zsasa-0-7-overcommit",
-        "zsasa_0_7_0_batch_f32_bitmask_40t_100p",
+        "zsasa_0_7_0_batch_f32_bitmask_40t_128p",
     )
     assert runtime == 23.0
 

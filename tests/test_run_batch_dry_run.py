@@ -223,11 +223,11 @@ def test_run_batch_human_cif_overcommit_targets_minimal_bitmask_matrix() -> None
 
     assert "dataset=human_cif" in proc.stdout
     assert "selected_commands=5/5" in proc.stdout
-    assert "# name: zsasa_0_7_0_batch_f32_bitmask_10t_100p" in proc.stdout
-    assert "# name: zsasa_0_7_0_batch_f32_bitmask_20t_100p" in proc.stdout
-    assert "# name: zsasa_0_7_0_batch_f32_bitmask_40t_100p" in proc.stdout
-    assert "# name: zsasa_0_7_0_batch_f32_bitmask_80t_100p" in proc.stdout
-    assert "# name: lahuta_bitmask_10t_100p" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f32_bitmask_10t_128p" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f32_bitmask_20t_128p" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f32_bitmask_40t_128p" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f32_bitmask_80t_128p" in proc.stdout
+    assert "# name: lahuta_bitmask_10t_128p" in proc.stdout
     assert "standard" not in proc.stdout
     assert "f64" not in proc.stdout
     assert "freesasa_batch" not in proc.stdout
@@ -257,11 +257,11 @@ def test_run_batch_ecoli_cif_overcommit_targets_minimal_bitmask_matrix() -> None
 
     assert "dataset=ecoli_cif" in proc.stdout
     assert "selected_commands=5/5" in proc.stdout
-    assert "# name: zsasa_0_7_0_batch_f32_bitmask_10t_100p" in proc.stdout
-    assert "# name: zsasa_0_7_0_batch_f32_bitmask_20t_100p" in proc.stdout
-    assert "# name: zsasa_0_7_0_batch_f32_bitmask_40t_100p" in proc.stdout
-    assert "# name: zsasa_0_7_0_batch_f32_bitmask_80t_100p" in proc.stdout
-    assert "# name: lahuta_bitmask_10t_100p" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f32_bitmask_10t_128p" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f32_bitmask_20t_128p" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f32_bitmask_40t_128p" in proc.stdout
+    assert "# name: zsasa_0_7_0_batch_f32_bitmask_80t_128p" in proc.stdout
+    assert "# name: lahuta_bitmask_10t_128p" in proc.stdout
     assert "standard" not in proc.stdout
     assert "f64" not in proc.stdout
     assert "freesasa_batch" not in proc.stdout
