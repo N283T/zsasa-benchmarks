@@ -14,12 +14,14 @@ ignored `results/` tree.
 5. Keep raw generated results, local DB files, and external source/build trees out of git.
 6. Keep local data paths out of manifests. Put them in ignored `config/datasets.local.toml`; use `config/datasets.toml.example` as the tracked template.
 7. Use RustSASA JSON output for protein-level totals. Protein-level PDB output writes the total into atom B-factors, which can truncate large SASA values in fixed-width PDB fields.
+8. Include PDBTools.jl only in single-file PDB/mmCIF benchmarks through `scripts/benchlib/pdbtools_sasa.jl`; it is a Julia library wrapper, not a batch CLI.
 
 ## Setup and dry-run checks
 
 ```bash
 python scripts/check_tools.py --profile minimal --dry-run
 python scripts/check_tools.py --profile single_file --dry-run
+python scripts/check_tools.py --profile single_file_pdbtools --dry-run
 python scripts/setup_external_tools.py --dry-run --reset freesasa freesasa_batch rustsasa lahuta verify
 python scripts/run_validation.py --manifest manifests/validation-ecoli-smoke.toml --datasets config/datasets.toml.example --run-id smoke --dry-run
 python scripts/run_validation.py --manifest manifests/validation-ecoli.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
@@ -46,8 +48,10 @@ accidentally mixed. The SwissProt-scale manifest intentionally runs only
 500k-structure workload is too expensive for slower comparators.
 
 The native mmCIF single-file manifest is separate from the cleaned-PDB
-single-file manifest. Do not merge those result sets unless the analysis clearly
-labels the input format.
+single-file manifest. It currently compares versioned `zsasa` with PDBTools.jl
+only, because FreeSASA/RustSASA/Lahuta mmCIF compatibility needs separate
+verification. Do not merge those result sets unless the analysis clearly labels
+the input format.
 
 ## Selective rerun policy
 
@@ -92,8 +96,10 @@ Single-file benchmark execution is split into two phases in
 `scripts/run_single_file.py`: `wall` records wrap each tool invocation in
 hyperfine for headline throughput, while `timing` records invoke the same native
 tool command with `--timing` where supported so parser and SASA component times
-can be inspected separately. Results are planned under
-`results/full_rerun/<run_id>/single/single_file_large_structure_subset/`.
-Lahuta is intentionally excluded from this benchmark because it targets
-AlphaFold-style inputs and is not expected to cover the mixed preprocessed
-AFDB/NVDA/PDB subset consistently.
+can be inspected separately. PDBTools.jl timing records run multiple measurements
+inside one Julia process after an unrecorded warmup and report median parse/SASA
+times, while wall records include Julia startup and package loading. Results are
+planned under `results/full_rerun/<run_id>/single/<dataset_id>/`. Lahuta is
+intentionally excluded from this benchmark because it targets AlphaFold-style
+inputs and is not expected to cover the mixed preprocessed AFDB/NVDA/PDB subset
+consistently.

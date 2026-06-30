@@ -26,6 +26,7 @@ VARIANT_ORDER = [
     "zsasa_bitmask_f32",
     "freesasa",
     "rustsasa",
+    "pdbtools_jl",
 ]
 ZSASA_VARIANTS = [
     "zsasa_f64",
@@ -33,7 +34,7 @@ ZSASA_VARIANTS = [
     "zsasa_bitmask_f64",
     "zsasa_bitmask_f32",
 ]
-COMPARATOR_VARIANTS = ["freesasa", "rustsasa"]
+COMPARATOR_VARIANTS = ["freesasa", "rustsasa", "pdbtools_jl"]
 COLORS = {
     "zsasa_f64": "#f39c12",
     "zsasa_f32": "#f6c85f",
@@ -41,6 +42,7 @@ COLORS = {
     "zsasa_bitmask_f32": "#ffb347",
     "freesasa": "#3498db",
     "rustsasa": "#e74c3c",
+    "pdbtools_jl": "#2ecc71",
 }
 DISPLAY_NAMES = {
     "zsasa_f64": "zsasa f64",
@@ -49,6 +51,7 @@ DISPLAY_NAMES = {
     "zsasa_bitmask_f32": "zsasa bitmask f32",
     "freesasa": "FreeSASA",
     "rustsasa": "RustSASA",
+    "pdbtools_jl": "PDBTools.jl",
 }
 MARKERS = {
     "zsasa_f64": "o",
@@ -57,6 +60,7 @@ MARKERS = {
     "zsasa_bitmask_f32": "o",
     "freesasa": "^",
     "rustsasa": "s",
+    "pdbtools_jl": "D",
 }
 
 
@@ -109,6 +113,8 @@ def single_variant_name(run: dict[str, Any]) -> str:
         return "freesasa"
     if tool_id == "rustsasa":
         return "rustsasa"
+    if tool_id == "pdbtools_jl":
+        return "pdbtools_jl"
     return f"{tool_id}_{precision}" if precision else tool_id
 
 
@@ -366,6 +372,11 @@ def plot_comparator_ratio_grid(
             "edgecolor": "#992d22",
             "hatch": "///",
         },
+        "pdbtools_jl": {
+            "color": color_for("pdbtools_jl"),
+            "edgecolor": "#1f8f4f",
+            "hatch": "xxx",
+        },
     }
     for ax, structure_id in zip(flat_axes, structures, strict=False):
         items = grouped[structure_id]
@@ -389,7 +400,7 @@ def plot_comparator_ratio_grid(
                 for row in zsasa_items
             ]
             all_values.extend(value for value in values if value > 0)
-            positions = x + (index - 0.5) * width
+            positions = x + (index - (len(COMPARATOR_VARIANTS) - 1) / 2) * width
             style = comparator_styles[comparator]
             ax.bar(
                 positions,
@@ -438,6 +449,14 @@ def plot_comparator_ratio_grid(
             label="vs RustSASA",
             alpha=0.75,
         ),
+        Patch(
+            facecolor=color_for("pdbtools_jl"),
+            edgecolor="#1f8f4f",
+            linewidth=1.2,
+            hatch="xxx",
+            label="vs PDBTools.jl",
+            alpha=0.75,
+        ),
         plt.Line2D(
             [0],
             [0],
@@ -447,7 +466,7 @@ def plot_comparator_ratio_grid(
             label="RustSASA vs FreeSASA",
         ),
     ]
-    fig.legend(handles=handles, loc="outside lower center", ncol=3)
+    fig.legend(handles=handles, loc="outside lower center", ncol=4)
     return save_figure(fig, out_dir, name)
 
 

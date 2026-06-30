@@ -98,3 +98,61 @@ def test_run_single_file_mmcif_dry_run_uses_input_file_and_versioned_tools() -> 
     assert "datasets/single-file-large-structure-mmcif/3jc8.cif.gz" in proc.stdout
     assert "--runs 1" in proc.stdout
     assert "--warmup 0" in proc.stdout
+
+
+def test_run_single_file_pdbtools_dry_run_uses_julia_wrapper_for_pdb() -> None:
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "scripts/run_single_file.py",
+            "--manifest",
+            "manifests/single-file-sample.toml",
+            "--datasets",
+            "config/datasets.toml.example",
+            "--run-id",
+            "test_single_pdbtools",
+            "--only",
+            "single_wall_pdbtools_jl_AF-P49792-F10-model_v6_10t_100p",
+            "--dry-run",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    assert "selected_commands=1/" in proc.stdout
+    assert "# name: single_wall_pdbtools_jl_AF-P49792-F10-model_v6_10t_100p" in proc.stdout
+    assert "julia --threads 10" in proc.stdout
+    assert "scripts/benchlib/pdbtools_sasa.jl" in proc.stdout
+    assert "--n-dots 100" in proc.stdout
+    assert "--timing-repeats 3" in proc.stdout
+    assert "datasets/single-file-large-structure/pdb/AF-P49792-F10-model_v6.pdb" in proc.stdout
+
+
+def test_run_single_file_pdbtools_dry_run_uses_julia_wrapper_for_mmcif() -> None:
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "scripts/run_single_file.py",
+            "--manifest",
+            "manifests/single-file-mmcif-sample.toml",
+            "--datasets",
+            "config/datasets.toml.example",
+            "--run-id",
+            "test_single_mmcif_pdbtools",
+            "--only",
+            "single_timing_pdbtools_jl_3jc8_10t_100p",
+            "--dry-run",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    assert "selected_commands=1/" in proc.stdout
+    assert "# name: single_timing_pdbtools_jl_3jc8_10t_100p" in proc.stdout
+    assert "julia --threads 10" in proc.stdout
+    assert "scripts/benchlib/pdbtools_sasa.jl" in proc.stdout
+    assert "--timing" in proc.stdout
+    assert "--timing-repeats 3" in proc.stdout
+    assert "datasets/single-file-large-structure-mmcif/3jc8.cif.gz" in proc.stdout

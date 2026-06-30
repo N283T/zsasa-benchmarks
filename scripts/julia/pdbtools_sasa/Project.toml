@@ -1,0 +1,8 @@
+[deps]
+JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+PDBTools = "e29189f1-7114-4dbd-93d0-c5673a921a58"
+
+[compat]
+JSON = "1.6.1"
+PDBTools = "3.33"
+julia = "1.10"

@@ -10,6 +10,7 @@ This repository is a clean benchmark workspace for the `zsasa` manuscript. It in
 
 - Build all benchmark tools from pinned versions before collecting manuscript evidence.
 - Treat FreeSASA comparator values as `freesasa_batch` wrapper outputs, because upstream FreeSASA has no native directory batch mode.
+- Include PDBTools.jl only for single-file PDB/mmCIF SASA comparisons through the repository Julia wrapper; do not treat it as a native batch CLI.
 - Capture RustSASA protein-level outputs as JSON. Do not use protein-level PDB B-factors for totals, because the PDB B-factor field cannot represent large total SASA values reliably.
 - Keep the compatibility `zsasa` tool pinned to `v0.6.0` for the current manuscript rerun, and use versioned tool IDs such as `zsasa_0_6_0` and `zsasa_0_7_0` for release-refresh comparisons.
 - Keep generated results out of git; archive final outputs separately after review.
@@ -58,6 +59,7 @@ nix develop
 python scripts/check_scaffold.py
 python scripts/check_tools.py --profile minimal
 python scripts/check_tools.py --profile single_file
+python scripts/check_tools.py --profile single_file_pdbtools
 uv run python scripts/check_tools.py --profile full
 python scripts/run_validation.py --manifest manifests/validation-ecoli-smoke.toml --datasets config/datasets.toml.example --run-id smoke --dry-run
 python scripts/run_validation.py --manifest manifests/validation-ecoli.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
@@ -81,6 +83,8 @@ The native Phase 1 runner examples above are dry-runs. They print the commands a
 
 The `nix develop` shell provides the pinned `zsasa` CLI from `github:N283T/zsasa/v0.6.0` and exports `ZSASA_CLI` to that Nix-store binary so uv-installed Python console scripts cannot shadow the CLI benchmark target. The same shell also builds and exposes the pinned native comparator CLIs (`freesasa`, `freesasa_batch`, `rust-sasa`, and `lahuta`) from `flake.nix`; `config/tool-versions.toml` intentionally resolves those tools from `PATH` instead of the ignored `external/bin` tree. Python trajectory backends and the `zsasa` Python package are pinned in `pyproject.toml`/`uv.lock`; do not import `zsasa` from a local source checkout for manuscript reruns.
 
+PDBTools.jl is available as the `pdbtools_jl` single-file comparator. The harness invokes `julia --threads <N> --project=scripts/julia/pdbtools_sasa scripts/benchlib/pdbtools_sasa.jl` for PDB and mmCIF inputs. For fair reporting, use Hyperfine `wall` results for full wrapper invocation cost and the Julia wrapper `timing` phase for warmed in-process parse/SASA medians. The Julia dependencies are locked in `scripts/julia/pdbtools_sasa/Manifest.toml`; before a real run in a fresh environment, instantiate/precompile them once with `nix develop -c julia --project=scripts/julia/pdbtools_sasa -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'`.
+
 Version-refresh manifests can compare multiple `zsasa` releases in the same harness. `config/tool-versions.toml` now includes versioned tool IDs such as `zsasa_0_6_0` and `zsasa_0_7_0`; their command names are kept separate from the compatibility `ZSASA_CLI` alias so dry-runs, outputs, and DB imports preserve release identity.
 
 Local dataset paths are centralized in `config/datasets.local.toml` (ignored). Copy `config/datasets.toml.example` and adjust paths before real runs.
@@ -95,7 +99,9 @@ plus PDB mmCIF `.cif.gz` structures to protein-only cleaned PDB files. Ligands,
 waters, hydrogens, alternative conformations, and non-L-peptide chains are
 excluded from these benchmark inputs so comparator behavior remains aligned.
 Run them with `scripts/run_single_file.py`, which records both hyperfine wall-clock
-commands and tool `--timing` component commands for parse/SASA timing.
+commands and tool `--timing` component commands for parse/SASA timing. The same
+runner also supports `manifests/single-file-mmcif-sample.toml`, which keeps native
+mmCIF inputs and compares versioned `zsasa` runs against PDBTools.jl only.
 
 ## Remaining benchmark rerun
 

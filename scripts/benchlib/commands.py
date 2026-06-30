@@ -129,6 +129,36 @@ def rustsasa_single_command(
     return cmd
 
 
+def pdbtools_single_command(
+    *,
+    binary: Path,
+    input_path: Path,
+    output_path: Path,
+    n_points: int,
+    threads: int,
+    timing: bool = False,
+    timing_repeats: int = 3,
+) -> list[str]:
+    cmd = [
+        str(binary),
+        "--threads",
+        str(threads),
+        "--project=scripts/julia/pdbtools_sasa",
+        "scripts/benchlib/pdbtools_sasa.jl",
+        "--input",
+        str(input_path),
+        "--output",
+        str(output_path),
+        "--n-dots",
+        str(n_points),
+        "--timing-repeats",
+        str(timing_repeats),
+    ]
+    if timing:
+        cmd.append("--timing")
+    return cmd
+
+
 def lahuta_batch_command(
     *,
     binary: Path,

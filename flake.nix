@@ -229,6 +229,7 @@
             uv
             hyperfine
             git
+            julia
             jq
             zstd
             duckdb
@@ -248,6 +249,7 @@
             echo "zsasa benchmark shell"
             echo "- zsasa CLI: $ZSASA_CLI"
             echo "- versioned zsasa CLIs: zsasa-0.6.0, zsasa-0.7.0"
+            echo "- PDBTools.jl wrapper: julia --project=scripts/julia/pdbtools_sasa scripts/benchlib/pdbtools_sasa.jl"
             echo "- Run: python scripts/check_scaffold.py"
             echo "- Dry run full validation: uv run python scripts/run_validation.py --manifest manifests/validation-ecoli.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run"
           '';
