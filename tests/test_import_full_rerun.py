@@ -5,6 +5,7 @@ from pathlib import Path
 
 import duckdb
 from scripts.import_full_rerun import (
+    import_full_rerun,
     parse_batch_record_name,
     parse_validation_zsasa_name,
     parse_zsasa_jsonl_total,
@@ -162,6 +163,81 @@ def test_smoke_import_full_rerun_fixture(tmp_path: Path) -> None:
         assert conn.execute("SELECT count(*) FROM validation_results").fetchone()[0] == 4
     finally:
         conn.close()
+
+
+def test_import_full_rerun_imports_swissprot_version_refresh_batch(tmp_path: Path) -> None:
+    results_root = tmp_path.joinpath("full_rerun", "version_refresh")
+    hyperfine_dir = results_root.joinpath("batch", "swissprot", "hyperfine")
+    hyperfine_dir.mkdir(parents=True)
+    hyperfine_dir.joinpath("zsasa_0_7_0_batch_f32_bitmask_40t_128p.json").write_text(
+        json.dumps(
+            {
+                "results": [
+                    {
+                        "command": "zsasa_0_7_0_batch_f32_bitmask_40t_128p",
+                        "mean": 495.0,
+                        "stddev": 0.0,
+                        "median": 495.0,
+                        "min": 495.0,
+                        "max": 495.0,
+                        "times": [495.0],
+                        "user": 1728.0,
+                        "system": 128.0,
+                        "memory_usage_byte": [466 * 1024 * 1024],
+                        "exit_codes": [0],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    db = tmp_path.joinpath("benchmark.duckdb")
+    import_full_rerun(
+        db,
+        results_root,
+        "version_refresh",
+        Path("config/datasets.toml.example"),
+    )
+
+    conn = duckdb.connect(str(db), read_only=True)
+    try:
+        run = conn.execute(
+            """
+            SELECT benchmark_kind, dataset_id, tool_id, precision, mode, threads, n_points,
+                   manifest_id, notes
+            FROM benchmark_runs
+            WHERE dataset_id = 'swissprot_500k_pdb'
+            """
+        ).fetchone()
+        metrics = {
+            (metric, statistic): value
+            for metric, statistic, value in conn.execute(
+                """
+                SELECT metric, statistic, value
+                FROM performance_results
+                WHERE run_id = (
+                  SELECT run_id FROM benchmark_runs WHERE dataset_id = 'swissprot_500k_pdb'
+                )
+                """
+            ).fetchall()
+        }
+    finally:
+        conn.close()
+
+    assert run == (
+        "batch",
+        "swissprot_500k_pdb",
+        "zsasa_0_7_0",
+        "f32",
+        "bitmask",
+        40,
+        128,
+        "batch-swissprot-version-refresh",
+        "zsasa_0_7_0_batch_f32_bitmask_40t_128p",
+    )
+    assert metrics[("runtime", "mean")] == 495.0
+    assert metrics[("peak_rss", "mean")] == 466 * 1024 * 1024
 
 
 def test_import_hyperfine_directory_imports_memory_and_cpu_metrics(tmp_path: Path) -> None:

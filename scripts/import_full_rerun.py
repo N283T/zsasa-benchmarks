@@ -695,6 +695,7 @@ def seed_all_datasets(conn, datasets_path: Path) -> None:
         ROOT.joinpath("manifests/validation-ecoli.toml"),
         ROOT.joinpath("manifests/batch-ecoli.toml"),
         ROOT.joinpath("manifests/batch-human.toml"),
+        ROOT.joinpath("manifests/batch-swissprot-version-refresh.toml"),
         ROOT.joinpath("manifests/single-file-sample.toml"),
         ROOT.joinpath("manifests/single-file-mmcif-sample.toml"),
     ]:
@@ -781,6 +782,15 @@ def import_full_rerun(
             benchmark_kind="batch",
             dataset_id="UP000005640_9606_HUMAN_v6_pdb",
             manifest_id="batch-human-full-rerun",
+            name_parser=parse_batch_record_name,
+        )
+        import_hyperfine_directory(
+            conn,
+            base=results_root.joinpath("batch", "swissprot"),
+            run_label=run_label,
+            benchmark_kind="batch",
+            dataset_id="swissprot_500k_pdb",
+            manifest_id="batch-swissprot-version-refresh",
             name_parser=parse_batch_record_name,
         )
         import_hyperfine_directory(
