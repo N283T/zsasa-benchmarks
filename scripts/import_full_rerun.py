@@ -516,6 +516,22 @@ def import_hyperfine_directory(
         )
 
 
+def manifest_id_from_config(base: Path, default: str) -> str:
+    config_path = base.joinpath("config.json")
+    if not config_path.exists():
+        return default
+    manifest_value = read_json(config_path).get("manifest")
+    if not manifest_value:
+        return default
+    manifest_path = Path(str(manifest_value))
+    if not manifest_path.is_absolute():
+        manifest_path = ROOT.joinpath(manifest_path)
+    if not manifest_path.exists():
+        return default
+    manifest = load_toml(manifest_path)
+    return str(manifest.get("id") or default)
+
+
 
 def hyperfine_metrics(path: Path) -> list[tuple[str, str, float, str, int | None]]:
     result = read_json(path)["results"][0]
@@ -694,7 +710,11 @@ def seed_all_datasets(conn, datasets_path: Path) -> None:
     for manifest_path in [
         ROOT.joinpath("manifests/validation-ecoli.toml"),
         ROOT.joinpath("manifests/batch-ecoli.toml"),
+        ROOT.joinpath("manifests/batch-ecoli-overcommit.toml"),
+        ROOT.joinpath("manifests/batch-ecoli-cif-overcommit.toml"),
         ROOT.joinpath("manifests/batch-human.toml"),
+        ROOT.joinpath("manifests/batch-human-overcommit.toml"),
+        ROOT.joinpath("manifests/batch-human-cif-overcommit.toml"),
         ROOT.joinpath("manifests/batch-swissprot-version-refresh.toml"),
         ROOT.joinpath("manifests/single-file-sample.toml"),
         ROOT.joinpath("manifests/single-file-mmcif-sample.toml"),
@@ -772,7 +792,9 @@ def import_full_rerun(
             run_label=run_label,
             benchmark_kind="batch",
             dataset_id="UP000000625_83333_ECOLI_v6_pdb",
-            manifest_id="batch-ecoli-full-rerun",
+            manifest_id=manifest_id_from_config(
+                results_root.joinpath("batch", "ecoli"), "batch-ecoli-full-rerun"
+            ),
             name_parser=parse_batch_record_name,
         )
         import_hyperfine_directory(
@@ -781,7 +803,33 @@ def import_full_rerun(
             run_label=run_label,
             benchmark_kind="batch",
             dataset_id="UP000005640_9606_HUMAN_v6_pdb",
-            manifest_id="batch-human-full-rerun",
+            manifest_id=manifest_id_from_config(
+                results_root.joinpath("batch", "human"), "batch-human-full-rerun"
+            ),
+            name_parser=parse_batch_record_name,
+        )
+        import_hyperfine_directory(
+            conn,
+            base=results_root.joinpath("batch", "ecoli_cif"),
+            run_label=run_label,
+            benchmark_kind="batch",
+            dataset_id="UP000000625_83333_ECOLI_v6_cif",
+            manifest_id=manifest_id_from_config(
+                results_root.joinpath("batch", "ecoli_cif"),
+                "batch-ecoli-cif-zsasa-0-7-overcommit",
+            ),
+            name_parser=parse_batch_record_name,
+        )
+        import_hyperfine_directory(
+            conn,
+            base=results_root.joinpath("batch", "human_cif"),
+            run_label=run_label,
+            benchmark_kind="batch",
+            dataset_id="UP000005640_9606_HUMAN_v6_cif",
+            manifest_id=manifest_id_from_config(
+                results_root.joinpath("batch", "human_cif"),
+                "batch-human-cif-zsasa-0-7-overcommit",
+            ),
             name_parser=parse_batch_record_name,
         )
         import_hyperfine_directory(
@@ -790,7 +838,9 @@ def import_full_rerun(
             run_label=run_label,
             benchmark_kind="batch",
             dataset_id="swissprot_500k_pdb",
-            manifest_id="batch-swissprot-version-refresh",
+            manifest_id=manifest_id_from_config(
+                results_root.joinpath("batch", "swissprot"), "batch-swissprot-version-refresh"
+            ),
             name_parser=parse_batch_record_name,
         )
         import_hyperfine_directory(

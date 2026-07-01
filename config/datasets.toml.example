@@ -4,8 +4,14 @@
 [UP000000625_83333_ECOLI_v6_pdb]
 path = "$HOME/pdb/afdb/UP000000625_83333_ECOLI_v6/pdb"
 
+[UP000000625_83333_ECOLI_v6_cif]
+path = "$HOME/pdb/afdb/UP000000625_83333_ECOLI_v6/cif"
+
 [UP000005640_9606_HUMAN_v6_pdb]
 path = "$HOME/pdb/afdb/UP000005640_9606_HUMAN_v6/pdb"
+
+[UP000005640_9606_HUMAN_v6_cif]
+path = "$HOME/pdb/afdb/UP000005640_9606_HUMAN_v6/cif"
 
 [swissprot_500k_pdb]
 path = "$HOME/pdb/afdb/swissprot_500k/pdb"
