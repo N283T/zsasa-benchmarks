@@ -111,6 +111,7 @@ def full_rerun_settings(manifest: dict[str, Any]) -> dict[str, Any]:
     full_rerun.setdefault("precisions", ["f64", "f32"])
     full_rerun.setdefault("modes", ["standard", "bitmask"])
     full_rerun.setdefault("prepare", "sync")
+    full_rerun.setdefault("classifier", "protor")
     full_rerun.setdefault("rerun_zsasa", True)
     full_rerun.setdefault("rerun_comparators", True)
     return full_rerun
@@ -233,6 +234,10 @@ def build_native_records(
     runs = int(settings["runs"])
     warmup = int(settings["warmup"])
     prepare = str(settings["prepare"]) if settings.get("prepare") else None
+    classifier = str(settings["classifier"]) if settings.get("classifier") else None
+    jsonl_decimals = (
+        int(settings["jsonl_decimals"]) if settings.get("jsonl_decimals") is not None else None
+    )
 
     for job in batch_jobs(settings):
         tool_id = str(job["tool"])
@@ -265,6 +270,8 @@ def build_native_records(
                             n_points=n_points,
                             threads=thread,
                             bitmask=bitmask,
+                            classifier=classifier,
+                            jsonl_decimals=jsonl_decimals,
                         )
                         records.append(
                             CommandRecord(
@@ -436,6 +443,8 @@ def main() -> None:
             "threads": settings["threads"],
             "precisions": settings["precisions"],
             "modes": settings["modes"],
+            "classifier": settings.get("classifier"),
+            "jsonl_decimals": settings.get("jsonl_decimals"),
             "jobs": settings.get("jobs", []),
             "tool_versions": str(resolve_repo_path(args.tool_versions)),
             "datasets": str(resolve_repo_path(args.datasets)),

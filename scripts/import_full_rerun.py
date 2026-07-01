@@ -76,6 +76,20 @@ def read_json(path: Path) -> dict[str, Any]:
 
 
 def parse_zsasa_jsonl_total(line: str) -> tuple[str, float, int | None]:
+    if '"status"' in line:
+        item = json.loads(line)
+        status = item.get("status")
+        filename = Path(str(item.get("filename", ""))).name
+        if status == "err":
+            error = item.get("error") or item.get("message") or "unknown error"
+            raise ValueError(f"zsasa JSONL error row for {filename or '<unknown>'}: {error}")
+        if status not in {None, "ok"}:
+            raise ValueError(f"unsupported zsasa JSONL status for {filename}: {status}")
+        return (
+            Path(item["filename"]).name,
+            float(item["total_area"]),
+            len(item.get("atom_areas", [])),
+        )
     filename = ZSASA_FILENAME_RE.search(line)
     total = ZSASA_TOTAL_RE.search(line)
     if filename is not None and total is not None:
