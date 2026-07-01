@@ -47,6 +47,8 @@ def batch_command(
     n_points: int,
     threads: int,
     bitmask: bool,
+    classifier: str | None = None,
+    jsonl_decimals: int | None = None,
 ) -> list[str]:
     cmd = [
         str(binary),
@@ -59,6 +61,10 @@ def batch_command(
         f"--precision={precision}",
         f"--n-points={n_points}",
     ]
+    if classifier is not None:
+        cmd.append(f"--classifier={classifier}")
+    if jsonl_decimals is not None:
+        cmd.append(f"--jsonl-decimals={jsonl_decimals}")
     if bitmask:
         cmd.append("--use-bitmask")
     return cmd

@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import duckdb
+import pytest
 from scripts.import_full_rerun import (
     import_full_rerun,
     manifest_id_from_config,
@@ -36,6 +37,19 @@ def test_parse_zsasa_jsonl_total_avoids_atom_area_parsing() -> None:
     assert parse_zsasa_jsonl_total(
         '{"filename":"AF-A.pdb","total_area":123.4,"atom_areas":[1,2,3]}'
     ) == ("AF-A.pdb", 123.4, None)
+
+
+def test_parse_zsasa_jsonl_total_accepts_status_ok_rows() -> None:
+    assert parse_zsasa_jsonl_total(
+        '{"status":"ok","filename":"AF-A.pdb","total_area":123.4,"atom_areas":[1,2,3]}'
+    ) == ("AF-A.pdb", 123.4, 3)
+
+
+def test_parse_zsasa_jsonl_total_rejects_status_err_rows() -> None:
+    with pytest.raises(ValueError, match="zsasa JSONL error row"):
+        parse_zsasa_jsonl_total(
+            '{"status":"err","filename":"AF-B.pdb","error":"parse failed"}'
+        )
 
 
 def test_parse_batch_record_name() -> None:

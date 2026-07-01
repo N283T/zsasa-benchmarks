@@ -34,11 +34,59 @@ def test_run_batch_dry_run_outputs_native_hyperfine_commands() -> None:
     assert "--threads=10" in proc.stdout
     assert "--precision=f64" in proc.stdout
     assert "--precision=f32" in proc.stdout
+    assert "--classifier=protor" in proc.stdout
     assert "--use-bitmask" in proc.stdout
     assert "lahuta" in proc.stdout
     assert "rustsasa" in proc.stdout
     assert " -f json " in proc.stdout
     assert " -f pdb " not in proc.stdout
+
+
+def test_run_batch_dry_run_accepts_jsonl_decimal_rounding(tmp_path: Path) -> None:
+    manifest = tmp_path.joinpath("batch-rounding.toml")
+    manifest.write_text(
+        """
+id = "batch-rounding"
+status = "planning"
+
+[dataset]
+id = "UP000000625_83333_ECOLI_v6_pdb"
+expected_count = 4370
+role = ["batch-throughput"]
+
+[full_rerun]
+source_kind = "full_rerun"
+n_points = 128
+threads = [10]
+runs = 1
+warmup = 0
+precisions = ["f32"]
+modes = ["standard"]
+prepare = "sync"
+rerun_comparators = false
+jsonl_decimals = 3
+""",
+        encoding="utf-8",
+    )
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "scripts/run_batch.py",
+            "--manifest",
+            str(manifest),
+            "--run-id",
+            "test_rounding",
+            "--datasets",
+            "config/datasets.toml.example",
+            "--dry-run",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    assert "--jsonl-decimals=3" in proc.stdout
 
 
 def test_run_batch_dry_run_prepares_output_directories() -> None:
