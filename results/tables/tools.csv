@@ -5,10 +5,14 @@ lahuta,lahuta,2.0.3,136411ee6ac797cab84a35d8183e6be6e6a270b2,https://github.com/
 mdanalysis,mdanalysis,2.10.0,,https://github.com/MDAnalysis/mdanalysis,runtime dependency for zsasa MDAnalysis wrappers and mdsasa-bolt trajectory runs,
 mdsasa_bolt,mdsasa_bolt,4.0.1,,https://github.com/refresh-bio/mdsasa-bolt,rerun trajectory comparator for same-session manuscript evidence,
 mdtraj,mdtraj,1.11.1.post1,,https://github.com/mdtraj/mdtraj,rerun native mdtraj trajectory comparator for same-session manuscript evidence,
+pdbtools_jl,pdbtools_jl,3.33.2,,https://github.com/m3g/PDBTools.jl,single-file PDB/mmCIF SASA competitor through a repository Julia wrapper,
 rustsasa,rustsasa,0.9.2-c3c9c4d-timing,c3c9c4da021c2d0a8822ca5b8c8b14fede1e6da1,https://github.com/maxall41/RustSASA,rerun from pinned Nix comparator build for manuscript benchmarks,upstream=https://github.com/maxall41/RustSASA
 zig,zig,,,https://github.com/N283T/zsasa,derived full-rerun tool label,zsasa CLI trajectory backend
 zig_bitmask,zig_bitmask,,,https://github.com/N283T/zsasa,derived full-rerun tool label,zsasa CLI trajectory backend with bitmask mode
 zsasa,zsasa,v0.6.0,94fdc1ee0ba27063d7cfe69e915e8425474316e1,https://github.com/N283T/zsasa,rerun for manuscript evidence,
+zsasa_0_6_0,zsasa_0_6_0,0.6.0,94fdc1ee0ba27063d7cfe69e915e8425474316e1,https://github.com/N283T/zsasa,versioned zsasa baseline for release-refresh benchmarks,
+zsasa_0_7_0,zsasa_0_7_0,0.7.0,80d5f0c5f2ff102627d8f94fcc41882dc51dab7b,https://github.com/N283T/zsasa,superseded historical benchmark attempt,Retained for provenance; excluded from active benchmark manifests after adopting zsasa 0.9.0.
+zsasa_0_9_0,zsasa_0_9_0,0.9.0,f4c7ac6290c6bbc23dbcd8d6b39b3efd51554cc1,https://github.com/N283T/zsasa,current zsasa release for benchmark reruns,
 zsasa_mdanalysis,zsasa_mdanalysis,,,https://github.com/N283T/zsasa,derived full-rerun tool label,zsasa Python wrapper over MDAnalysis frames
 zsasa_mdanalysis_bitmask,zsasa_mdanalysis_bitmask,,,https://github.com/N283T/zsasa,derived full-rerun tool label,zsasa Python wrapper over MDAnalysis frames with bitmask mode
 zsasa_mdtraj,zsasa_mdtraj,,,https://github.com/N283T/zsasa,derived full-rerun tool label,zsasa Python wrapper over MDTraj frames
