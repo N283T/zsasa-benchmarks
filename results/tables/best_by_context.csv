@@ -2,9 +2,15 @@ context,metric,objective,winner_variant,winner_display_name,winner_value,dataset
 batch:UP000000625_83333_ECOLI_v6_pdb:t10,runtime_mean_s,min,zsasa_bitmask_f32,zsasa bitmask f32,1.4808608920266668,UP000000625_83333_ECOLI_v6_pdb,E. coli AFDB,,10
 batch:UP000000625_83333_ECOLI_v6_pdb:t10,items_per_sec,max,zsasa_bitmask_f32,zsasa bitmask f32,2950.9861618530113,UP000000625_83333_ECOLI_v6_pdb,E. coli AFDB,,10
 batch:UP000000625_83333_ECOLI_v6_pdb:t10,peak_rss_mean_mib,min,zsasa_f32,zsasa f32,43.46875,UP000000625_83333_ECOLI_v6_pdb,E. coli AFDB,,10
+batch:UP000005640_9606_HUMAN_v6_cif:t10,runtime_mean_s,min,zsasa_af_fast_read,zsasa AF fast/read,16.18850781340667,UP000005640_9606_HUMAN_v6_cif,UP000005640_9606_HUMAN_v6_cif,,10
+batch:UP000005640_9606_HUMAN_v6_cif:t10,items_per_sec,max,zsasa_af_fast_read,zsasa AF fast/read,1456.959484583689,UP000005640_9606_HUMAN_v6_cif,UP000005640_9606_HUMAN_v6_cif,,10
+batch:UP000005640_9606_HUMAN_v6_cif:t10,peak_rss_mean_mib,min,zsasa_af_fast_read,zsasa AF fast/read,94.859375,UP000005640_9606_HUMAN_v6_cif,UP000005640_9606_HUMAN_v6_cif,,10
 batch:UP000005640_9606_HUMAN_v6_pdb:t10,runtime_mean_s,min,zsasa_bitmask_f32,zsasa bitmask f32,13.814230546586666,UP000005640_9606_HUMAN_v6_pdb,Human AFDB,,10
 batch:UP000005640_9606_HUMAN_v6_pdb:t10,items_per_sec,max,zsasa_bitmask_f32,zsasa bitmask f32,1707.3697967077742,UP000005640_9606_HUMAN_v6_pdb,Human AFDB,,10
 batch:UP000005640_9606_HUMAN_v6_pdb:t10,peak_rss_mean_mib,min,zsasa_f32,zsasa f32,76.421875,UP000005640_9606_HUMAN_v6_pdb,Human AFDB,,10
+batch:swissprot_500k_pdb:t10,runtime_mean_s,min,lahuta_bitmask,Lahuta bitmask,588.117224601,swissprot_500k_pdb,SwissProt AFDB,,10
+batch:swissprot_500k_pdb:t10,items_per_sec,max,lahuta_bitmask,Lahuta bitmask,850.170644703049,swissprot_500k_pdb,SwissProt AFDB,,10
+batch:swissprot_500k_pdb:t10,peak_rss_mean_mib,min,zsasa_0_6_0_f32,zsasa 0.6.0 f32,253.4375,swissprot_500k_pdb,SwissProt AFDB,,10
 single_file:3jc8:t10,runtime_mean_s,min,zsasa_bitmask_f32,zsasa bitmask f32,0.07180484567333334,single_file_large_structure_subset,single_file_large_structure_subset,3jc8,10
 single_file:3jc8:t10,atoms_per_sec,max,zsasa_bitmask_f32,zsasa bitmask f32,1497113.4467589702,single_file_large_structure_subset,single_file_large_structure_subset,3jc8,10
 single_file:3jc8:t10,peak_rss_mean_mib,min,zsasa_f64,zsasa f64,37.234375,single_file_large_structure_subset,single_file_large_structure_subset,3jc8,10
