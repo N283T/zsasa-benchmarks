@@ -20,11 +20,11 @@ REQUIRED_FILES = [
     "manifests/validation-ecoli.toml",
     "manifests/validation-md-5wvo.toml",
     "manifests/batch-ecoli.toml",
-    "manifests/batch-ecoli-overcommit.toml",
-    "manifests/batch-ecoli-cif-overcommit.toml",
+    "manifests/batch-ecoli-zsasa-0.9.toml",
+    "manifests/batch-ecoli-cif-zsasa-0.9.toml",
     "manifests/batch-human.toml",
-    "manifests/batch-human-overcommit.toml",
-    "manifests/batch-human-cif-overcommit.toml",
+    "manifests/batch-human-zsasa-0.9.toml",
+    "manifests/batch-human-cif-zsasa-0.9.toml",
     "manifests/batch-swissprot-version-refresh.toml",
     "manifests/single-file-sample.toml",
     "manifests/single-file-mmcif-sample.toml",
@@ -166,7 +166,7 @@ def main() -> None:
         fail("tool-versions.toml must keep zsasa as the v0.6.0 compatibility alias")
     expected_zsasa_versions = {
         "zsasa_0_6_0": "v0.6.0",
-        "zsasa_0_7_0": "v0.7.0",
+        "zsasa_0_9_0": "v0.9.0",
     }
     for tool, expected_tag in expected_zsasa_versions.items():
         spec = tools.get(tool, {})
@@ -282,7 +282,7 @@ def main() -> None:
             "modes": ["standard", "bitmask"],
         },
         {
-            "tool": "zsasa_0_7_0",
+            "tool": "zsasa_0_9_0",
             "threads": [10, 20, 40],
             "precisions": ["f32"],
             "modes": ["standard", "bitmask"],
@@ -292,8 +292,62 @@ def main() -> None:
     if jobs != expected_jobs:
         fail(
             "SwissProt version-refresh jobs must encode 0.6.0 10t, "
-            "0.7.0 10/20/40t, and Lahuta bitmask 10t"
+            "0.9.0 10/20/40t, and Lahuta bitmask 10t"
         )
+
+    human_cif = read_toml(ROOT.joinpath("manifests/batch-human-cif-zsasa-0.9.toml"))
+    human_cif_full = human_cif.get("full_rerun", {})
+    if human_cif_full.get("runs") != 3 or human_cif_full.get("warmup") != 1:
+        fail("Human CIF benchmark must use three measured runs and one warmup")
+    if human_cif_full.get("jsonl_decimals") != 3:
+        fail("Human CIF benchmark must use three-decimal JSONL output")
+    human_cif_jobs = human_cif_full.get("jobs", [])
+    expected_human_cif_jobs = [
+        {
+            "tool": "zsasa_0_9_0",
+            "variant": "generic_read",
+            "threads": [10, 20, 40],
+            "precisions": ["f32"],
+            "modes": ["bitmask"],
+            "af_model_fast": False,
+            "input_io": "read",
+        },
+        {
+            "tool": "zsasa_0_9_0",
+            "variant": "af_fast_read",
+            "threads": [10, 20, 40],
+            "precisions": ["f32"],
+            "modes": ["bitmask"],
+            "af_model_fast": True,
+            "input_io": "read",
+        },
+        {
+            "tool": "zsasa_0_9_0",
+            "variant": "generic_mmap",
+            "threads": [20],
+            "precisions": ["f32"],
+            "modes": ["bitmask"],
+            "af_model_fast": False,
+            "input_io": "mmap",
+        },
+        {
+            "tool": "zsasa_0_9_0",
+            "variant": "af_fast_mmap",
+            "threads": [20],
+            "precisions": ["f32"],
+            "modes": ["bitmask"],
+            "af_model_fast": True,
+            "input_io": "mmap",
+        },
+        {
+            "tool": "lahuta",
+            "threads": [10],
+            "precisions": ["f32"],
+            "modes": ["bitmask"],
+        },
+    ]
+    if human_cif_jobs != expected_human_cif_jobs:
+        fail("Human CIF jobs must encode the parser/I/O matrix plus Lahuta 10t")
 
     single_pdb = read_toml(ROOT.joinpath("manifests/single-file-sample.toml"))
     if "pdbtools_jl" not in single_pdb.get("full_rerun", {}).get("tools", []):
@@ -318,6 +372,8 @@ def main() -> None:
     ]:
         if f"CREATE TABLE IF NOT EXISTS {table}" not in schema:
             fail(f"benchmark schema missing table: {table}")
+    if "variant VARCHAR" not in schema:
+        fail("benchmark_runs schema must include the implementation variant")
 
     for path in [
         "README.md",

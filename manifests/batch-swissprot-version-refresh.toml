@@ -21,7 +21,7 @@ modes = ["standard", "bitmask"]
 prepare = "sync"
 rerun_zsasa = true
 rerun_comparators = true
-notes = "SwissProt-scale version-refresh benchmark for the 0.7.0 batch thread-overcommit change. 0.6.0 is measured at 10 threads because it caps explicit batch threads to CPU count; 0.7.0 is measured at 10, 20, and 40 workers to test CPU-cap removal on I/O-bound file sets. Lahuta is included only as a 10-thread bitmask comparator."
+notes = "SwissProt-scale version-refresh benchmark for the 0.9.0 batch thread-overcommit change. 0.6.0 is measured at 10 threads because it caps explicit batch threads to CPU count; 0.9.0 is measured at 10, 20, and 40 workers to test CPU-cap removal on I/O-bound file sets. Lahuta is included only as a 10-thread bitmask comparator."
 
 [[full_rerun.jobs]]
 tool = "zsasa_0_6_0"
@@ -30,7 +30,7 @@ precisions = ["f32"]
 modes = ["standard", "bitmask"]
 
 [[full_rerun.jobs]]
-tool = "zsasa_0_7_0"
+tool = "zsasa_0_9_0"
 threads = [10, 20, 40]
 precisions = ["f32"]
 modes = ["standard", "bitmask"]

@@ -84,7 +84,7 @@ def test_run_single_file_mmcif_dry_run_uses_input_file_and_versioned_tools() -> 
             "--run-id",
             "test_single_mmcif",
             "--only",
-            "single_wall_zsasa_0_7_0_f64_3jc8_10t_100p",
+            "single_wall_zsasa_0_9_0_f64_3jc8_10t_100p",
             "--dry-run",
         ],
         check=True,
@@ -94,7 +94,7 @@ def test_run_single_file_mmcif_dry_run_uses_input_file_and_versioned_tools() -> 
 
     assert "dataset=single_file_large_structure_mmcif_subset" in proc.stdout
     assert "selected_commands=1/" in proc.stdout
-    assert "# name: single_wall_zsasa_0_7_0_f64_3jc8_10t_100p" in proc.stdout
+    assert "# name: single_wall_zsasa_0_9_0_f64_3jc8_10t_100p" in proc.stdout
     assert "datasets/single-file-large-structure-mmcif/3jc8.cif.gz" in proc.stdout
     assert "--runs 1" in proc.stdout
     assert "--warmup 0" in proc.stdout

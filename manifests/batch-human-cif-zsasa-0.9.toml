@@ -1,0 +1,67 @@
+# Human CIF zsasa 0.9.0 parser, input I/O, and thread-scaling benchmark.
+
+id = "batch-human-cif-zsasa-0-9-parser-io"
+status = "planning"
+
+[dataset]
+id = "UP000005640_9606_HUMAN_v6_cif"
+expected_count = 23586
+role = ["batch-throughput", "parser-comparison", "input-io-comparison", "mmcif-native"]
+
+[full_rerun]
+source_kind = "full_rerun"
+run_id_default = "v0_9_0_human_cif"
+n_points = 128
+threads = [10, 20, 40]
+runs = 3
+warmup = 1
+precisions = ["f32"]
+modes = ["bitmask"]
+prepare = "sync"
+classifier = "protor"
+jsonl_decimals = 3
+rerun_zsasa = true
+rerun_comparators = true
+output_base = "results/full_rerun/v0_9_0_human_cif/batch/human_cif"
+
+[[full_rerun.jobs]]
+tool = "zsasa_0_9_0"
+variant = "generic_read"
+threads = [10, 20, 40]
+precisions = ["f32"]
+modes = ["bitmask"]
+af_model_fast = false
+input_io = "read"
+
+[[full_rerun.jobs]]
+tool = "zsasa_0_9_0"
+variant = "af_fast_read"
+threads = [10, 20, 40]
+precisions = ["f32"]
+modes = ["bitmask"]
+af_model_fast = true
+input_io = "read"
+
+[[full_rerun.jobs]]
+tool = "zsasa_0_9_0"
+variant = "generic_mmap"
+threads = [20]
+precisions = ["f32"]
+modes = ["bitmask"]
+af_model_fast = false
+input_io = "mmap"
+
+[[full_rerun.jobs]]
+tool = "zsasa_0_9_0"
+variant = "af_fast_mmap"
+threads = [20]
+precisions = ["f32"]
+modes = ["bitmask"]
+af_model_fast = true
+input_io = "mmap"
+
+[[full_rerun.jobs]]
+tool = "lahuta"
+threads = [10]
+precisions = ["f32"]
+modes = ["bitmask"]

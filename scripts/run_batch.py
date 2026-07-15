@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -112,8 +113,13 @@ def full_rerun_settings(manifest: dict[str, Any]) -> dict[str, Any]:
     full_rerun.setdefault("modes", ["standard", "bitmask"])
     full_rerun.setdefault("prepare", "sync")
     full_rerun.setdefault("classifier", "protor")
+    full_rerun.setdefault("af_model_fast", False)
+    full_rerun.setdefault("profile_stages", False)
     full_rerun.setdefault("rerun_zsasa", True)
     full_rerun.setdefault("rerun_comparators", True)
+    input_io = full_rerun.get("input_io")
+    if input_io is not None and input_io not in {"auto", "mmap", "read"}:
+        raise ValueError("full_rerun.input_io must be one of: auto, mmap, read")
     return full_rerun
 
 
@@ -143,12 +149,43 @@ def is_zsasa_tool(tool_id: str) -> bool:
 
 
 def zsasa_batch_record_name(
-    *, tool_id: str, precision: str, mode: str, threads: int, n_points: int
+    *,
+    tool_id: str,
+    precision: str,
+    mode: str,
+    threads: int,
+    n_points: int,
+    variant: str | None = None,
 ) -> str:
     suffix = f"batch_{precision}_{mode}_{threads}t_{n_points}p"
-    if tool_id == "zsasa":
-        return f"zsasa_{suffix}"
-    return f"{tool_id}_{suffix}"
+    prefix = f"{tool_id}_{variant}" if variant else tool_id
+    return f"{prefix}_{suffix}"
+
+
+def validate_variant(value: object) -> str | None:
+    if value is None:
+        return None
+    variant = str(value)
+    if re.fullmatch(r"[a-z][a-z0-9_]*", variant) is None:
+        raise ValueError("batch job variant must match [a-z][a-z0-9_]*")
+    return variant
+
+
+def zsasa_job_options(raw_job: dict[str, Any], settings: dict[str, Any]) -> dict[str, Any]:
+    options: dict[str, Any] = {"variant": validate_variant(raw_job.get("variant"))}
+    for key in [
+        "classifier",
+        "jsonl_decimals",
+        "af_model_fast",
+        "input_io",
+        "timing",
+        "profile_stages",
+    ]:
+        options[key] = raw_job[key] if key in raw_job else settings.get(key)
+    input_io = options.get("input_io")
+    if input_io is not None and input_io not in {"auto", "mmap", "read"}:
+        raise ValueError("batch job input_io must be one of: auto, mmap, read")
+    return options
 
 
 def default_batch_tools(settings: dict[str, Any]) -> list[str]:
@@ -182,6 +219,7 @@ def batch_jobs(settings: dict[str, Any]) -> list[dict[str, Any]]:
                         str(value) for value in raw_job.get("precisions", settings["precisions"])
                     ],
                     "modes": [str(value) for value in raw_job.get("modes", settings["modes"])],
+                    **zsasa_job_options(raw_job, settings),
                 }
             )
         return jobs
@@ -192,6 +230,7 @@ def batch_jobs(settings: dict[str, Any]) -> list[dict[str, Any]]:
             "threads": [int(value) for value in settings["threads"]],
             "precisions": [str(value) for value in settings["precisions"]],
             "modes": [str(value) for value in settings["modes"]],
+            **zsasa_job_options({}, settings),
         }
         for tool in default_batch_tools(settings)
     ]
@@ -234,19 +273,26 @@ def build_native_records(
     runs = int(settings["runs"])
     warmup = int(settings["warmup"])
     prepare = str(settings["prepare"]) if settings.get("prepare") else None
-    classifier = str(settings["classifier"]) if settings.get("classifier") else None
-    jsonl_decimals = (
-        int(settings["jsonl_decimals"]) if settings.get("jsonl_decimals") is not None else None
-    )
-
     for job in batch_jobs(settings):
         tool_id = str(job["tool"])
+        variant = validate_variant(job.get("variant"))
         threads = [int(thread) for thread in job["threads"]]
         modes = [str(mode) for mode in job["modes"]]
         precisions = [str(precision) for precision in job["precisions"]]
 
         if is_zsasa_tool(tool_id):
             zsasa = require_binary(specs, tool_id)
+            classifier = str(job["classifier"]) if job.get("classifier") else None
+            jsonl_decimals = (
+                int(job["jsonl_decimals"]) if job.get("jsonl_decimals") is not None else None
+            )
+            af_model_fast = bool(job.get("af_model_fast", False))
+            input_io = str(job["input_io"]) if job.get("input_io") else None
+            timing = bool(job.get("timing", False))
+            profile_stages = bool(job.get("profile_stages", False))
+            output_dir = (
+                output_base.joinpath(tool_id, variant) if variant else output_base.joinpath(tool_id)
+            )
             for thread in threads:
                 for precision in precisions:
                     for mode in modes:
@@ -259,28 +305,31 @@ def build_native_records(
                             mode=mode,
                             threads=thread,
                             n_points=n_points,
+                            variant=variant,
+                        )
+                        output_jsonl = output_dir.joinpath(
+                            f"{precision}_{mode}_{thread}t_{n_points}p.jsonl"
                         )
                         native = batch_command(
                             binary=zsasa,
                             input_dir=input_dir,
-                            output_jsonl=output_base.joinpath(
-                                tool_id, f"{precision}_{mode}_{thread}t_{n_points}p.jsonl"
-                            ),
+                            output_jsonl=output_jsonl,
                             precision=precision,
                             n_points=n_points,
                             threads=thread,
                             bitmask=bitmask,
                             classifier=classifier,
                             jsonl_decimals=jsonl_decimals,
+                            af_model_fast=af_model_fast,
+                            input_io=input_io,
+                            timing=timing,
+                            profile_stages=profile_stages,
                         )
                         records.append(
                             CommandRecord(
                                 name=name,
                                 outputs=[
-                                    output_base.joinpath(
-                                        tool_id,
-                                        f"{precision}_{mode}_{thread}t_{n_points}p.jsonl",
-                                    ),
+                                    output_jsonl,
                                     output_base.joinpath("hyperfine", f"{name}.json"),
                                 ],
                                 argv=hyperfine_command(
@@ -379,6 +428,9 @@ def build_native_records(
                         ),
                     )
                 )
+    names = [record.name for record in records]
+    if len(names) != len(set(names)):
+        raise ValueError("batch jobs produce duplicate command names; add distinct variants")
     return records
 
 
@@ -391,7 +443,10 @@ def prepare_output_directories(*, output_base: Path, settings: dict[str, Any]) -
         threads = [int(thread) for thread in job["threads"]]
         modes = [str(mode) for mode in job["modes"]]
         if is_zsasa_tool(tool_id):
-            directories.append(output_base.joinpath(tool_id))
+            variant = validate_variant(job.get("variant"))
+            directories.append(
+                output_base.joinpath(tool_id, variant) if variant else output_base.joinpath(tool_id)
+            )
         elif tool_id in {"freesasa_batch", "rustsasa"}:
             for thread in threads:
                 directories.append(output_base.joinpath(tool_id, f"{thread}t_{n_points}p"))
@@ -445,6 +500,10 @@ def main() -> None:
             "modes": settings["modes"],
             "classifier": settings.get("classifier"),
             "jsonl_decimals": settings.get("jsonl_decimals"),
+            "af_model_fast": settings.get("af_model_fast"),
+            "input_io": settings.get("input_io"),
+            "timing": settings.get("timing"),
+            "profile_stages": settings.get("profile_stages"),
             "jobs": settings.get("jobs", []),
             "tool_versions": str(resolve_repo_path(args.tool_versions)),
             "datasets": str(resolve_repo_path(args.datasets)),

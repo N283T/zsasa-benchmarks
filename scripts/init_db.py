@@ -4,20 +4,19 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 
-if __package__:
-    from scripts.benchlib.datasets import (
-        DEFAULT_DATASETS_CONFIG,
-        dataset_path,
-        load_dataset_catalog,
-    )
-    from scripts.db_common import DEFAULT_DB, apply_schema, connect, load_toml, resolve
-else:
-    from benchlib.datasets import DEFAULT_DATASETS_CONFIG, dataset_path, load_dataset_catalog
-    from db_common import DEFAULT_DB, apply_schema, connect, load_toml, resolve
-
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.benchlib.datasets import (  # noqa: E402
+    DEFAULT_DATASETS_CONFIG,
+    dataset_path,
+    load_dataset_catalog,
+)
+from scripts.db_common import DEFAULT_DB, apply_schema, connect, load_toml, resolve  # noqa: E402
 
 
 def parse_args() -> argparse.Namespace:

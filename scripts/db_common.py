@@ -46,3 +46,8 @@ def connect(db_path: Path):
 
 def apply_schema(conn) -> None:
     conn.execute(SCHEMA_PATH.read_text(encoding="utf-8"))
+    benchmark_run_columns = {
+        str(row[1]) for row in conn.execute("PRAGMA table_info('benchmark_runs')").fetchall()
+    }
+    if "variant" not in benchmark_run_columns:
+        conn.execute("ALTER TABLE benchmark_runs ADD COLUMN variant VARCHAR")

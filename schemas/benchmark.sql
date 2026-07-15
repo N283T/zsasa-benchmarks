@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS benchmark_runs (
   algorithm VARCHAR,
   precision VARCHAR,
   mode VARCHAR,
+  variant VARCHAR,
   n_points INTEGER,
   n_slices INTEGER,
   threads INTEGER,
