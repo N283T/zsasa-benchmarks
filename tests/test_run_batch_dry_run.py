@@ -310,7 +310,7 @@ def test_run_batch_human_overcommit_targets_zsasa_0_9_matrix() -> None:
     assert "--runs 3" in proc.stdout
 
 
-def test_run_batch_human_cif_overcommit_targets_minimal_bitmask_matrix() -> None:
+def test_run_batch_human_cif_targets_parser_io_matrix() -> None:
     proc = subprocess.run(
         [
             sys.executable,
@@ -329,20 +329,28 @@ def test_run_batch_human_cif_overcommit_targets_minimal_bitmask_matrix() -> None
     )
 
     assert "dataset=human_cif" in proc.stdout
-    assert "selected_commands=5/5" in proc.stdout
-    assert "# name: zsasa_0_9_0_batch_f32_bitmask_10t_128p" in proc.stdout
-    assert "# name: zsasa_0_9_0_batch_f32_bitmask_20t_128p" in proc.stdout
-    assert "# name: zsasa_0_9_0_batch_f32_bitmask_40t_128p" in proc.stdout
-    assert "# name: zsasa_0_9_0_batch_f32_bitmask_80t_128p" in proc.stdout
+    assert "selected_commands=9/9" in proc.stdout
+    assert "# name: zsasa_0_9_0_generic_read_batch_f32_bitmask_10t_128p" in proc.stdout
+    assert "# name: zsasa_0_9_0_generic_read_batch_f32_bitmask_20t_128p" in proc.stdout
+    assert "# name: zsasa_0_9_0_generic_read_batch_f32_bitmask_40t_128p" in proc.stdout
+    assert "# name: zsasa_0_9_0_af_fast_read_batch_f32_bitmask_10t_128p" in proc.stdout
+    assert "# name: zsasa_0_9_0_af_fast_read_batch_f32_bitmask_20t_128p" in proc.stdout
+    assert "# name: zsasa_0_9_0_af_fast_read_batch_f32_bitmask_40t_128p" in proc.stdout
+    assert "# name: zsasa_0_9_0_generic_mmap_batch_f32_bitmask_20t_128p" in proc.stdout
+    assert "# name: zsasa_0_9_0_af_fast_mmap_batch_f32_bitmask_20t_128p" in proc.stdout
     assert "# name: lahuta_bitmask_10t_128p" in proc.stdout
     assert "standard" not in proc.stdout
     assert "f64" not in proc.stdout
     assert "freesasa_batch" not in proc.stdout
     assert "rustsasa" not in proc.stdout
     assert "--use-bitmask" in proc.stdout
-    assert "--af-model-fast" in proc.stdout
-    assert "--input-io=auto" in proc.stdout
-    assert "--warmup 3" in proc.stdout
+    assert proc.stdout.count("--af-model-fast") == 4
+    assert proc.stdout.count("--input-io=read") == 6
+    assert proc.stdout.count("--input-io=mmap") == 2
+    assert "--jsonl-decimals=3" in proc.stdout
+    assert "/zsasa_0_9_0/generic_read/" in proc.stdout
+    assert "/zsasa_0_9_0/af_fast_read/" in proc.stdout
+    assert "--warmup 1" in proc.stdout
     assert "--runs 3" in proc.stdout
 
 

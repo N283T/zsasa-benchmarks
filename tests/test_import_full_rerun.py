@@ -5,6 +5,7 @@ from pathlib import Path
 
 import duckdb
 import pytest
+from scripts.db_common import apply_schema
 from scripts.import_full_rerun import (
     import_full_rerun,
     manifest_id_from_config,
@@ -67,6 +68,15 @@ def test_parse_batch_record_name() -> None:
         "threads": 10,
         "n_points": 128,
     }
+    assert parse_batch_record_name("zsasa_0_9_0_af_fast_read_batch_f32_bitmask_20t_128p") == {
+        "tool_id": "zsasa_0_9_0",
+        "variant": "af_fast_read",
+        "algorithm": "sr",
+        "precision": "f32",
+        "mode": "bitmask",
+        "threads": 20,
+        "n_points": 128,
+    }
     assert parse_batch_record_name("lahuta_bitmask_4t_128p") == {
         "tool_id": "lahuta",
         "algorithm": "sr",
@@ -126,6 +136,25 @@ def test_reset_database_removes_existing_rows(tmp_path: Path) -> None:
         tables = {row[0] for row in conn.execute("SHOW TABLES").fetchall()}
         assert "stale" not in tables
         assert {"benchmark_runs", "validation_results", "performance_results"} <= tables
+        columns = {row[1] for row in conn.execute("PRAGMA table_info('benchmark_runs')").fetchall()}
+        assert "variant" in columns
+    finally:
+        conn.close()
+
+
+def test_apply_schema_adds_variant_to_existing_database(tmp_path: Path) -> None:
+    db = tmp_path.joinpath("benchmark.duckdb")
+    old_schema = (
+        Path("schemas/benchmark.sql")
+        .read_text(encoding="utf-8")
+        .replace("  variant VARCHAR,\n", "")
+    )
+    conn = duckdb.connect(str(db))
+    try:
+        conn.execute(old_schema)
+        apply_schema(conn)
+        columns = {row[1] for row in conn.execute("PRAGMA table_info('benchmark_runs')").fetchall()}
+        assert "variant" in columns
     finally:
         conn.close()
 
@@ -267,7 +296,7 @@ def test_manifest_id_from_config_reads_batch_overcommit_manifest(tmp_path: Path)
     )
 
 
-def test_import_full_rerun_imports_human_cif_overcommit_batch(tmp_path: Path) -> None:
+def test_import_full_rerun_imports_human_cif_variant_batch(tmp_path: Path) -> None:
     results_root = tmp_path.joinpath("full_rerun", "cif_overcommit")
     human_cif = results_root.joinpath("batch", "human_cif")
     hyperfine_dir = human_cif.joinpath("hyperfine")
@@ -276,12 +305,13 @@ def test_import_full_rerun_imports_human_cif_overcommit_batch(tmp_path: Path) ->
         json.dumps({"manifest": "manifests/batch-human-cif-zsasa-0.9.toml"}),
         encoding="utf-8",
     )
-    hyperfine_dir.joinpath("zsasa_0_9_0_batch_f32_bitmask_40t_128p.json").write_text(
+    record_name = "zsasa_0_9_0_af_fast_read_batch_f32_bitmask_40t_128p"
+    hyperfine_dir.joinpath(f"{record_name}.json").write_text(
         json.dumps(
             {
                 "results": [
                     {
-                        "command": "zsasa_0_9_0_batch_f32_bitmask_40t_128p",
+                        "command": record_name,
                         "mean": 23.0,
                         "stddev": 0.0,
                         "median": 23.0,
@@ -311,7 +341,8 @@ def test_import_full_rerun_imports_human_cif_overcommit_batch(tmp_path: Path) ->
     try:
         run = conn.execute(
             """
-            SELECT benchmark_kind, dataset_id, tool_id, precision, mode, threads, n_points,
+            SELECT benchmark_kind, dataset_id, tool_id, variant, precision, mode,
+                   threads, n_points,
                    manifest_id, notes
             FROM benchmark_runs
             WHERE dataset_id = 'UP000005640_9606_HUMAN_v6_cif'
@@ -337,12 +368,13 @@ def test_import_full_rerun_imports_human_cif_overcommit_batch(tmp_path: Path) ->
         "batch",
         "UP000005640_9606_HUMAN_v6_cif",
         "zsasa_0_9_0",
+        "af_fast_read",
         "f32",
         "bitmask",
         40,
         128,
-        "batch-human-cif-zsasa-0-9-overcommit",
-        "zsasa_0_9_0_batch_f32_bitmask_40t_128p",
+        "batch-human-cif-zsasa-0-9-parser-io",
+        record_name,
     )
     assert runtime == 23.0
 

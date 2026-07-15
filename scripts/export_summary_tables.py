@@ -25,6 +25,10 @@ BATCH_VARIANT_ORDER = [
     "zsasa_f32",
     "zsasa_bitmask_f64",
     "zsasa_bitmask_f32",
+    "zsasa_generic_read",
+    "zsasa_generic_mmap",
+    "zsasa_af_fast_read",
+    "zsasa_af_fast_mmap",
     "freesasa_batch",
     "rustsasa",
     "lahuta",
@@ -57,6 +61,10 @@ DISPLAY_NAMES = {
     "zsasa_f32": "zsasa f32",
     "zsasa_bitmask_f64": "zsasa bitmask f64",
     "zsasa_bitmask_f32": "zsasa bitmask f32",
+    "zsasa_generic_read": "zsasa generic/read",
+    "zsasa_generic_mmap": "zsasa generic/mmap",
+    "zsasa_af_fast_read": "zsasa AF fast/read",
+    "zsasa_af_fast_mmap": "zsasa AF fast/mmap",
     "freesasa": "FreeSASA",
     "freesasa_batch": "FreeSASA batch",
     "rustsasa": "RustSASA",
@@ -85,26 +93,22 @@ DATASET_LABELS = {
 
 CSV_DESCRIPTIONS = {
     "runs_long.csv": (
-        "One row per benchmark run with raw hyperfine-style statistics and common "
-        "derived metrics."
+        "One row per benchmark run with raw hyperfine-style statistics and common derived metrics."
     ),
     "datasets.csv": "Dataset metadata copied from the benchmark database.",
     "tools.csv": "Tool metadata copied from the benchmark database.",
     "batch_t10_summary.csv": (
-        "10-thread batch performance table, including runtime/RSS ratios versus "
-        "comparators."
+        "10-thread batch performance table, including runtime/RSS ratios versus comparators."
     ),
     "batch_thread_scaling.csv": (
-        "Batch runtime, throughput, RSS, speedup, and efficiency across thread "
-        "counts."
+        "Batch runtime, throughput, RSS, speedup, and efficiency across thread counts."
     ),
     "single_file_t10_summary.csv": "10-thread single-file performance by structure and variant.",
     "single_file_thread_scaling.csv": (
         "Single-file runtime, RSS, speedup, and efficiency across thread counts."
     ),
     "md_summary.csv": (
-        "Trajectory/MD performance summary with runtime/RSS ratios versus "
-        "available comparators."
+        "Trajectory/MD performance summary with runtime/RSS ratios versus available comparators."
     ),
     "validation_pairwise_summary.csv": (
         "Pairwise SASA agreement against FreeSASA/MDTraj references."
@@ -140,6 +144,9 @@ def display_name(variant: str) -> str:
 
 def batch_variant_name(row: dict[str, Any]) -> str:
     tool_id = str(row.get("tool_id") or "")
+    run_variant = str(row.get("run_variant") or "")
+    if run_variant:
+        return f"zsasa_{run_variant}" if tool_id.startswith("zsasa") else run_variant
     precision = str(row.get("precision") or "")
     mode = str(row.get("mode") or "")
     if tool_id == "freesasa_batch":
@@ -266,6 +273,7 @@ def load_runs(con: duckdb.DuckDBPyConnection) -> list[dict[str, Any]]:
         "algorithm",
         "precision",
         "mode",
+        "run_variant",
         "n_points",
         "n_slices",
         "threads",
@@ -283,7 +291,7 @@ def load_runs(con: duckdb.DuckDBPyConnection) -> list[dict[str, Any]]:
     rows = con.execute(
         """
         SELECT r.run_id, r.benchmark_kind, r.dataset_id, r.tool_id, r.algorithm,
-               r.precision, r.mode, r.n_points, r.n_slices, r.threads,
+               r.precision, r.mode, r.variant, r.n_points, r.n_slices, r.threads,
                r.source_kind, r.source_path, r.manifest_id, r.created_at,
                r.status, r.notes, d.name, d.role, d.expected_count, d.notes
         FROM benchmark_runs r
@@ -673,20 +681,16 @@ def export_validation_summary(
     out_dir: Path,
 ) -> list[Path]:
     validation_runs = [
-        row
-        for row in rows
-        if row["benchmark_kind"] in {"validation", "trajectory_validation"}
+        row for row in rows if row["benchmark_kind"] in {"validation", "trajectory_validation"}
     ]
     values = validation_values(con)
     refs: dict[tuple[Any, ...], dict[str, Any]] = {}
     for row in validation_runs:
         is_static_reference = (
-            row["benchmark_kind"] == "validation"
-            and row["tool_id"] == "freesasa_batch"
+            row["benchmark_kind"] == "validation" and row["tool_id"] == "freesasa_batch"
         )
         is_trajectory_reference = (
-            row["benchmark_kind"] == "trajectory_validation"
-            and row["tool_id"] == "mdtraj"
+            row["benchmark_kind"] == "trajectory_validation" and row["tool_id"] == "mdtraj"
         )
         if is_static_reference or is_trajectory_reference:
             refs[validation_key(row)] = row
@@ -948,15 +952,16 @@ def main() -> None:
     try:
         metric_map = load_metric_map(con)
         rows = enrich_runs(load_runs(con), metric_map)
+        active_rows = [row for row in rows if row["status"] != "superseded"]
         outputs: list[Path] = []
         outputs.extend(export_metadata(con, out_dir))
         outputs.append(export_runs_long(rows, out_dir))
-        outputs.extend(export_batch_tables(rows, out_dir))
-        outputs.extend(export_single_file_tables(rows, out_dir))
-        outputs.extend(export_md_summary(rows, out_dir))
-        outputs.extend(export_validation_summary(con, rows, out_dir))
-        outputs.extend(export_comparator_ratios(rows, out_dir))
-        outputs.extend(export_best_by_context(rows, out_dir))
+        outputs.extend(export_batch_tables(active_rows, out_dir))
+        outputs.extend(export_single_file_tables(active_rows, out_dir))
+        outputs.extend(export_md_summary(active_rows, out_dir))
+        outputs.extend(export_validation_summary(con, active_rows, out_dir))
+        outputs.extend(export_comparator_ratios(active_rows, out_dir))
+        outputs.extend(export_best_by_context(active_rows, out_dir))
         index = write_index(out_dir, outputs)
     finally:
         con.close()

@@ -49,6 +49,15 @@ f32 standard/bitmask at 10 threads, `zsasa_0_9_0` runs f32 standard/bitmask at
 10, 20, and 40 threads, and Lahuta runs only the 10-thread bitmask comparator.
 The earlier 0.7.0 attempt is excluded from active benchmark manifests.
 
+The Human AFDB mmCIF benchmark keeps parser, input I/O, and thread scaling
+separable. At 20 threads it measures the full generic/AF-fast by read/mmap
+matrix. At 10 and 40 threads it measures the generic/read and AF-fast/read
+paths, and it includes Lahuta bitmask at 10 threads. Use one warmup, three
+measured runs, f32 bitmask with 128 points, ProtOr classification, and
+three-decimal JSONL output. Interpret the result as a warm-cache end-to-end
+batch benchmark because `prepare = "sync"` does not drop the operating-system
+page cache.
+
 The native mmCIF single-file manifest is separate from the cleaned-PDB
 single-file manifest. It currently compares versioned `zsasa` with PDBTools.jl
 only, because FreeSASA/RustSASA/Lahuta mmCIF compatibility needs separate

@@ -24,6 +24,10 @@ VARIANT_ORDER = [
     "zsasa_f32",
     "zsasa_bitmask_f64",
     "zsasa_bitmask_f32",
+    "zsasa_generic_read",
+    "zsasa_generic_mmap",
+    "zsasa_af_fast_read",
+    "zsasa_af_fast_mmap",
     "freesasa_batch",
     "rustsasa",
     "lahuta",
@@ -41,6 +45,10 @@ COLORS = {
     "zsasa_f32": "#f6c85f",
     "zsasa_bitmask_f64": "#e67e22",
     "zsasa_bitmask_f32": "#ffb347",
+    "zsasa_generic_read": "#f6c85f",
+    "zsasa_generic_mmap": "#d99b2b",
+    "zsasa_af_fast_read": "#e67e22",
+    "zsasa_af_fast_mmap": "#b95f0b",
     "freesasa_batch": "#3498db",
     "rustsasa": "#e74c3c",
     "lahuta": "#8e44ad",
@@ -51,6 +59,10 @@ DISPLAY_NAMES = {
     "zsasa_f32": "zsasa f32",
     "zsasa_bitmask_f64": "zsasa bitmask f64",
     "zsasa_bitmask_f32": "zsasa bitmask f32",
+    "zsasa_generic_read": "zsasa generic/read",
+    "zsasa_generic_mmap": "zsasa generic/mmap",
+    "zsasa_af_fast_read": "zsasa AF fast/read",
+    "zsasa_af_fast_mmap": "zsasa AF fast/mmap",
     "freesasa_batch": "FreeSASA batch",
     "rustsasa": "RustSASA",
     "lahuta": "Lahuta",
@@ -76,6 +88,9 @@ def dataset_label(dataset_id: str) -> str:
 
 def batch_column_name(run: dict[str, Any]) -> str:
     tool_id = str(run.get("tool_id") or "")
+    run_variant = str(run.get("run_variant") or "")
+    if run_variant:
+        return f"zsasa_{run_variant}" if tool_id.startswith("zsasa") else run_variant
     precision = str(run.get("precision") or "")
     mode = str(run.get("mode") or "")
     if tool_id == "freesasa_batch":
@@ -168,18 +183,20 @@ def load_batch_rows(db_path: Path, dataset_id: str) -> list[dict[str, Any]]:
             "tool_id",
             "precision",
             "mode",
+            "run_variant",
             "threads",
             "expected_count",
             "source_path",
         ]
         run_rows = con.execute(
             """
-            SELECT r.run_id, r.dataset_id, r.tool_id, r.precision, r.mode, r.threads,
+            SELECT r.run_id, r.dataset_id, r.tool_id, r.precision, r.mode, r.variant, r.threads,
                    d.expected_count, r.source_path
             FROM benchmark_runs r
             LEFT JOIN datasets d USING (dataset_id)
             WHERE r.benchmark_kind = 'batch'
               AND r.dataset_id = ?
+              AND r.status <> 'superseded'
             ORDER BY r.tool_id, r.precision, r.mode, r.threads
             """,
             [dataset_id],

@@ -6,7 +6,7 @@
 
 - `datasets`: dataset identity, role, expected count, provenance, redistribution status.
 - `tools`: tool versions, commits, repositories, and reuse/rerun policy.
-- `benchmark_runs`: one row per imported or executed tool/configuration.
+- `benchmark_runs`: one row per imported or executed tool/configuration. The optional `variant` column distinguishes implementation paths such as `generic_read` and `af_fast_mmap` without encoding them into `tool_id`.
 - `validation_results`: per-structure SASA values keyed by `run_id` and `structure_id`.
 - `performance_results`: aggregate timing or memory metrics.
 - `artifacts`: raw outputs, exported tables, figures, and archive links.
@@ -15,6 +15,8 @@
 
 Use `source_kind` to keep generated evidence provenance explicit. The current
 manuscript rerun uses `full_rerun` for same-harness comparator and `zsasa` data.
+Rows marked `superseded` remain visible in the provenance-oriented `runs_long.csv`
+export but are excluded from active summary tables and batch figures.
 
 ## Typical commands
 
