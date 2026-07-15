@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from scripts.export_summary_tables import batch_variant_name
 from scripts.plot_batch_figures import (
     batch_column_name,
     memory_summary_mb,
@@ -17,6 +18,9 @@ def test_batch_column_name_maps_variants() -> None:
         batch_column_name({"tool_id": "zsasa", "precision": "f32", "mode": "bitmask"})
         == "zsasa_bitmask_f32"
     )
+    versioned_bitmask = {"tool_id": "zsasa_0_9_0", "precision": "f32", "mode": "bitmask"}
+    assert batch_column_name(versioned_bitmask) == "zsasa_0_9_0_bitmask_f32"
+    assert batch_variant_name(versioned_bitmask) == "zsasa_0_9_0_bitmask_f32"
     assert (
         batch_column_name({"tool_id": "rustsasa", "precision": "f64", "mode": "standard"})
         == "rustsasa"

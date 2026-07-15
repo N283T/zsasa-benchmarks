@@ -18,12 +18,17 @@ DEFAULT_DB = ROOT.joinpath("results", "benchmark.duckdb")
 DEFAULT_OUT_DIR = ROOT.joinpath("results", "figures")
 ECOLI_DATASET = "UP000000625_83333_ECOLI_v6_pdb"
 HUMAN_DATASET = "UP000005640_9606_HUMAN_v6_pdb"
+SWISSPROT_DATASET = "swissprot_500k_pdb"
 
 VARIANT_ORDER = [
     "zsasa_f64",
     "zsasa_f32",
     "zsasa_bitmask_f64",
     "zsasa_bitmask_f32",
+    "zsasa_0_6_0_f32",
+    "zsasa_0_6_0_bitmask_f32",
+    "zsasa_0_9_0_f32",
+    "zsasa_0_9_0_bitmask_f32",
     "zsasa_generic_read",
     "zsasa_generic_mmap",
     "zsasa_af_fast_read",
@@ -45,6 +50,10 @@ COLORS = {
     "zsasa_f32": "#f6c85f",
     "zsasa_bitmask_f64": "#e67e22",
     "zsasa_bitmask_f32": "#ffb347",
+    "zsasa_0_6_0_f32": "#f6c85f",
+    "zsasa_0_6_0_bitmask_f32": "#ffb347",
+    "zsasa_0_9_0_f32": "#d99b2b",
+    "zsasa_0_9_0_bitmask_f32": "#e67e22",
     "zsasa_generic_read": "#f6c85f",
     "zsasa_generic_mmap": "#d99b2b",
     "zsasa_af_fast_read": "#e67e22",
@@ -59,6 +68,10 @@ DISPLAY_NAMES = {
     "zsasa_f32": "zsasa f32",
     "zsasa_bitmask_f64": "zsasa bitmask f64",
     "zsasa_bitmask_f32": "zsasa bitmask f32",
+    "zsasa_0_6_0_f32": "zsasa 0.6.0 f32",
+    "zsasa_0_6_0_bitmask_f32": "zsasa 0.6.0 bitmask f32",
+    "zsasa_0_9_0_f32": "zsasa 0.9.0 f32",
+    "zsasa_0_9_0_bitmask_f32": "zsasa 0.9.0 bitmask f32",
     "zsasa_generic_read": "zsasa generic/read",
     "zsasa_generic_mmap": "zsasa generic/mmap",
     "zsasa_af_fast_read": "zsasa AF fast/read",
@@ -83,6 +96,8 @@ def dataset_label(dataset_id: str) -> str:
         return "E. coli AFDB"
     if "HUMAN" in dataset_id:
         return "Human AFDB"
+    if dataset_id == SWISSPROT_DATASET:
+        return "SwissProt AFDB"
     return dataset_id
 
 
@@ -99,8 +114,8 @@ def batch_column_name(run: dict[str, Any]) -> str:
         return "rustsasa"
     if tool_id == "lahuta":
         return "lahuta_bitmask" if mode == "bitmask" else "lahuta"
-    if tool_id == "zsasa":
-        prefix = "zsasa_bitmask" if mode == "bitmask" else "zsasa"
+    if tool_id.startswith("zsasa"):
+        prefix = f"{tool_id}_bitmask" if mode == "bitmask" else tool_id
         return f"{prefix}_{precision}"
     return f"{tool_id}_{precision}" if precision else tool_id
 
