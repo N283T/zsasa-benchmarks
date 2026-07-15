@@ -1,16 +1,16 @@
-# E. coli zsasa 0.7.0 batch thread-overcommit manifest.
+# Human zsasa 0.9.0 batch thread-overcommit manifest.
 
-id = "batch-ecoli-zsasa-0-7-overcommit"
+id = "batch-human-zsasa-0-9-overcommit"
 status = "planning"
 
 [dataset]
-id = "UP000000625_83333_ECOLI_v6_pdb"
-expected_count = 4370
+id = "UP000005640_9606_HUMAN_v6_pdb"
+expected_count = 23586
 role = ["batch-throughput", "thread-overcommit"]
 
 [full_rerun]
 source_kind = "full_rerun"
-run_id_default = "v0_7_0_overcommit"
+run_id_default = "v0_9_0_overcommit"
 n_points = 128
 threads = [10, 20, 40, 80]
 runs = 3
@@ -20,10 +20,10 @@ modes = ["standard", "bitmask"]
 prepare = "sync"
 rerun_zsasa = true
 rerun_comparators = false
-output_base = "results/full_rerun/v0_7_0_overcommit/batch/ecoli"
+output_base = "results/full_rerun/v0_9_0_overcommit/batch/human"
 
 [[full_rerun.jobs]]
-tool = "zsasa_0_7_0"
+tool = "zsasa_0_9_0"
 threads = [10, 20, 40, 80]
 precisions = ["f64", "f32"]
 modes = ["standard", "bitmask"]

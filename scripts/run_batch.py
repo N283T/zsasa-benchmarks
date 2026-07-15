@@ -112,8 +112,13 @@ def full_rerun_settings(manifest: dict[str, Any]) -> dict[str, Any]:
     full_rerun.setdefault("modes", ["standard", "bitmask"])
     full_rerun.setdefault("prepare", "sync")
     full_rerun.setdefault("classifier", "protor")
+    full_rerun.setdefault("af_model_fast", False)
+    full_rerun.setdefault("profile_stages", False)
     full_rerun.setdefault("rerun_zsasa", True)
     full_rerun.setdefault("rerun_comparators", True)
+    input_io = full_rerun.get("input_io")
+    if input_io is not None and input_io not in {"auto", "mmap", "read"}:
+        raise ValueError("full_rerun.input_io must be one of: auto, mmap, read")
     return full_rerun
 
 
@@ -238,6 +243,10 @@ def build_native_records(
     jsonl_decimals = (
         int(settings["jsonl_decimals"]) if settings.get("jsonl_decimals") is not None else None
     )
+    af_model_fast = bool(settings.get("af_model_fast", False))
+    input_io = str(settings["input_io"]) if settings.get("input_io") else None
+    timing = bool(settings.get("timing", False))
+    profile_stages = bool(settings.get("profile_stages", False))
 
     for job in batch_jobs(settings):
         tool_id = str(job["tool"])
@@ -272,6 +281,10 @@ def build_native_records(
                             bitmask=bitmask,
                             classifier=classifier,
                             jsonl_decimals=jsonl_decimals,
+                            af_model_fast=af_model_fast,
+                            input_io=input_io,
+                            timing=timing,
+                            profile_stages=profile_stages,
                         )
                         records.append(
                             CommandRecord(
@@ -445,6 +458,10 @@ def main() -> None:
             "modes": settings["modes"],
             "classifier": settings.get("classifier"),
             "jsonl_decimals": settings.get("jsonl_decimals"),
+            "af_model_fast": settings.get("af_model_fast"),
+            "input_io": settings.get("input_io"),
+            "timing": settings.get("timing"),
+            "profile_stages": settings.get("profile_stages"),
             "jobs": settings.get("jobs", []),
             "tool_versions": str(resolve_repo_path(args.tool_versions)),
             "datasets": str(resolve_repo_path(args.datasets)),

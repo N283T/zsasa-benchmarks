@@ -20,11 +20,11 @@ REQUIRED_FILES = [
     "manifests/validation-ecoli.toml",
     "manifests/validation-md-5wvo.toml",
     "manifests/batch-ecoli.toml",
-    "manifests/batch-ecoli-overcommit.toml",
-    "manifests/batch-ecoli-cif-overcommit.toml",
+    "manifests/batch-ecoli-zsasa-0.9.toml",
+    "manifests/batch-ecoli-cif-zsasa-0.9.toml",
     "manifests/batch-human.toml",
-    "manifests/batch-human-overcommit.toml",
-    "manifests/batch-human-cif-overcommit.toml",
+    "manifests/batch-human-zsasa-0.9.toml",
+    "manifests/batch-human-cif-zsasa-0.9.toml",
     "manifests/batch-swissprot-version-refresh.toml",
     "manifests/single-file-sample.toml",
     "manifests/single-file-mmcif-sample.toml",
@@ -166,7 +166,7 @@ def main() -> None:
         fail("tool-versions.toml must keep zsasa as the v0.6.0 compatibility alias")
     expected_zsasa_versions = {
         "zsasa_0_6_0": "v0.6.0",
-        "zsasa_0_7_0": "v0.7.0",
+        "zsasa_0_9_0": "v0.9.0",
     }
     for tool, expected_tag in expected_zsasa_versions.items():
         spec = tools.get(tool, {})
@@ -282,7 +282,7 @@ def main() -> None:
             "modes": ["standard", "bitmask"],
         },
         {
-            "tool": "zsasa_0_7_0",
+            "tool": "zsasa_0_9_0",
             "threads": [10, 20, 40],
             "precisions": ["f32"],
             "modes": ["standard", "bitmask"],
@@ -292,7 +292,7 @@ def main() -> None:
     if jobs != expected_jobs:
         fail(
             "SwissProt version-refresh jobs must encode 0.6.0 10t, "
-            "0.7.0 10/20/40t, and Lahuta bitmask 10t"
+            "0.9.0 10/20/40t, and Lahuta bitmask 10t"
         )
 
     single_pdb = read_toml(ROOT.joinpath("manifests/single-file-sample.toml"))

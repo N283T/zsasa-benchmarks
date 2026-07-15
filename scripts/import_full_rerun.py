@@ -45,8 +45,7 @@ def parse_args() -> argparse.Namespace:
         "--validation-run-id",
         default=None,
         help=(
-            "run-id whose validation/validation_md outputs should be imported; "
-            "defaults to --run-id"
+            "run-id whose validation/validation_md outputs should be imported; defaults to --run-id"
         ),
     )
     parser.add_argument(
@@ -193,7 +192,6 @@ def split_dataset_prefix(name: str) -> tuple[str, str]:
     raise ValueError(f"unrecognized trajectory dataset prefix: {name}")
 
 
-
 def parse_single_tool_label(tool_label: str) -> dict[str, Any]:
     zsasa = re.fullmatch(r"(zsasa(?:_\d+_\d+_\d+)?)_(f32|f64)(_bitmask)?", tool_label)
     if zsasa:
@@ -286,6 +284,7 @@ def insert_performance_metrics(
             for metric, statistic, value, unit, n in metrics
         ],
     )
+
 
 def insert_run(
     conn,
@@ -546,7 +545,6 @@ def manifest_id_from_config(base: Path, default: str) -> str:
     return str(manifest.get("id") or default)
 
 
-
 def hyperfine_metrics(path: Path) -> list[tuple[str, str, float, str, int | None]]:
     result = read_json(path)["results"][0]
     times = result.get("times", [])
@@ -668,6 +666,7 @@ def import_single_file_results(
                 if metrics:
                     insert_performance_metrics(conn, run_id, metrics)
 
+
 def import_trajectory_validation(conn, validation_dir: Path, run_label: str) -> None:
     dataset_id = "5wvo_C_analysis"
     manifest_id = "validation-md-5wvo-full-rerun"
@@ -724,11 +723,11 @@ def seed_all_datasets(conn, datasets_path: Path) -> None:
     for manifest_path in [
         ROOT.joinpath("manifests/validation-ecoli.toml"),
         ROOT.joinpath("manifests/batch-ecoli.toml"),
-        ROOT.joinpath("manifests/batch-ecoli-overcommit.toml"),
-        ROOT.joinpath("manifests/batch-ecoli-cif-overcommit.toml"),
+        ROOT.joinpath("manifests/batch-ecoli-zsasa-0.9.toml"),
+        ROOT.joinpath("manifests/batch-ecoli-cif-zsasa-0.9.toml"),
         ROOT.joinpath("manifests/batch-human.toml"),
-        ROOT.joinpath("manifests/batch-human-overcommit.toml"),
-        ROOT.joinpath("manifests/batch-human-cif-overcommit.toml"),
+        ROOT.joinpath("manifests/batch-human-zsasa-0.9.toml"),
+        ROOT.joinpath("manifests/batch-human-cif-zsasa-0.9.toml"),
         ROOT.joinpath("manifests/batch-swissprot-version-refresh.toml"),
         ROOT.joinpath("manifests/single-file-sample.toml"),
         ROOT.joinpath("manifests/single-file-mmcif-sample.toml"),
@@ -830,7 +829,7 @@ def import_full_rerun(
             dataset_id="UP000000625_83333_ECOLI_v6_cif",
             manifest_id=manifest_id_from_config(
                 results_root.joinpath("batch", "ecoli_cif"),
-                "batch-ecoli-cif-zsasa-0-7-overcommit",
+                "batch-ecoli-cif-zsasa-0-9-overcommit",
             ),
             name_parser=parse_batch_record_name,
         )
@@ -842,7 +841,7 @@ def import_full_rerun(
             dataset_id="UP000005640_9606_HUMAN_v6_cif",
             manifest_id=manifest_id_from_config(
                 results_root.joinpath("batch", "human_cif"),
-                "batch-human-cif-zsasa-0-7-overcommit",
+                "batch-human-cif-zsasa-0-9-overcommit",
             ),
             name_parser=parse_batch_record_name,
         )
@@ -923,8 +922,7 @@ def main() -> None:
         conn.close()
     print(f"imported benchmark results {results_root} into {db_path}")
     print(
-        f"imported validation results {validation_results_root} "
-        f"with run label {validation_run_id}"
+        f"imported validation results {validation_results_root} with run label {validation_run_id}"
     )
     for key, value in summary.items():
         print(f"{key}={value}")

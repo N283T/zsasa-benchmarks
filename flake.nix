@@ -13,8 +13,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.zig-overlay.follows = "zig-overlay";
     };
-    zsasa_0_7_0 = {
-      url = "github:N283T/zsasa/v0.7.0";
+    zsasa_0_9_0 = {
+      url = "github:N283T/zsasa/v0.9.0";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.zig-overlay.follows = "zig-overlay";
     };
@@ -26,7 +26,7 @@
       flake-utils,
       zig-overlay,
       zsasa,
-      zsasa_0_7_0,
+      zsasa_0_9_0,
       ...
     }:
     flake-utils.lib.eachDefaultSystem (
@@ -89,16 +89,16 @@
           src = zsasa;
           zigDepsHash = "sha256-XgIsmn9/8bgfTkJP4+oosvl8nasl7MB4GcEtwYaP+eM=";
         };
-        zsasaCli07 = mkZsasaCli {
-          version = "0.7.0";
-          src = zsasa_0_7_0;
+        zsasaCli09 = mkZsasaCli {
+          version = "0.9.0";
+          src = zsasa_0_9_0;
           zigDepsHash = "sha256-XgIsmn9/8bgfTkJP4+oosvl8nasl7MB4GcEtwYaP+eM=";
         };
         zsasaVersioned06 = pkgs.writeShellScriptBin "zsasa-0.6.0" ''
           exec ${zsasaCli}/bin/zsasa "$@"
         '';
-        zsasaVersioned07 = pkgs.writeShellScriptBin "zsasa-0.7.0" ''
-          exec ${zsasaCli07}/bin/zsasa "$@"
+        zsasaVersioned09 = pkgs.writeShellScriptBin "zsasa-0.9.0" ''
+          exec ${zsasaCli09}/bin/zsasa "$@"
         '';
         freesasaCli = pkgs.stdenv.mkDerivation {
           pname = "freesasa";
@@ -209,7 +209,7 @@
       {
         packages.zsasa = zsasaCli;
         packages.zsasa_0_6_0 = zsasaVersioned06;
-        packages.zsasa_0_7_0 = zsasaVersioned07;
+        packages.zsasa_0_9_0 = zsasaVersioned09;
         packages.freesasa = freesasaCli;
         packages.freesasaBatch = freesasaBatch;
         packages.rustsasa = rustsasaCli;
@@ -220,7 +220,7 @@
             zig
             zsasaCli
             zsasaVersioned06
-            zsasaVersioned07
+            zsasaVersioned09
             freesasaCli
             freesasaBatch
             rustsasaCli
@@ -248,7 +248,7 @@
             export ZSASA_CLI="${zsasaCli}/bin/zsasa"
             echo "zsasa benchmark shell"
             echo "- zsasa CLI: $ZSASA_CLI"
-            echo "- versioned zsasa CLIs: zsasa-0.6.0, zsasa-0.7.0"
+            echo "- versioned zsasa CLIs: zsasa-0.6.0, zsasa-0.9.0"
             echo "- PDBTools.jl wrapper: julia --project=scripts/julia/pdbtools_sasa scripts/benchlib/pdbtools_sasa.jl"
             echo "- Run: python scripts/check_scaffold.py"
             echo "- Dry run full validation: uv run python scripts/run_validation.py --manifest manifests/validation-ecoli.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run"

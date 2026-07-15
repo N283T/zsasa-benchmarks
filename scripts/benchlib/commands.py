@@ -49,6 +49,10 @@ def batch_command(
     bitmask: bool,
     classifier: str | None = None,
     jsonl_decimals: int | None = None,
+    af_model_fast: bool = False,
+    input_io: str | None = None,
+    timing: bool = False,
+    profile_stages: bool = False,
 ) -> list[str]:
     cmd = [
         str(binary),
@@ -65,6 +69,14 @@ def batch_command(
         cmd.append(f"--classifier={classifier}")
     if jsonl_decimals is not None:
         cmd.append(f"--jsonl-decimals={jsonl_decimals}")
+    if af_model_fast:
+        cmd.append("--af-model-fast")
+    if input_io is not None:
+        cmd.append(f"--input-io={input_io}")
+    if timing or profile_stages:
+        cmd.append("--timing")
+    if profile_stages:
+        cmd.append("--profile-stages")
     if bitmask:
         cmd.append("--use-bitmask")
     return cmd

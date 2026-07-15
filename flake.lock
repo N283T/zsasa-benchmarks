@@ -92,7 +92,7 @@
         "nixpkgs": "nixpkgs",
         "zig-overlay": "zig-overlay",
         "zsasa": "zsasa",
-        "zsasa_0_7_0": "zsasa_0_7_0"
+        "zsasa_0_9_0": "zsasa_0_9_0"
       }
     },
     "systems": {
@@ -203,7 +203,7 @@
         "type": "github"
       }
     },
-    "zsasa_0_7_0": {
+    "zsasa_0_9_0": {
       "inputs": {
         "flake-utils": "flake-utils_3",
         "nixpkgs": [
@@ -214,16 +214,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1782656862,
-        "narHash": "sha256-A87zf6pV74qhyOg+QunJeibRFWfMrgbOm3zo+G8JeF4=",
+        "lastModified": 1784094807,
+        "narHash": "sha256-RauMFjATjiF/g7cPn1vNc8YtEvqFc0Pio9dhBL1bg4g=",
         "owner": "N283T",
         "repo": "zsasa",
-        "rev": "80d5f0c5f2ff102627d8f94fcc41882dc51dab7b",
+        "rev": "f4c7ac6290c6bbc23dbcd8d6b39b3efd51554cc1",
         "type": "github"
       },
       "original": {
         "owner": "N283T",
-        "ref": "v0.7.0",
+        "ref": "v0.9.0",
         "repo": "zsasa",
         "type": "github"
       }

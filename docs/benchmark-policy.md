@@ -8,7 +8,7 @@ ignored `results/` tree.
 ## Rerun principles
 
 1. Build comparator tools under `external/` from pinned commits with `scripts/setup_external_tools.py`.
-2. Resolve the compatibility `zsasa` CLI from the Nix dev shell (`github:N283T/zsasa/v0.6.0`) for manuscript reruns, and use versioned tool IDs such as `zsasa_0_6_0` and `zsasa_0_7_0` for release-refresh comparisons.
+2. Resolve the compatibility `zsasa` CLI from the Nix dev shell (`github:N283T/zsasa/v0.6.0`) for the completed baseline, and use `zsasa_0_9_0` for current release-refresh comparisons. Treat 0.7.0 results as superseded historical data.
 3. Resolve Python trajectory backends from the uv environment pinned by `pyproject.toml` and `uv.lock`.
 4. Write generated outputs under `results/full_rerun/<run_id>/...`; review before staging archives.
 5. Keep raw generated results, local DB files, and external source/build trees out of git.
@@ -42,12 +42,12 @@ Remove `--dry-run` / use `--execute` only when a real benchmark run is explicitl
 
 Release-refresh manifests compare multiple `zsasa` versions without replacing the
 compatibility `zsasa` tool used by the manuscript rerun. Keep versioned tool IDs
-in command names and output directories so `0.6.0` and `0.7.0` results cannot be
+in command names and output directories so `0.6.0` and `0.9.0` results cannot be
 accidentally mixed. The SwissProt-scale manifest intentionally keeps the matrix
 small because the full 500k-structure workload is expensive: `zsasa_0_6_0` runs
-f32 standard/bitmask at 10 threads, `zsasa_0_7_0` runs f32 standard/bitmask at
+f32 standard/bitmask at 10 threads, `zsasa_0_9_0` runs f32 standard/bitmask at
 10, 20, and 40 threads, and Lahuta runs only the 10-thread bitmask comparator.
-This targets the 0.7.0 batch worker overcommit change for I/O-bound workloads.
+The earlier 0.7.0 attempt is excluded from active benchmark manifests.
 
 The native mmCIF single-file manifest is separate from the cleaned-PDB
 single-file manifest. It currently compares versioned `zsasa` with PDBTools.jl

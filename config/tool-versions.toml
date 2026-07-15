@@ -20,14 +20,14 @@ zig = "0.16.0"
 binary = "zsasa-0.6.0"
 check_args = ["--version"]
 
-[zsasa_0_7_0]
-policy = "versioned zsasa candidate for release-refresh benchmarks"
+[zsasa_0_9_0]
+policy = "current zsasa release for benchmark reruns"
 repository = "https://github.com/N283T/zsasa"
-version = "0.7.0"
-tag = "v0.7.0"
-commit = "80d5f0c5f2ff102627d8f94fcc41882dc51dab7b"
+version = "0.9.0"
+tag = "v0.9.0"
+commit = "f4c7ac6290c6bbc23dbcd8d6b39b3efd51554cc1"
 zig = "0.16.0"
-binary = "zsasa-0.7.0"
+binary = "zsasa-0.9.0"
 check_args = ["--version"]
 
 [freesasa]
