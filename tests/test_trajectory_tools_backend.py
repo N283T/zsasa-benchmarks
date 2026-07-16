@@ -87,6 +87,7 @@ def test_resolve_zsasa_binary_uses_path(tmp_path: Path, monkeypatch) -> None:
     binary = tmp_path.joinpath("zsasa")
     binary.write_text("#!/bin/sh\necho zsasa 0.6.0\n", encoding="utf-8")
     binary.chmod(0o755)
+    monkeypatch.delenv("ZSASA_CLI", raising=False)
     monkeypatch.setenv("PATH", str(tmp_path))
     assert resolve_zsasa_binary(Path("zsasa")) == binary
 

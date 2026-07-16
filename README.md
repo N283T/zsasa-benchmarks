@@ -62,11 +62,11 @@ python scripts/check_tools.py --profile single_file
 python scripts/check_tools.py --profile single_file_pdbtools
 uv run python scripts/check_tools.py --profile full
 python scripts/run_validation.py --manifest manifests/validation-ecoli-smoke.toml --datasets config/datasets.toml.example --run-id smoke --dry-run
-python scripts/run_validation.py --manifest manifests/validation-ecoli.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
+python scripts/run_validation.py --manifest manifests/validation-ecoli.toml --datasets config/datasets.toml.example --run-id v0_9_0_validation --dry-run
 python scripts/run_batch.py --manifest manifests/batch-ecoli.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
 python scripts/prepare_single_file_structures.py --manifest manifests/single-file-sample.toml --datasets config/datasets.toml.example --dry-run
 python scripts/run_single_file.py --manifest manifests/single-file-sample.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
-uv run python scripts/run_trajectory_validation.py --manifest manifests/validation-md-5wvo.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
+uv run python scripts/run_trajectory_validation.py --manifest manifests/validation-md-5wvo.toml --datasets config/datasets.toml.example --run-id v0_9_0_validation --dry-run
 uv run python scripts/run_trajectory.py --manifest manifests/trajectory.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
 ```
 
@@ -146,7 +146,7 @@ Native runners accept command-record glob filters for targeted reruns:
 python scripts/run_validation.py --manifest manifests/validation-ecoli.toml --datasets config/datasets.local.toml --run-id v0_6_0_full --only 'rustsasa_*' --replace --execute
 python scripts/run_batch.py --manifest manifests/batch-ecoli.toml --datasets config/datasets.local.toml --run-id v0_6_0_full --only 'zsasa_batch_*_10t_*' --dry-run
 python scripts/run_single_file.py --manifest manifests/single-file-sample.toml --datasets config/datasets.local.toml --run-id v0_6_0_full --only 'single_wall_zsasa_f64_*_10t_100p' --dry-run
-uv run python scripts/run_trajectory_validation.py --manifest manifests/validation-md-5wvo.toml --datasets config/datasets.local.toml --run-id v0_6_0_full --only 'zig_bitmask_*_1000p' --dry-run
+uv run python scripts/run_trajectory_validation.py --manifest manifests/validation-md-5wvo.toml --datasets config/datasets.local.toml --run-id v0_9_0_validation --only 'zig_bitmask_*_1024p' --dry-run
 ```
 
 Use `--only` and `--exclude` repeatedly to combine conditions. Use `--replace` only when

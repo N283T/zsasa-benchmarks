@@ -238,8 +238,12 @@ def main() -> None:
         if "xtc" not in entry or "pdb" not in entry:
             fail(f"datasets example missing trajectory paths for {dataset_id}")
     runs = validation.get("runs", [])
-    if not any(run.get("algorithm") == "sr" and 100 in run.get("points", []) for run in runs):
-        fail("validation manifest must include SR 100-point full rerun")
+    expected_validation_points = [64, 128, 256, 512, 1024]
+    if not any(
+        run.get("algorithm") == "sr" and run.get("points") == expected_validation_points
+        for run in runs
+    ):
+        fail("validation manifest must include power-of-two SR point counts through 1024")
     if not any(run.get("algorithm") == "lr" and 20 in run.get("points", []) for run in runs):
         fail("validation manifest must include LR 20-slice full rerun")
 
@@ -254,6 +258,8 @@ def main() -> None:
     md_full = md_validation.get("full_rerun", {})
     if md_full.get("tools") != ["mdtraj", "zsasa_mdtraj", "zsasa_mdanalysis", "zig", "zig_bitmask"]:
         fail("MD validation full_rerun must include mdtraj, zsasa wrappers, and CLI tools")
+    if md_full.get("n_points") != expected_validation_points:
+        fail("MD validation must use power-of-two point counts through 1024")
     if md_full.get("classifier") != "naccess" or md_full.get("include_hydrogens") is not True:
         fail("MD validation full_rerun must use naccess with explicit hydrogens")
 

@@ -98,15 +98,19 @@ def parse_zsasa_jsonl_total(line: str) -> tuple[str, float, int | None]:
 
 
 def parse_validation_zsasa_name(filename: str) -> dict[str, Any]:
-    sr = re.fullmatch(r"sr_(f32|f64)_(standard|bitmask)_(\d+)\.jsonl", filename)
+    sr = re.fullmatch(
+        r"sr_(f32|f64)_(standard|bitmask|bitmask_corrected)_(\d+)\.jsonl", filename
+    )
     if sr:
-        precision, mode, n_points = sr.groups()
+        precision, variant_name, n_points = sr.groups()
+        mode = "bitmask" if variant_name.startswith("bitmask") else "standard"
         return {
             "algorithm": "sr",
             "precision": precision,
             "mode": mode,
             "n_points": int(n_points),
             "n_slices": None,
+            "variant": "corrected" if variant_name == "bitmask_corrected" else None,
         }
     lr = re.fullmatch(r"lr_(f32|f64)_(\d+)\.jsonl", filename)
     if lr:
@@ -701,6 +705,17 @@ def import_trajectory_validation(conn, validation_dir: Path, run_label: str) -> 
 
 
 def parse_trajectory_validation_parts(parts: tuple[str, ...]) -> dict[str, Any]:
+    if parts[0] == "zig_bitmask" and len(parts) == 5:
+        tool_id, precision, variant, points_part, _ = parts
+        return {
+            "tool_id": tool_id,
+            "algorithm": "sr",
+            "precision": precision,
+            "mode": "bitmask",
+            "variant": variant,
+            "n_points": int(points_part.removesuffix("p")),
+            "threads": 10,
+        }
     if parts[0] in {"zig", "zig_bitmask"}:
         tool_id, precision, points_part, _ = parts
         return {

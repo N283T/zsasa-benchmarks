@@ -44,6 +44,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--precision", choices=["f32", "f64"], default="f64")
     parser.add_argument("--classifier", default="naccess")
     parser.add_argument("--zsasa-binary", type=Path, default=Path(DEFAULT_ZSASA_BINARY))
+    parser.add_argument(
+        "--bitmask-lut-mode",
+        choices=["single", "per-frame", "cycle"],
+        default=None,
+    )
+    parser.add_argument("--bitmask-correction", action="store_true")
     parser.add_argument("--output", required=True, type=Path)
     hydrogen = parser.add_mutually_exclusive_group()
     hydrogen.add_argument(
@@ -79,6 +85,8 @@ def build_zsasa_traj_command(
     use_bitmask: bool,
     include_hydrogens: bool,
     classifier: str,
+    bitmask_lut_mode: str | None = None,
+    bitmask_correction: bool = False,
 ) -> list[str]:
     """Build a zsasa CLI trajectory command matching the MD benchmark settings."""
     cmd = [
@@ -95,6 +103,10 @@ def build_zsasa_traj_command(
     ]
     if use_bitmask:
         cmd.append("--use-bitmask")
+        if bitmask_lut_mode is not None:
+            cmd.append(f"--bitmask-lut-mode={bitmask_lut_mode}")
+        if bitmask_correction:
+            cmd.append("--bitmask-correction")
     cmd.extend(["-o", str(output_csv), "-q"])
     return cmd
 
@@ -118,6 +130,8 @@ def write_command_stub(args: argparse.Namespace) -> None:
             "classifier": args.classifier,
             "include_hydrogens": args.include_hydrogens,
             "zsasa_binary": str(args.zsasa_binary),
+            "bitmask_lut_mode": args.bitmask_lut_mode,
+            "bitmask_correction": args.bitmask_correction,
             "status": "command_stub_only",
         },
     )
@@ -134,6 +148,8 @@ def _totals_payload(*, args: argparse.Namespace, totals_a2: list[float]) -> dict
         "precision": args.precision,
         "classifier": args.classifier,
         "include_hydrogens": args.include_hydrogens,
+        "bitmask_lut_mode": args.bitmask_lut_mode,
+        "bitmask_correction": args.bitmask_correction,
         "n_frames": len(totals_a2),
         "total_sasa_a2": totals_a2,
     }
@@ -146,9 +162,10 @@ def parse_zsasa_csv_totals(path: Path) -> list[float]:
 
 
 def resolve_zsasa_binary(path: Path) -> Path:
-    env_binary = os.environ.get("ZSASA_CLI")
-    if env_binary:
-        return Path(os.path.expanduser(env_binary))
+    if path == Path(DEFAULT_ZSASA_BINARY):
+        env_binary = os.environ.get("ZSASA_CLI")
+        if env_binary:
+            return Path(os.path.expanduser(env_binary))
     if path.parent == Path("."):
         found = shutil.which(str(path))
         if found:
@@ -172,6 +189,8 @@ def run_zsasa_cli(args: argparse.Namespace, *, use_bitmask: bool) -> None:
             use_bitmask=use_bitmask,
             include_hydrogens=args.include_hydrogens,
             classifier=args.classifier,
+            bitmask_lut_mode=args.bitmask_lut_mode,
+            bitmask_correction=args.bitmask_correction,
         )
         subprocess.run(cmd, check=True)
         totals = parse_zsasa_csv_totals(output_csv)
