@@ -106,8 +106,18 @@ waters, hydrogens, alternative conformations, and non-L-peptide chains are
 excluded from these benchmark inputs so comparator behavior remains aligned.
 Run them with `scripts/run_single_file.py`, which records both hyperfine wall-clock
 commands and tool `--timing` component commands for parse/SASA timing. The same
-runner also supports `manifests/single-file-mmcif-sample.toml`, which keeps native
-mmCIF inputs and compares versioned `zsasa` runs against PDBTools.jl only.
+runner also supports `manifests/single-file-mmcif-sample.toml`, which mirrors all
+eight PDB subset structures and the PDB tool/thread matrix using native
+uncompressed mmCIF. Materialize those ignored inputs with `uv run python
+scripts/prepare_single_file_mmcif_structures.py --datasets
+config/datasets.local.toml --execute`. The mmCIF matrix compares zsasa 0.9.0,
+FreeSASA, RustSASA, and PDBTools.jl; Lahuta remains excluded because its file mode
+requires AlphaFold-style model metadata and skips general PDB-derived assemblies.
+FreeSASA is excluded for the two NVDA structures because it aborts without
+producing atomic radii, and for 9fqr because the pinned parser aborts on that
+file's valid long assembly text field. Every other structure/tool combination
+remains enabled. Interrupted wall-clock runs resume from existing hyperfine JSON
+results unless `--replace` is supplied.
 
 ## Remaining benchmark rerun
 

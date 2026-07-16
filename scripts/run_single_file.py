@@ -153,6 +153,7 @@ def full_rerun_settings(manifest: dict[str, Any]) -> dict[str, Any]:
         ],
     )
     full_rerun.setdefault("phases", ["wall", "timing"])
+    full_rerun.setdefault("excluded_records", [])
     return full_rerun
 
 
@@ -460,6 +461,9 @@ def run_single_file_records(
     timing_records = [record for record in records if record.phase == "timing"]
     for record in wall_records:
         print(f"# name: {record.name}")
+        if not replace and record.hyperfine_json is not None and record.hyperfine_json.is_file():
+            print(f"already completed: {record.hyperfine_json}", flush=True)
+            continue
         if replace:
             for output in record.outputs:
                 if not output.exists() and not output.is_symlink():
@@ -494,6 +498,11 @@ def main() -> None:
         settings=settings,
         execute=not args.dry_run,
     )
+    manifest_excluded_records = [str(value) for value in settings["excluded_records"]]
+    records = cast(
+        list[SingleFileRecord],
+        filter_records(records, only=[], exclude=manifest_excluded_records),
+    )
     prepare_output_directories(output_base=output_base, settings=settings)
     selected_records = cast(
         list[SingleFileRecord],
@@ -516,6 +525,7 @@ def main() -> None:
             "timing_repeats": settings["timing_repeats"],
             "tools": settings["tools"],
             "phases": settings["phases"],
+            "manifest_excluded_records": manifest_excluded_records,
             "tool_versions": str(resolve_repo_path(args.tool_versions)),
             "datasets": str(resolve_repo_path(args.datasets)),
             "only": list(args.only),
