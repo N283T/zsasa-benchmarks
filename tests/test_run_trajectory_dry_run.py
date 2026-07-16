@@ -1,9 +1,13 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
+from unittest.mock import patch
+
+from scripts.benchlib.trajectory_tools import resolve_zsasa_binary
 
 
 def test_run_trajectory_validation_dry_run_outputs_native_commands() -> None:
@@ -29,14 +33,18 @@ def test_run_trajectory_validation_dry_run_outputs_native_commands() -> None:
     assert "benchmarks/scripts/" not in proc.stdout
     assert "mdtraj" in proc.stdout
     assert f"results/full_rerun/{run_id}/validation_md" in proc.stdout
-    assert "--n-points 100" in proc.stdout
-    assert "--n-points 1000" in proc.stdout
+    assert "--n-points 64" in proc.stdout
+    assert "--n-points 1024" in proc.stdout
+    assert "--bitmask-lut-mode single" in proc.stdout
+    assert "--bitmask-lut-mode per-frame" in proc.stdout
+    assert "--bitmask-lut-mode cycle" in proc.stdout
+    assert "--bitmask-correction" in proc.stdout
     assert "--output" in proc.stdout
     assert "--include-hydrogens" in proc.stdout
     assert "--classifier naccess" in proc.stdout
     assert "--precision f64" in proc.stdout
     assert "--precision f32" in proc.stdout
-    assert "raw/mdtraj/100p/results.json" in proc.stdout
+    assert "raw/mdtraj/64p/results.json" in proc.stdout
 
     output_base = Path("results/full_rerun") / run_id / "validation_md" / "5wvo_C_analysis"
     assert output_base.joinpath("commands.log").is_file()
@@ -44,9 +52,10 @@ def test_run_trajectory_validation_dry_run_outputs_native_commands() -> None:
     assert config_path.is_file()
     config = json.loads(config_path.read_text(encoding="utf-8"))
     assert config["dataset_id"] == "5wvo_C_analysis"
-    assert config["n_points"] == [100, 200, 500, 1000]
-    assert output_base.joinpath("raw", "mdtraj", "100p").is_dir()
-    assert output_base.joinpath("raw", "zsasa_mdtraj", "1000p").is_dir()
+    assert config["n_points"] == [64, 128, 256, 512, 1024]
+    assert output_base.joinpath("raw", "mdtraj", "64p").is_dir()
+    assert output_base.joinpath("raw", "zsasa_mdtraj", "1024p").is_dir()
+    assert output_base.joinpath("raw", "zig_bitmask", "f64", "cycle", "1024p").is_dir()
 
 
 def test_run_trajectory_dry_run_outputs_native_hyperfine_commands() -> None:
@@ -163,7 +172,7 @@ def test_run_trajectory_validation_dry_run_filters_record_names() -> None:
             "--datasets",
             "config/datasets.toml.example",
             "--only",
-            "zig_bitmask_f64_10t_1000p",
+            "zig_bitmask_f64_cycle_corrected_10t_1024p",
             "--dry-run",
         ],
         check=True,
@@ -171,9 +180,9 @@ def test_run_trajectory_validation_dry_run_filters_record_names() -> None:
         text=True,
     )
 
-    assert "# name: zig_bitmask_f64_10t_1000p" in proc.stdout
-    assert "# name: mdtraj_1000p" not in proc.stdout
-    assert "# name: zig_f64_10t_1000p" not in proc.stdout
+    assert "# name: zig_bitmask_f64_cycle_corrected_10t_1024p" in proc.stdout
+    assert "# name: mdtraj_1024p" not in proc.stdout
+    assert "# name: zig_f64_10t_1024p" not in proc.stdout
 
 
 def test_run_trajectory_dry_run_filters_record_names() -> None:
@@ -216,3 +225,10 @@ def test_trajectory_tools_module_help_is_available() -> None:
 
     assert "--tool" in proc.stdout
     assert "--output" in proc.stdout
+
+
+def test_explicit_zsasa_binary_takes_precedence_over_environment() -> None:
+    with patch.dict(os.environ, {"ZSASA_CLI": "/tmp/zsasa-0.6.0"}):
+        assert resolve_zsasa_binary(Path("/tmp/zsasa-0.9.0")) == Path(
+            "/tmp/zsasa-0.9.0"
+        )

@@ -29,8 +29,9 @@ def test_run_validation_dry_run_outputs_native_commands() -> None:
     assert "rustsasa" in proc.stdout
     assert " -f json " in proc.stdout
     assert " -f pdb " not in proc.stdout
-    assert "--n-points=100" in proc.stdout
-    assert "--n-points=1000" in proc.stdout
+    assert "--n-points=64" in proc.stdout
+    assert "--n-points=1024" in proc.stdout
+    assert "--bitmask-correction" in proc.stdout
     assert "--n-slices=20" in proc.stdout
     assert "scripts/validation.py" not in proc.stdout
 
@@ -38,9 +39,9 @@ def test_run_validation_dry_run_outputs_native_commands() -> None:
     assert output_base.joinpath("commands.log").is_file()
     assert output_base.joinpath("config.json").is_file()
     assert output_base.joinpath("zsasa").is_dir()
-    assert output_base.joinpath("freesasa_batch", "sr_100").is_dir()
-    assert output_base.joinpath("rustsasa", "sr_1000").is_dir()
-    assert output_base.joinpath("lahuta", "sr_standard_100").is_dir()
+    assert output_base.joinpath("freesasa_batch", "sr_64").is_dir()
+    assert output_base.joinpath("rustsasa", "sr_1024").is_dir()
+    assert output_base.joinpath("lahuta", "sr_standard_64").is_dir()
     assert output_base.joinpath("lahuta", "sr_bitmask_128").is_dir()
 
 
@@ -113,6 +114,6 @@ def test_run_validation_dry_run_filters_record_names() -> None:
         text=True,
     )
 
-    assert "# name: rustsasa_sr_100" in proc.stdout
-    assert "# name: zsasa_sr_f64_standard_100" not in proc.stdout
-    assert "# name: freesasa_batch_sr_100" not in proc.stdout
+    assert "# name: rustsasa_sr_64" in proc.stdout
+    assert "# name: zsasa_sr_f64_standard_64" not in proc.stdout
+    assert "# name: freesasa_batch_sr_64" not in proc.stdout

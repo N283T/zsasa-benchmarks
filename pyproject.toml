@@ -11,7 +11,7 @@ dependencies = [
   "mdsasa-bolt==4.0.1",
   "mdtraj==1.11.1.post1",
   "pytest>=8.0",
-  "zsasa==0.6.0",
+  "zsasa==0.9.0",
   "gemmi>=0.7.4",
 ]
 
@@ -27,4 +27,4 @@ pythonpath = ["."]
 norecursedirs = ["external", "results", "archives"]
 
 [tool.uv.sources]
-zsasa = { git = "https://github.com/N283T/zsasa", subdirectory = "python", rev = "v0.6.0" }
+zsasa = { git = "https://github.com/N283T/zsasa", subdirectory = "python", rev = "v0.9.0" }

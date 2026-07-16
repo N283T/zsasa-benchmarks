@@ -10,6 +10,7 @@ from scripts.import_full_rerun import (
     import_full_rerun,
     manifest_id_from_config,
     parse_batch_record_name,
+    parse_trajectory_validation_parts,
     parse_validation_zsasa_name,
     parse_zsasa_jsonl_total,
     reset_database,
@@ -24,6 +25,15 @@ def test_parse_validation_zsasa_name() -> None:
         "mode": "bitmask",
         "n_points": 1000,
         "n_slices": None,
+        "variant": None,
+    }
+    assert parse_validation_zsasa_name("sr_f32_bitmask_corrected_128.jsonl") == {
+        "algorithm": "sr",
+        "precision": "f32",
+        "mode": "bitmask",
+        "n_points": 128,
+        "n_slices": None,
+        "variant": "corrected",
     }
     assert parse_validation_zsasa_name("lr_f32_20.jsonl") == {
         "algorithm": "lr",
@@ -31,6 +41,20 @@ def test_parse_validation_zsasa_name() -> None:
         "mode": "standard",
         "n_points": None,
         "n_slices": 20,
+    }
+
+
+def test_parse_trajectory_bitmask_variant() -> None:
+    assert parse_trajectory_validation_parts(
+        ("zig_bitmask", "f64", "cycle_corrected", "1024p", "results.json")
+    ) == {
+        "tool_id": "zig_bitmask",
+        "algorithm": "sr",
+        "precision": "f64",
+        "mode": "bitmask",
+        "variant": "cycle_corrected",
+        "n_points": 1024,
+        "threads": 10,
     }
 
 

@@ -47,6 +47,7 @@ def batch_command(
     n_points: int,
     threads: int,
     bitmask: bool,
+    bitmask_correction: bool = False,
     classifier: str | None = None,
     jsonl_decimals: int | None = None,
     af_model_fast: bool = False,
@@ -79,6 +80,8 @@ def batch_command(
         cmd.append("--profile-stages")
     if bitmask:
         cmd.append("--use-bitmask")
+    if bitmask_correction:
+        cmd.append("--bitmask-correction")
     return cmd
 
 
@@ -223,6 +226,8 @@ def mdtraj_runner_command(
     classifier: str | None = None,
     include_hydrogens: bool | None = None,
     zsasa_binary: Path | None = None,
+    bitmask_lut_mode: str | None = None,
+    bitmask_correction: bool = False,
 ) -> list[str]:
     cmd = [
         str(python or sys.executable),
@@ -249,6 +254,10 @@ def mdtraj_runner_command(
         cmd.append("--include-hydrogens" if include_hydrogens else "--no-hydrogens")
     if zsasa_binary is not None:
         cmd.extend(["--zsasa-binary", str(zsasa_binary)])
+    if bitmask_lut_mode is not None:
+        cmd.extend(["--bitmask-lut-mode", bitmask_lut_mode])
+    if bitmask_correction:
+        cmd.append("--bitmask-correction")
     if output is not None:
         cmd.extend(["--output", str(output)])
     return cmd

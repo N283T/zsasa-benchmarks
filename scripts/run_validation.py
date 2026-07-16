@@ -43,7 +43,7 @@ from scripts.benchlib.tools import (  # noqa: E402
     resolve_tool_binary,
 )
 
-DEFAULT_RUN_ID = "v0_6_0_full"
+DEFAULT_RUN_ID = "v0_9_0_validation"
 DEFAULT_TOOL_VERSIONS = Path("config/tool-versions.toml")
 
 
@@ -93,7 +93,7 @@ def require_binary(specs: dict[str, ToolSpec], tool_id: str) -> Path:
         raise ToolError(f"unknown tool: {tool_id}")
     if spec.binary is None:
         raise ToolError(f"missing binary for tool: {tool_id}")
-    if tool_id == "zsasa":
+    if tool_id.startswith("zsasa"):
         return resolve_tool_binary(tool_id, spec.binary)
     return spec.binary
 
@@ -174,13 +174,16 @@ def sr_records(
     input_dir: Path,
     output_base: Path,
     points: list[int],
+    variants: list[str],
     threads: int,
 ) -> list[CommandRecord]:
     records: list[CommandRecord] = []
     for n_points in points:
         for precision in ["f64", "f32"]:
-            for bitmask in [False, True]:
-                suffix = "bitmask" if bitmask else "standard"
+            for variant in variants:
+                bitmask = variant.startswith("bitmask")
+                correction = variant == "bitmask_corrected"
+                suffix = variant
                 records.append(
                     CommandRecord(
                         name=f"zsasa_sr_{precision}_{suffix}_{n_points}",
@@ -199,6 +202,7 @@ def sr_records(
                             n_points=n_points,
                             threads=threads,
                             bitmask=bitmask,
+                            bitmask_correction=correction,
                         ),
                     )
                 )
@@ -293,7 +297,7 @@ def build_records(
     input_dir = dataset_path(dataset_catalog, str(dataset["id"]), "path")
     threads = int(full_rerun["threads"])
 
-    zsasa = require_binary(specs, "zsasa")
+    zsasa = require_binary(specs, str(full_rerun.get("zsasa_tool", "zsasa")))
     freesasa_batch = require_binary(specs, "freesasa_batch")
     lahuta = require_binary(specs, "lahuta")
     rustsasa = require_binary(specs, "rustsasa")
@@ -313,6 +317,10 @@ def build_records(
                     input_dir=input_dir,
                     output_base=output_base,
                     points=[int(point) for point in run.get("points", [])],
+                    variants=[
+                        str(value)
+                        for value in run.get("zsasa_variants", ["standard", "bitmask"])
+                    ],
                     threads=threads,
                 )
             )
