@@ -964,7 +964,13 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def ecoli_comparison_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Keep the release-comparable E. coli thread range in the primary figures."""
+    return [row for row in rows if int(row["threads"]) <= 10]
+
+
 def generate_ecoli(rows: list[dict[str, Any]], out_dir: Path) -> tuple[list[Path], Path]:
+    rows = ecoli_comparison_rows(rows)
     outputs: list[Path] = []
     outputs.extend(plot_throughput(rows, out_dir))
     outputs.extend(plot_runtime(rows, out_dir))

@@ -1,4 +1,4 @@
-# E. coli zsasa 0.9.0 batch thread-overcommit manifest.
+# E. coli zsasa 0.9.0 batch thread-scaling and overcommit manifest.
 
 id = "batch-ecoli-zsasa-0-9-overcommit"
 status = "ready"
@@ -6,13 +6,13 @@ status = "ready"
 [dataset]
 id = "UP000000625_83333_ECOLI_v6_pdb"
 expected_count = 4370
-role = ["batch-throughput", "thread-overcommit"]
+role = ["batch-throughput", "thread-scaling", "thread-overcommit"]
 
 [full_rerun]
 source_kind = "full_rerun"
 run_id_default = "v0_9_0_overcommit"
 n_points = 128
-threads = [10, 20, 40]
+threads = [1, 4, 8, 10, 20, 40]
 runs = 3
 warmup = 3
 precisions = ["f64", "f32"]
@@ -24,6 +24,6 @@ output_base = "results/full_rerun/v0_9_0_overcommit/batch/ecoli"
 
 [[full_rerun.jobs]]
 tool = "zsasa_0_9_0"
-threads = [10, 20, 40]
+threads = [1, 4, 8, 10, 20, 40]
 precisions = ["f64", "f32"]
 modes = ["standard", "bitmask"]

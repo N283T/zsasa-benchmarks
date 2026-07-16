@@ -18,7 +18,7 @@ Exploratory figures generated from `results/benchmark.duckdb` in PNG/SVG/PDF for
 
 | benchmark_kind | runs | datasets |
 | --- | --- | --- |
-| batch | 162 | 4 |
+| batch | 174 | 4 |
 | single_file | 760 | 2 |
 | trajectory | 166 | 3 |
 | trajectory_validation | 103 | 1 |
@@ -29,12 +29,12 @@ Exploratory figures generated from `results/benchmark.duckdb` in PNG/SVG/PDF for
 | metric | rows | runs |
 | --- | --- | --- |
 | parse_time | 760 | 760 |
-| peak_rss | 8670 | 1088 |
-| runtime | 8653 | 1088 |
+| peak_rss | 8766 | 1100 |
+| runtime | 8749 | 1100 |
 | sasa_time | 760 | 760 |
-| system_time | 1088 | 1088 |
+| system_time | 1100 | 1100 |
 | total_time | 760 | 760 |
-| user_time | 1088 | 1088 |
+| user_time | 1100 | 1100 |
 
 ## Quick winners
 

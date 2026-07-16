@@ -80,6 +80,19 @@ def test_milliseconds_per_structure() -> None:
     assert milliseconds_per_structure(2.0, 1000) == 2.0
 
 
+def test_ecoli_comparison_rows_excludes_overcommit_threads() -> None:
+    from scripts.plot_batch_figures import ecoli_comparison_rows
+
+    rows = [{"threads": thread} for thread in (1, 4, 8, 10, 20, 40)]
+
+    assert ecoli_comparison_rows(rows) == [
+        {"threads": 1},
+        {"threads": 4},
+        {"threads": 8},
+        {"threads": 10},
+    ]
+
+
 
 def test_batch_comparison_label_style_places_selected_labels() -> None:
     from scripts.plot_batch_figures import batch_comparison_label_style
