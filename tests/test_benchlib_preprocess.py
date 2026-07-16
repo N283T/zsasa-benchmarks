@@ -4,12 +4,41 @@ import csv
 import json
 from pathlib import Path
 
+import gemmi
 import pytest
 from scripts.benchlib.preprocess import (
     PreprocessError,
+    clean_structure_to_cif,
     clean_structure_to_pdb,
     prepare_manifest_structures,
 )
+
+
+def test_clean_structure_to_cif_removes_non_protein_records(tmp_path: Path) -> None:
+    source = tmp_path.joinpath("input.pdb")
+    source.write_text(
+        "\n".join(
+            [
+                "ATOM      1  N   ALA A   1       1.000   2.000   3.000  1.00 20.00           N  ",
+                "ATOM      2  CA  ALA A   1       2.000   2.000   3.000  1.00 20.00           C  ",
+                "ATOM      3  H   ALA A   1       1.100   2.100   3.100  1.00 20.00           H  ",
+                "HETATM    4  O   HOH A   2       4.000   2.000   3.000  1.00 20.00           O  ",
+                "END",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    output = tmp_path.joinpath("cleaned.cif")
+
+    result = clean_structure_to_cif(source, output, structure_id="example")
+
+    assert result.n_atoms == 2
+    assert result.n_chains == 1
+    cleaned = gemmi.read_structure(str(output))
+    atoms = [atom for model in cleaned for chain in model for residue in chain for atom in residue]
+    assert len(atoms) == 2
+    assert all(atom.element.name != "H" for atom in atoms)
 
 
 def test_clean_structure_to_pdb_removes_non_protein_records_and_wraps_pdb_fields(

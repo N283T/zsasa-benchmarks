@@ -296,6 +296,25 @@ def main() -> None:
             "0.9.0 10/20/40t, and Lahuta bitmask 10t"
         )
 
+    for manifest_name, dataset_id in [
+        ("batch-ecoli-zsasa-0.9.toml", "UP000000625_83333_ECOLI_v6_pdb"),
+        ("batch-human-zsasa-0.9.toml", "UP000005640_9606_HUMAN_v6_pdb"),
+    ]:
+        pdb_refresh = read_toml(ROOT.joinpath("manifests", manifest_name))
+        pdb_full = pdb_refresh.get("full_rerun", {})
+        if pdb_refresh.get("dataset", {}).get("id") != dataset_id:
+            fail(f"{manifest_name} must use {dataset_id}")
+        expected_pdb_jobs = [
+            {
+                "tool": "zsasa_0_9_0",
+                "threads": [10, 20, 40],
+                "precisions": ["f64", "f32"],
+                "modes": ["standard", "bitmask"],
+            }
+        ]
+        if pdb_full.get("threads") != [10, 20, 40] or pdb_full.get("jobs") != expected_pdb_jobs:
+            fail(f"{manifest_name} must encode the zsasa 0.9.0 10/20/40t matrix")
+
     human_cif = read_toml(ROOT.joinpath("manifests/batch-human-cif-zsasa-0.9.toml"))
     human_cif_full = human_cif.get("full_rerun", {})
     if human_cif_full.get("runs") != 3 or human_cif_full.get("warmup") != 1:
@@ -351,8 +370,15 @@ def main() -> None:
         fail("Human CIF jobs must encode the parser/I/O matrix plus Lahuta 10t")
 
     single_pdb = read_toml(ROOT.joinpath("manifests/single-file-sample.toml"))
-    if "pdbtools_jl" not in single_pdb.get("full_rerun", {}).get("tools", []):
-        fail("PDB single-file manifest must include pdbtools_jl")
+    expected_pdb_tools = {
+        "zsasa_0_9_0_f64",
+        "zsasa_0_9_0_f32",
+        "zsasa_0_9_0_f64_bitmask",
+        "zsasa_0_9_0_f32_bitmask",
+        "pdbtools_jl",
+    }
+    if set(single_pdb.get("full_rerun", {}).get("tools", [])) != expected_pdb_tools:
+        fail("PDB single-file manifest must refresh zsasa 0.9.0 with PDBTools.jl")
 
     single_mmcif = read_toml(ROOT.joinpath("manifests/single-file-mmcif-sample.toml"))
     if single_mmcif.get("dataset", {}).get("id") != "single_file_large_structure_mmcif_subset":

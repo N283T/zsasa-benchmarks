@@ -49,6 +49,11 @@ f32 standard/bitmask at 10 threads, `zsasa_0_9_0` runs f32 standard/bitmask at
 10, 20, and 40 threads, and Lahuta runs only the 10-thread bitmask comparator.
 The earlier 0.7.0 attempt is excluded from active benchmark manifests.
 
+The E. coli and Human PDB release refresh reruns zsasa 0.9.0 f32/f64 in
+standard and bitmask modes at 10, 20, and 40 threads. Keep the completed 0.6.0
+comparator and lower-thread results as reference measurements rather than
+rerunning them in this matrix.
+
 The Human AFDB mmCIF benchmark keeps parser, input I/O, and thread scaling
 separable. At 20 threads it measures the full generic/AF-fast by read/mmap
 matrix. At 10 and 40 threads it measures the generic/read and AF-fast/read
@@ -58,16 +63,19 @@ three-decimal JSONL output. Interpret the result as a warm-cache end-to-end
 batch benchmark because `prepare = "sync"` does not drop the operating-system
 page cache.
 
-The native mmCIF single-file manifest replaces the cleaned-PDB matrix for new
+The mmCIF single-file manifest replaces the cleaned-PDB matrix for new
 measurements. It mirrors all eight structures, thread counts, precisions, and
 standard/bitmask modes with zsasa 0.9.0, FreeSASA, RustSASA, and PDBTools.jl.
 Use uncompressed `.cif` inputs so every comparator measures the same bytes;
 FreeSASA must be invoked with `--cif`. Lahuta remains excluded because its file
 mode requires AlphaFold-style model metadata and skips general PDB-derived
-assemblies. FreeSASA is additionally excluded for the two NVDA structures,
-where it aborts without producing atomic radii, and for 9fqr, where its pinned
-mmCIF parser aborts on a valid 9,696-character assembly text field. Record these
-as parser limitations rather than changing the native inputs. Keep historical
+assemblies. To keep zsasa atom workloads aligned with the cleaned PDB inputs,
+prepare 5vyc and 9fqr as protein-only mmCIF; their raw native files contain
+221,406 and 20,949 additional atoms, respectively. The other six mmCIF inputs
+remain native because their zsasa atom counts already match. Preserve source
+metadata while filtering `_atom_site`, but remove stale assembly-generation
+metadata that the pinned FreeSASA parser cannot read. FreeSASA is excluded for
+the two NVDA inputs because it aborts without producing atomic radii. Keep historical
 cleaned-PDB results separate and label the input format explicitly when comparing
 them with native mmCIF results.
 
@@ -120,4 +128,7 @@ times, while wall records include Julia startup and package loading. Results are
 planned under `results/full_rerun/<run_id>/single/<dataset_id>/`. Lahuta is
 intentionally excluded from this benchmark because it targets AlphaFold-style
 inputs and is not expected to cover the mixed preprocessed AFDB/NVDA/PDB subset
-consistently.
+consistently. The current PDB refresh runs the four zsasa 0.9.0 precision/mode
+variants and PDBTools.jl at 1, 4, 8, and 10 threads. FreeSASA and RustSASA are not
+rerun because their historical cleaned-PDB measurements already belong to the
+0.6.0 suite.

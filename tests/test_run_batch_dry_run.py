@@ -267,11 +267,11 @@ def test_run_batch_ecoli_overcommit_targets_zsasa_0_9_matrix() -> None:
     )
 
     assert "dataset=ecoli" in proc.stdout
-    assert "selected_commands=16/16" in proc.stdout
+    assert "selected_commands=12/12" in proc.stdout
     assert "# name: zsasa_0_9_0_batch_f64_standard_10t_128p" in proc.stdout
     assert "# name: zsasa_0_9_0_batch_f64_bitmask_20t_128p" in proc.stdout
     assert "# name: zsasa_0_9_0_batch_f32_standard_40t_128p" in proc.stdout
-    assert "# name: zsasa_0_9_0_batch_f32_bitmask_80t_128p" in proc.stdout
+    assert "80t_128p" not in proc.stdout
     assert "freesasa_batch" not in proc.stdout
     assert "rustsasa" not in proc.stdout
     assert "lahuta" not in proc.stdout
@@ -298,11 +298,11 @@ def test_run_batch_human_overcommit_targets_zsasa_0_9_matrix() -> None:
     )
 
     assert "dataset=human" in proc.stdout
-    assert "selected_commands=16/16" in proc.stdout
+    assert "selected_commands=12/12" in proc.stdout
     assert "# name: zsasa_0_9_0_batch_f64_standard_10t_128p" in proc.stdout
     assert "# name: zsasa_0_9_0_batch_f64_bitmask_20t_128p" in proc.stdout
     assert "# name: zsasa_0_9_0_batch_f32_standard_40t_128p" in proc.stdout
-    assert "# name: zsasa_0_9_0_batch_f32_bitmask_80t_128p" in proc.stdout
+    assert "80t_128p" not in proc.stdout
     assert "freesasa_batch" not in proc.stdout
     assert "rustsasa" not in proc.stdout
     assert "lahuta" not in proc.stdout
