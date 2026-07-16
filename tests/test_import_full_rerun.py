@@ -10,6 +10,7 @@ from scripts.import_full_rerun import (
     import_full_rerun,
     manifest_id_from_config,
     parse_batch_record_name,
+    parse_trajectory_record_name,
     parse_trajectory_validation_parts,
     parse_validation_zsasa_name,
     parse_zsasa_jsonl_total,
@@ -55,6 +56,21 @@ def test_parse_trajectory_bitmask_variant() -> None:
         "variant": "cycle_corrected",
         "n_points": 1024,
         "threads": 10,
+    }
+
+
+def test_parse_trajectory_benchmark_bitmask_variant() -> None:
+    assert parse_trajectory_record_name(
+        "5vz0_A_protein_zig_bitmask_f32_per_frame_10t_100p"
+    ) == {
+        "dataset_id": "5vz0_A_protein",
+        "tool_id": "zig_bitmask",
+        "algorithm": "sr",
+        "precision": "f32",
+        "mode": "bitmask",
+        "variant": "per_frame",
+        "threads": 10,
+        "n_points": 100,
     }
 
 

@@ -44,6 +44,10 @@ def test_run_trajectory_validation_dry_run_outputs_native_commands() -> None:
     assert "--classifier naccess" in proc.stdout
     assert "--precision f64" in proc.stdout
     assert "--precision f32" in proc.stdout
+    assert "--bitmask-lut-mode single" in proc.stdout
+    assert "--bitmask-lut-mode per-frame" in proc.stdout
+    assert "--bitmask-lut-mode cycle" in proc.stdout
+    assert "--bitmask-correction" in proc.stdout
     assert "raw/mdtraj/64p/results.json" in proc.stdout
 
     output_base = Path("results/full_rerun") / run_id / "validation_md" / "5wvo_C_analysis"
@@ -80,20 +84,20 @@ def test_run_trajectory_dry_run_outputs_native_hyperfine_commands() -> None:
     assert "scripts/bench_md.py" not in proc.stdout
     assert "benchmarks/scripts/" not in proc.stdout
     assert "hyperfine" in proc.stdout
-    assert "mdsasa_bolt" in proc.stdout
+    assert "mdsasa_bolt" not in proc.stdout
+    assert "--tool mdtraj" not in proc.stdout
+    assert "selected_commands=44/44" in proc.stdout
     assert f"results/full_rerun/{run_id}/md" in proc.stdout
     assert "5wvo_C_analysis" in proc.stdout
     assert "5vz0_A_protein" in proc.stdout
     assert "--tool zig" in proc.stdout
     assert "--tool zsasa_mdtraj" in proc.stdout
-    assert "--tool mdsasa_bolt" in proc.stdout
     assert "--include-hydrogens" in proc.stdout
     assert "--classifier naccess" in proc.stdout
     assert "--precision f64" in proc.stdout
     assert "--precision f32" in proc.stdout
     assert "--threads 10" in proc.stdout
     assert "--output" in proc.stdout
-    assert "raw/5wvo_C_analysis/mdsasa_bolt/results.json" in proc.stdout
 
     output_base = Path("results/full_rerun") / run_id / "md"
     assert output_base.joinpath("commands.log").is_file()
@@ -101,9 +105,18 @@ def test_run_trajectory_dry_run_outputs_native_hyperfine_commands() -> None:
     assert config_path.is_file()
     config = json.loads(config_path.read_text(encoding="utf-8"))
     assert config["dataset_ids"] == ["5wvo_C_analysis", "6sup_A_analysis", "5vz0_A_protein"]
+    assert config["cli_bitmask_variants"] == [
+        "single",
+        "single_corrected",
+        "per_frame",
+        "cycle",
+        "cycle_corrected",
+    ]
     assert output_base.joinpath("hyperfine").is_dir()
-    assert output_base.joinpath("raw", "5wvo_C_analysis", "mdsasa_bolt").is_dir()
     assert output_base.joinpath("raw", "5vz0_A_protein", "zig").is_dir()
+    assert output_base.joinpath(
+        "raw", "5vz0_A_protein", "zig_bitmask", "f64", "per_frame"
+    ).is_dir()
 
 
 def test_run_trajectory_rejects_disabled_full_rerun_flags(tmp_path: Path) -> None:

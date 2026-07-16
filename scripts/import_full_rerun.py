@@ -162,6 +162,22 @@ def parse_batch_record_name(name: str) -> dict[str, Any]:
 
 def parse_trajectory_record_name(name: str) -> dict[str, Any]:
     dataset_id, rest = split_dataset_prefix(name)
+    m = re.fullmatch(
+        r"zig_bitmask_(f32|f64)_(single|single_corrected|per_frame|cycle|cycle_corrected)_(\d+)t_(\d+)p",
+        rest,
+    )
+    if m:
+        precision, variant, threads, n_points = m.groups()
+        return {
+            "dataset_id": dataset_id,
+            "tool_id": "zig_bitmask",
+            "algorithm": "sr",
+            "precision": precision,
+            "mode": "bitmask",
+            "variant": variant,
+            "threads": int(threads),
+            "n_points": int(n_points),
+        }
     m = re.fullmatch(r"(zig|zig_bitmask)_(f32|f64)_(\d+)t_(\d+)p", rest)
     if m:
         tool_id, precision, threads, n_points = m.groups()

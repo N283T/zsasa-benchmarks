@@ -35,7 +35,7 @@ from scripts.benchlib.runner import (  # noqa: E402
 )
 from scripts.benchlib.tools import load_tool_specs, resolve_tool_binary  # noqa: E402
 
-DEFAULT_RUN_ID = "v0_6_0_full"
+DEFAULT_RUN_ID = "v0_9_0_md_zsasa"
 
 
 def parse_args() -> argparse.Namespace:
@@ -91,6 +91,7 @@ def full_rerun_settings(manifest: dict[str, Any]) -> dict[str, Any]:
             "warmup",
             "prepare",
             "cli_precisions",
+            "cli_bitmask_variants",
         ]
         for key in inherited_keys:
             if key in refresh:
@@ -115,6 +116,10 @@ def full_rerun_settings(manifest: dict[str, Any]) -> dict[str, Any]:
     full_rerun.setdefault("stride", 1)
     full_rerun.setdefault("threads", [10])
     full_rerun.setdefault("cli_precisions", ["f64", "f32"])
+    full_rerun.setdefault(
+        "cli_bitmask_variants",
+        ["single", "single_corrected", "per_frame", "cycle", "cycle_corrected"],
+    )
     full_rerun.setdefault("classifier", "naccess")
     full_rerun.setdefault("include_hydrogens", True)
     full_rerun.setdefault("runs", 3)
@@ -125,12 +130,12 @@ def full_rerun_settings(manifest: dict[str, Any]) -> dict[str, Any]:
     return full_rerun
 
 
-def require_zsasa_binary(tool_versions: Path) -> Path:
+def require_zsasa_binary(tool_versions: Path, tool_id: str) -> Path:
     specs = load_tool_specs(tool_versions)
-    spec = specs.get("zsasa")
+    spec = specs.get(tool_id)
     if spec is None or spec.binary is None:
         return resolve_tool_binary("zsasa", Path("zsasa"))
-    return resolve_tool_binary("zsasa", spec.binary)
+    return resolve_tool_binary(tool_id, spec.binary)
 
 
 def tools_for_dataset(dataset: dict[str, Any], settings: dict[str, Any]) -> list[str]:
@@ -152,7 +157,7 @@ def command_variants(
     *, tool: str, dataset: dict[str, Any], n_points: int, settings: dict[str, Any]
 ) -> list[dict[str, Any]]:
     threads = threads_for_dataset(dataset, settings)
-    if tool in {"zig", "zig_bitmask"}:
+    if tool == "zig":
         return [
             {
                 "name_parts": [tool, str(precision), f"{thread}t", f"{n_points}p"],
@@ -164,6 +169,38 @@ def command_variants(
             for thread in threads
             for precision in settings["cli_precisions"]
         ]
+    if tool == "zig_bitmask":
+        variants = []
+        for thread in threads:
+            for precision in settings["cli_precisions"]:
+                for bitmask_variant in settings["cli_bitmask_variants"]:
+                    lut_mode = str(bitmask_variant).removesuffix("_corrected").replace(
+                        "_", "-"
+                    )
+                    corrected = str(bitmask_variant).endswith("_corrected")
+                    variants.append(
+                        {
+                            "name_parts": [
+                                tool,
+                                str(precision),
+                                str(bitmask_variant),
+                                f"{thread}t",
+                                f"{n_points}p",
+                            ],
+                            "tool": tool,
+                            "precision": str(precision),
+                            "threads": thread,
+                            "bitmask_lut_mode": lut_mode,
+                            "bitmask_correction": corrected,
+                            "raw_parts": [
+                                str(dataset["id"]),
+                                tool,
+                                str(precision),
+                                str(bitmask_variant),
+                            ],
+                        }
+                    )
+        return variants
     if tool.startswith("zsasa_"):
         return [
             {
@@ -226,6 +263,8 @@ def build_records(
                     classifier=str(settings["classifier"]),
                     include_hydrogens=bool(settings["include_hydrogens"]),
                     zsasa_binary=zsasa_binary,
+                    bitmask_lut_mode=variant.get("bitmask_lut_mode"),
+                    bitmask_correction=bool(variant.get("bitmask_correction", False)),
                 )
                 name = "_".join([dataset_id, *[str(part) for part in variant["name_parts"]]])
                 records.append(
@@ -256,7 +295,9 @@ def main() -> None:
     dataset_catalog = load_dataset_catalog(args.datasets)
     settings = full_rerun_settings(manifest)
     require_native_full_rerun_flags(settings, runner="scripts/run_trajectory.py")
-    zsasa_binary = require_zsasa_binary(resolve_repo_path(args.tool_versions))
+    zsasa_binary = require_zsasa_binary(
+        resolve_repo_path(args.tool_versions), str(settings.get("zsasa_tool", "zsasa"))
+    )
     output_base = full_rerun_dir(args.run_id, "md")
     output_base.mkdir(parents=True, exist_ok=True)
 
@@ -285,6 +326,9 @@ def main() -> None:
             "stride": int(settings["stride"]),
             "threads": [int(value) for value in settings["threads"]],
             "cli_precisions": [str(value) for value in settings["cli_precisions"]],
+            "cli_bitmask_variants": [
+                str(value) for value in settings["cli_bitmask_variants"]
+            ],
             "classifier": str(settings["classifier"]),
             "include_hydrogens": bool(settings["include_hydrogens"]),
             "runs": int(settings["runs"]),
