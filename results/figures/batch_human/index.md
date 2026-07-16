@@ -1,6 +1,6 @@
 # Human batch figures
 
-Generated 8 PNG figures.
+Generated 8 figures in PNG/SVG/PDF.
 
 - `png/human_t10_cpu_utilization_bar.png`
 - `png/human_t10_peak_rss_bar.png`

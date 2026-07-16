@@ -1,6 +1,6 @@
 # Single-file performance figures
 
-Generated 10 PNG figures.
+Generated 10 figures in PNG/SVG/PDF.
 
 - `png/single_runtime_vs_threads_grid.png`
 - `png/single_t10_atoms_per_sec_vs_atoms.png`

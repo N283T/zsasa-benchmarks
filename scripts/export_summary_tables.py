@@ -13,6 +13,11 @@ from typing import Any
 
 import duckdb
 
+try:
+    from scripts.benchlib.reporting import adopted_for_reporting, run_set
+except ModuleNotFoundError:  # pragma: no cover - supports direct script execution
+    from benchlib.reporting import adopted_for_reporting, run_set
+
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DB = ROOT.joinpath("results", "benchmark.duckdb")
 DEFAULT_OUT_DIR = ROOT.joinpath("results", "tables")
@@ -28,7 +33,9 @@ BATCH_VARIANT_ORDER = [
     "zsasa_bitmask_f32",
     "zsasa_0_6_0_f32",
     "zsasa_0_6_0_bitmask_f32",
+    "zsasa_0_9_0_f64",
     "zsasa_0_9_0_f32",
+    "zsasa_0_9_0_bitmask_f64",
     "zsasa_0_9_0_bitmask_f32",
     "zsasa_generic_read",
     "zsasa_generic_mmap",
@@ -68,7 +75,9 @@ DISPLAY_NAMES = {
     "zsasa_bitmask_f32": "zsasa bitmask f32",
     "zsasa_0_6_0_f32": "zsasa 0.6.0 f32",
     "zsasa_0_6_0_bitmask_f32": "zsasa 0.6.0 bitmask f32",
+    "zsasa_0_9_0_f64": "zsasa 0.9.0 f64",
     "zsasa_0_9_0_f32": "zsasa 0.9.0 f32",
+    "zsasa_0_9_0_bitmask_f64": "zsasa 0.9.0 bitmask f64",
     "zsasa_0_9_0_bitmask_f32": "zsasa 0.9.0 bitmask f32",
     "zsasa_generic_read": "zsasa generic/read",
     "zsasa_generic_mmap": "zsasa generic/mmap",
@@ -120,6 +129,9 @@ CSV_DESCRIPTIONS = {
     "md_summary.csv": (
         "Trajectory/MD performance summary with runtime/RSS ratios versus available comparators."
     ),
+    "md_thread_scaling.csv": (
+        "Native zsasa trajectory scaling at 10/20/40 workers, with LUT and correction options."
+    ),
     "validation_pairwise_summary.csv": (
         "Pairwise SASA agreement against FreeSASA/MDTraj references."
     ),
@@ -149,6 +161,13 @@ def dataset_label(dataset_id: str) -> str:
 
 
 def display_name(variant: str) -> str:
+    match = re.fullmatch(r"zsasa_cli_bitmask_(f32|f64)_(.+)", variant)
+    if match:
+        precision, option = match.groups()
+        option_label = option.replace("per_frame", "per-frame").replace(
+            "_corrected", " + corrected"
+        )
+        return f"zsasa CLI bitmask {precision} ({option_label})"
     return DISPLAY_NAMES.get(variant, variant)
 
 
@@ -175,7 +194,7 @@ def single_variant_name(row: dict[str, Any]) -> str:
     tool_id = str(row.get("tool_id") or "")
     precision = str(row.get("precision") or "")
     mode = str(row.get("mode") or "")
-    if tool_id == "zsasa":
+    if tool_id in {"zsasa", "zsasa_0_9_0"}:
         prefix = "zsasa_bitmask" if mode == "bitmask" else "zsasa"
         return f"{prefix}_{precision}"
     if tool_id == "freesasa":
@@ -215,14 +234,23 @@ def variant_name(row: dict[str, Any]) -> str:
         return batch_variant_name(row)
     if kind == "single_file":
         return single_variant_name(row)
-    if kind in {"trajectory", "trajectory_validation"}:
+    if kind == "trajectory_validation":
+        base = md_variant_name(row)
+        if row["tool_id"] == "zig_bitmask" and row.get("run_variant"):
+            return f"{base}_{row['run_variant']}"
+        return base
+    if kind == "trajectory":
         return md_variant_name(row)
     if kind == "validation" and row["tool_id"] == "freesasa_batch":
         return "freesasa_batch"
     if kind == "validation" and row["tool_id"] == "lahuta":
         return "lahuta_bitmask" if row.get("mode") == "bitmask" else "lahuta"
     if kind == "validation" and row["tool_id"] == "zsasa":
-        return batch_variant_name(row)
+        precision = str(row.get("precision") or "")
+        if row.get("mode") == "bitmask":
+            corrected = "_corrected" if row.get("run_variant") == "corrected" else ""
+            return f"zsasa_bitmask{corrected}_{precision}"
+        return f"zsasa_{precision}"
     return str(row.get("tool_id") or "")
 
 
@@ -367,6 +395,8 @@ def enrich_runs(
             "source_kind": run.get("source_kind"),
             "source_path": run.get("source_path"),
             "manifest_id": run.get("manifest_id"),
+            "run_set": run_set(run.get("source_path")),
+            "run_variant": run.get("run_variant"),
             "status": run.get("status"),
             "expected_count": expected_count,
             "structure_id": parse_note(run.get("notes"), "structure_id"),
@@ -438,9 +468,35 @@ def write_csv(path: Path, rows: list[dict[str, Any]], columns: list[str] | None 
                     seen.add(key)
                     columns.append(key)
     with path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=columns, extrasaction="ignore")
+        writer = csv.DictWriter(
+            handle,
+            fieldnames=columns,
+            extrasaction="ignore",
+            lineterminator="\n",
+        )
         writer.writeheader()
         writer.writerows(rows)
+
+
+def curate_report_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Remove historical duplicates while retaining the documented adopted matrix."""
+    curated: list[dict[str, Any]] = []
+    for row in rows:
+        source = row["run_set"]
+        kind = row["benchmark_kind"]
+        if kind == "batch" and row["dataset_id"] in {ECOLI_DATASET, HUMAN_DATASET}:
+            if source == "v0_6_0_full" and row["tool_id"] == "zsasa":
+                continue
+            if source == "v0_9_0_overcommit" and row["tool_id"] != "zsasa_0_9_0":
+                continue
+        elif kind == "single_file" and source == "v0_6_0_full":
+            if row["tool_id"] not in {"freesasa", "rustsasa"}:
+                continue
+        elif kind == "trajectory" and source == "v0_6_0_full":
+            if row["tool_id"] not in {"mdtraj", "mdsasa_bolt"}:
+                continue
+        curated.append(row)
+    return curated
 
 
 def export_metadata(con: duckdb.DuckDBPyConnection, out_dir: Path) -> list[Path]:
@@ -554,12 +610,12 @@ def export_batch_tables(rows: list[dict[str, Any]], out_dir: Path) -> list[Path]
 
 def export_single_file_tables(rows: list[dict[str, Any]], out_dir: Path) -> list[Path]:
     single = [row for row in rows if row["benchmark_kind"] == "single_file"]
-    by_structure: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    by_structure: dict[tuple[str, str], list[dict[str, Any]]] = defaultdict(list)
     for row in single:
-        by_structure[str(row["structure_id"])].append(row)
+        by_structure[(row["dataset_id"], str(row["structure_id"]))].append(row)
     t10_output: list[dict[str, Any]] = []
     scaling_output: list[dict[str, Any]] = []
-    for structure_id, structure_rows in sorted(
+    for (dataset_id, structure_id), structure_rows in sorted(
         by_structure.items(), key=lambda item: min(row["n_atoms"] or 0 for row in item[1])
     ):
         t1 = {row["variant"]: row for row in structure_rows if row["threads"] == 1}
@@ -578,6 +634,8 @@ def export_single_file_tables(rows: list[dict[str, Any]], out_dir: Path) -> list
             )
             scaling_output.append(
                 {
+                    "dataset_id": dataset_id,
+                    "input_format": "mmCIF" if "mmcif" in dataset_id else "PDB",
                     "structure_id": structure_id,
                     "structure_role": row["structure_role"],
                     "n_atoms": row["n_atoms"],
@@ -600,6 +658,8 @@ def export_single_file_tables(rows: list[dict[str, Any]], out_dir: Path) -> list
             key=lambda item: variant_sort_key(item["variant"], SINGLE_VARIANT_ORDER),
         ):
             out = {
+                "dataset_id": dataset_id,
+                "input_format": "mmCIF" if "mmcif" in dataset_id else "PDB",
                 "structure_id": structure_id,
                 "structure_role": row["structure_role"],
                 "n_atoms": row["n_atoms"],
@@ -607,6 +667,7 @@ def export_single_file_tables(rows: list[dict[str, Any]], out_dir: Path) -> list
                 "variant": row["variant"],
                 "display_name": row["display_name"],
                 "threads": row["threads"],
+                "bitmask_variant": row["run_variant"],
                 "runtime_mean_s": row["runtime_mean_s"],
                 "runtime_stddev_s": row["runtime_stddev_s"],
                 "structures_per_sec": row["items_per_sec"],
@@ -630,7 +691,14 @@ def export_single_file_tables(rows: list[dict[str, Any]], out_dir: Path) -> list
 
 
 def export_md_summary(rows: list[dict[str, Any]], out_dir: Path) -> list[Path]:
-    md_rows = [row for row in rows if row["benchmark_kind"] == "trajectory"]
+    all_md_rows = [row for row in rows if row["benchmark_kind"] == "trajectory"]
+    md_rows = [
+        row
+        for row in all_md_rows
+        if row["run_set"] == "v0_6_0_full" and row["variant"] in {"mdtraj", "mdsasa_bolt"}
+        or row["run_set"] == "v0_9_0_md_zsasa"
+        and (row["tool_id"] != "zig_bitmask" or row["run_variant"] == "single_corrected")
+    ]
     output: list[dict[str, Any]] = []
     for dataset_id in sorted({row["dataset_id"] for row in md_rows}):
         dataset_rows = [row for row in md_rows if row["dataset_id"] == dataset_id]
@@ -648,6 +716,7 @@ def export_md_summary(rows: list[dict[str, Any]], out_dir: Path) -> list[Path]:
                 "display_name": row["display_name"],
                 "threads": row["threads"],
                 "n_points": row["n_points"],
+                "bitmask_variant": row["run_variant"],
                 "runtime_mean_s": row["runtime_mean_s"],
                 "runtime_stddev_s": row["runtime_stddev_s"],
                 "frames_per_sec": row["items_per_sec"],
@@ -660,9 +729,54 @@ def export_md_summary(rows: list[dict[str, Any]], out_dir: Path) -> list[Path]:
             }
             add_ratio_columns(out, by_variant, ["mdtraj", "mdsasa_bolt"])
             output.append(out)
-    path = out_dir.joinpath("md_summary.csv")
-    write_csv(path, output)
-    return [path]
+    scaling_output: list[dict[str, Any]] = []
+    native = [
+        row
+        for row in all_md_rows
+        if row["run_set"].startswith("v0_9_0_md_zsasa")
+        and row["tool_id"] in {"zig", "zig_bitmask"}
+    ]
+    baselines = {
+        (row["dataset_id"], row["variant"], row["run_variant"]): row
+        for row in native
+        if row["threads"] == 10
+    }
+    for row in sorted(
+        native,
+        key=lambda item: (
+            item["dataset_id"],
+            item["variant"],
+            item["run_variant"] or "",
+            item["threads"],
+        ),
+    ):
+        baseline = baselines.get((row["dataset_id"], row["variant"], row["run_variant"]))
+        scaling_output.append(
+            {
+                "dataset_id": row["dataset_id"],
+                "dataset_label": row["dataset_label"],
+                "frame_count": row["frame_count"],
+                "atom_count": row["n_atoms"],
+                "variant": row["variant"],
+                "display_name": row["display_name"],
+                "bitmask_variant": row["run_variant"],
+                "threads": row["threads"],
+                "runtime_mean_s": row["runtime_mean_s"],
+                "runtime_median_s": row["runtime_median_s"],
+                "runtime_stddev_s": row["runtime_stddev_s"],
+                "speedup_vs_t10_median": safe_div(
+                    baseline["runtime_median_s"] if baseline else None,
+                    row["runtime_median_s"],
+                ),
+                "frames_per_sec": row["items_per_sec"],
+                "peak_rss_mean_mib": row["peak_rss_mean_mib"],
+                "manifest_id": row["manifest_id"],
+            }
+        )
+    outputs = [out_dir.joinpath("md_summary.csv"), out_dir.joinpath("md_thread_scaling.csv")]
+    write_csv(outputs[0], output)
+    write_csv(outputs[1], scaling_output)
+    return outputs
 
 
 def validation_values(con: duckdb.DuckDBPyConnection) -> dict[str, dict[str, float]]:
@@ -731,6 +845,7 @@ def export_validation_summary(
                 "algorithm": row["algorithm"],
                 "precision": row["precision"],
                 "mode": row["mode"],
+                "bitmask_variant": row["run_variant"],
                 "n_points": row["n_points"],
                 "n_slices": row["n_slices"],
                 "threads": row["threads"],
@@ -788,11 +903,17 @@ def export_best_by_context(rows: list[dict[str, Any]], out_dir: Path) -> list[Pa
     single_t10 = [
         row for row in rows if row["benchmark_kind"] == "single_file" and row["threads"] == 10
     ]
-    for structure_id in sorted({row["structure_id"] for row in single_t10}):
-        context_rows = [row for row in single_t10 if row["structure_id"] == structure_id]
-        add_winner(f"single_file:{structure_id}:t10", context_rows, "runtime_mean_s", "min")
-        add_winner(f"single_file:{structure_id}:t10", context_rows, "atoms_per_sec", "max")
-        add_winner(f"single_file:{structure_id}:t10", context_rows, "peak_rss_mean_mib", "min")
+    single_contexts = sorted({(row["dataset_id"], row["structure_id"]) for row in single_t10})
+    for dataset_id, structure_id in single_contexts:
+        context_rows = [
+            row
+            for row in single_t10
+            if row["dataset_id"] == dataset_id and row["structure_id"] == structure_id
+        ]
+        context = f"single_file:{dataset_id}:{structure_id}:t10"
+        add_winner(context, context_rows, "runtime_mean_s", "min")
+        add_winner(context, context_rows, "atoms_per_sec", "max")
+        add_winner(context, context_rows, "peak_rss_mean_mib", "min")
     md = [row for row in rows if row["benchmark_kind"] == "trajectory"]
     for dataset_id in sorted({row["dataset_id"] for row in md}):
         context_rows = [row for row in md if row["dataset_id"] == dataset_id]
@@ -871,8 +992,13 @@ def export_comparator_ratios(rows: list[dict[str, Any]], out_dir: Path) -> list[
     single_t10 = [
         row for row in rows if row["benchmark_kind"] == "single_file" and row["threads"] == 10
     ]
-    for structure_id in sorted({row["structure_id"] for row in single_t10}):
-        context_rows = [row for row in single_t10 if row["structure_id"] == structure_id]
+    single_contexts = sorted({(row["dataset_id"], row["structure_id"]) for row in single_t10})
+    for dataset_id, structure_id in single_contexts:
+        context_rows = [
+            row
+            for row in single_t10
+            if row["dataset_id"] == dataset_id and row["structure_id"] == structure_id
+        ]
         by_variant = {row["variant"]: row for row in context_rows}
         targets = [variant for variant in SINGLE_VARIANT_ORDER if variant.startswith("zsasa")]
         for target_variant in targets:
@@ -885,7 +1011,7 @@ def export_comparator_ratios(rows: list[dict[str, Any]], out_dir: Path) -> list[
                     continue
                 add_ratio_rows(
                     output,
-                    context=f"single_file:{structure_id}:t10",
+                    context=f"single_file:{dataset_id}:{structure_id}:t10",
                     benchmark_kind="single_file",
                     dataset_id=target["dataset_id"],
                     dataset_label_value=target["dataset_label"],
@@ -962,7 +1088,11 @@ def main() -> None:
     try:
         metric_map = load_metric_map(con)
         rows = enrich_runs(load_runs(con), metric_map)
-        active_rows = [row for row in rows if row["status"] != "superseded"]
+        active_rows = curate_report_rows([
+            row
+            for row in rows
+            if adopted_for_reporting(row["benchmark_kind"], row["source_path"], row["status"])
+        ])
         outputs: list[Path] = []
         outputs.extend(export_metadata(con, out_dir))
         outputs.append(export_runs_long(rows, out_dir))

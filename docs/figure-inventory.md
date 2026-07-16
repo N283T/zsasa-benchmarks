@@ -25,7 +25,8 @@ uv run python scripts/plot_overview_figures.py --db results/benchmark.duckdb --f
 - `results/figures/batch_t10_comparison/` — E. coli vs Human 10-thread comparison figures.
 - `results/figures/md/` — trajectory throughput, runtime, memory, throughput/RSS, and CPU figures.
 
-Each section includes PNG and SVG outputs plus a section-level `index.md`.
+Each section includes PNG, SVG, and PDF outputs plus a section-level `index.md`.
+Use the PDF files for TeX manuscripts and other vector-first publication workflows.
 MD scatter-style summaries use marker families in addition to color:
 
 - circles: native `zsasa` CLI runs

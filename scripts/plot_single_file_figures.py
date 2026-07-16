@@ -15,6 +15,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import Patch
 
+try:
+    from scripts.benchlib.reporting import adopted_for_reporting, run_set
+except ModuleNotFoundError:  # pragma: no cover - supports direct script execution
+    from benchlib.reporting import adopted_for_reporting, run_set
+
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DB = ROOT.joinpath("results", "benchmark.duckdb")
 DEFAULT_OUT_DIR = ROOT.joinpath("results", "figures", "single_file")
@@ -86,7 +91,7 @@ def setup_style() -> None:
 
 def save_figure(fig: plt.Figure, out_dir: Path, name: str) -> list[Path]:
     written: list[Path] = []
-    for ext in ("png", "svg"):
+    for ext in ("png", "svg", "pdf"):
         path = out_dir.joinpath(ext, f"{name}.{ext}")
         path.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(path, bbox_inches="tight")
@@ -106,7 +111,7 @@ def single_variant_name(run: dict[str, Any]) -> str:
     tool_id = str(run.get("tool_id") or "")
     precision = str(run.get("precision") or "")
     mode = str(run.get("mode") or "")
-    if tool_id == "zsasa":
+    if tool_id in {"zsasa", "zsasa_0_9_0"}:
         prefix = "zsasa_bitmask" if mode == "bitmask" else "zsasa"
         return f"{prefix}_{precision}"
     if tool_id == "freesasa":
@@ -152,7 +157,7 @@ def structure_sort_key(
 def structure_label(row: dict[str, Any]) -> str:
     chain_label = "chain" if row["expected_chains"] == 1 else "chains"
     return (
-        f"{row['structure_id']}\n"
+        f"{row['structure_name']} ({row['format']})\n"
         f"{row['n_atoms']:,} atoms, {row['expected_chains']} {chain_label}"
     )
 
@@ -169,10 +174,13 @@ def load_single_rows(db_path: Path) -> list[dict[str, Any]]:
             "threads",
             "n_points",
             "notes",
+            "source_path",
+            "status",
         ]
         run_rows = con.execute(
             """
-            SELECT run_id, tool_id, algorithm, precision, mode, threads, n_points, notes
+            SELECT run_id, tool_id, algorithm, precision, mode, threads, n_points, notes,
+                   source_path, status
             FROM benchmark_runs
             WHERE benchmark_kind = 'single_file'
             ORDER BY notes, tool_id, mode, precision, threads
@@ -181,6 +189,13 @@ def load_single_rows(db_path: Path) -> list[dict[str, Any]]:
         rows: list[dict[str, Any]] = []
         for raw in run_rows:
             run = dict(zip(run_cols, raw, strict=True))
+            if not adopted_for_reporting("single_file", run["source_path"], run["status"]):
+                continue
+            source = run_set(run["source_path"])
+            if run["tool_id"] == "zsasa":
+                continue
+            if source == "v0_6_0_full" and run["tool_id"] not in {"freesasa", "rustsasa"}:
+                continue
             stats = {
                 (metric, statistic): value
                 for metric, statistic, value in con.execute(
@@ -197,7 +212,9 @@ def load_single_rows(db_path: Path) -> list[dict[str, Any]]:
             rss_bytes = float(stats.get(("peak_rss", "mean")) or 0.0)
             rss_stddev_bytes = float(stats.get(("peak_rss", "stddev")) or 0.0)
             notes = str(run.get("notes") or "")
-            structure_id = parse_note(notes, "structure_id") or "unknown"
+            structure_name = parse_note(notes, "structure_id") or "unknown"
+            format_label = "mmCIF" if "single_mmcif" in source else "PDB"
+            structure_id = f"{format_label}:{structure_name}"
             n_atoms = int(parse_note(notes, "n_atoms") or 0)
             rows.append(
                 {
@@ -206,6 +223,8 @@ def load_single_rows(db_path: Path) -> list[dict[str, Any]]:
                     "threads": int(run["threads"]),
                     "n_points": int(run["n_points"] or 0),
                     "structure_id": structure_id,
+                    "structure_name": structure_name,
+                    "format": format_label,
                     "role": parse_note(notes, "role") or "",
                     "n_atoms": n_atoms,
                     "expected_chains": int(parse_note(notes, "expected_chains") or 0),
@@ -279,19 +298,27 @@ def plot_metric_vs_atoms(
     variants = sorted({row["variant"] for row in selected}, key=variant_sort_key)
     fig, ax = plt.subplots(figsize=(9, 5.5), layout="constrained")
     for variant in variants:
-        items = sorted(
-            [row for row in selected if row["variant"] == variant],
-            key=structure_sort_key,
-        )
-        ax.plot(
-            [row["n_atoms"] for row in items],
-            [row[metric] for row in items],
-            marker=marker_for(variant),
-            linewidth=1.4,
-            markersize=5.5,
-            label=display_name(variant),
-            color=color_for(variant),
-        )
+        for format_label, linestyle in (("PDB", "-"), ("mmCIF", "--")):
+            items = sorted(
+                [
+                    row
+                    for row in selected
+                    if row["variant"] == variant and row["format"] == format_label
+                ],
+                key=structure_sort_key,
+            )
+            if not items:
+                continue
+            ax.plot(
+                [row["n_atoms"] for row in items],
+                [row[metric] for row in items],
+                marker=marker_for(variant),
+                linewidth=1.4,
+                linestyle=linestyle,
+                markersize=5.5,
+                label=f"{display_name(variant)} ({format_label})",
+                color=color_for(variant),
+            )
     ax.set_xscale("log")
     ax.set_yscale(yscale)
     ax.set_title(title)
@@ -564,7 +591,7 @@ def write_index(out_dir: Path, outputs: list[Path]) -> Path:
     lines = [
         "# Single-file performance figures",
         "",
-        f"Generated {len(pngs)} PNG figures.",
+        f"Generated {len(pngs)} figures in PNG/SVG/PDF.",
         "",
     ]
     for path in pngs:
@@ -661,7 +688,7 @@ def main() -> None:
     outputs.extend(plot_cpu_utilization_grid(rows, args.out_dir))
     index = write_index(args.out_dir, outputs)
     png_count = sum(1 for path in outputs if path.suffix == ".png")
-    print(f"wrote {png_count} PNG figures under {args.out_dir}")
+    print(f"wrote {png_count} figure sets in PNG/SVG/PDF under {args.out_dir}")
     print(f"wrote {index}")
 
 
