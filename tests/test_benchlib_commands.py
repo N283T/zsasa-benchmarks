@@ -118,6 +118,18 @@ def test_rustsasa_single_command() -> None:
     ]
 
 
+def test_freesasa_single_command_enables_cif_parser() -> None:
+    cmd = freesasa_single_command(
+        binary=Path("/bin/freesasa"),
+        input_path=Path("input.cif"),
+        n_points=100,
+        threads=10,
+    )
+
+    assert "--cif" in cmd
+    assert cmd[-1] == "input.cif"
+
+
 def test_pdbtools_single_command_with_timing_repeats() -> None:
     cmd = pdbtools_single_command(
         binary=Path("/bin/julia"),

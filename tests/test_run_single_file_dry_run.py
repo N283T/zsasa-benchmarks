@@ -95,9 +95,34 @@ def test_run_single_file_mmcif_dry_run_uses_input_file_and_versioned_tools() -> 
     assert "dataset=single_file_large_structure_mmcif_subset" in proc.stdout
     assert "selected_commands=1/" in proc.stdout
     assert "# name: single_wall_zsasa_0_9_0_f64_3jc8_10t_100p" in proc.stdout
-    assert "datasets/single-file-large-structure-mmcif/3jc8.cif.gz" in proc.stdout
-    assert "--runs 1" in proc.stdout
-    assert "--warmup 0" in proc.stdout
+    assert "datasets/single-file-large-structure-mmcif/3jc8.cif" in proc.stdout
+    assert "--runs 3" in proc.stdout
+    assert "--warmup 1" in proc.stdout
+
+
+def test_run_single_file_mmcif_applies_manifest_record_exclusions() -> None:
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "scripts/run_single_file.py",
+            "--manifest",
+            "manifests/single-file-mmcif-sample.toml",
+            "--datasets",
+            "config/datasets.toml.example",
+            "--run-id",
+            "test_single_mmcif_exclusions",
+            "--only",
+            "single_wall_freesasa_8rbs_1t_100p",
+            "--dry-run",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    assert "selected_commands=1/424" in proc.stdout
+    assert "# name: single_wall_freesasa_8rbs_1t_100p" in proc.stdout
+    assert "freesasa_9fqr" not in proc.stdout
 
 
 def test_run_single_file_pdbtools_dry_run_uses_julia_wrapper_for_pdb() -> None:
@@ -155,4 +180,4 @@ def test_run_single_file_pdbtools_dry_run_uses_julia_wrapper_for_mmcif() -> None
     assert "scripts/benchlib/pdbtools_sasa.jl" in proc.stdout
     assert "--timing" in proc.stdout
     assert "--timing-repeats 3" in proc.stdout
-    assert "datasets/single-file-large-structure-mmcif/3jc8.cif.gz" in proc.stdout
+    assert "datasets/single-file-large-structure-mmcif/3jc8.cif" in proc.stdout

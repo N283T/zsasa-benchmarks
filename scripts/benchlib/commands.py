@@ -113,6 +113,9 @@ def freesasa_single_command(
         f"--resolution={n_points}",
         f"--n-threads={threads}",
     ]
+    input_name = input_path.name.lower()
+    if input_name.endswith((".cif", ".mmcif", ".cif.gz", ".mmcif.gz")):
+        cmd.append("--cif")
     if timing:
         cmd.append("--timing")
     cmd.append(str(input_path))

@@ -30,3 +30,4 @@ result-*
 
 # Regenerated single-file benchmark PDB payloads (sources are tracked under datasets/)
 /datasets/single-file-large-structure/pdb/*.pdb
+/datasets/single-file-large-structure-mmcif/*.cif

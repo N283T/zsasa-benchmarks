@@ -41,6 +41,7 @@ REQUIRED_FILES = [
     "scripts/run_validation.py",
     "scripts/run_batch.py",
     "scripts/run_single_file.py",
+    "scripts/prepare_single_file_mmcif_structures.py",
     "scripts/run_trajectory_validation.py",
     "scripts/run_trajectory.py",
     "scripts/run_remaining_benchmarks.py",
@@ -358,8 +359,19 @@ def main() -> None:
         fail("mmCIF single-file manifest must use single_file_large_structure_mmcif_subset")
     if not all("input_file" in item for item in single_mmcif.get("structures", [])):
         fail("mmCIF single-file structures must specify input_file")
-    if "pdbtools_jl" not in single_mmcif.get("full_rerun", {}).get("tools", []):
-        fail("mmCIF single-file manifest must include pdbtools_jl")
+    if len(single_mmcif.get("structures", [])) != 8:
+        fail("mmCIF single-file manifest must mirror all eight PDB subset structures")
+    expected_mmcif_tools = {
+        "zsasa_0_9_0_f64",
+        "zsasa_0_9_0_f32",
+        "zsasa_0_9_0_f64_bitmask",
+        "zsasa_0_9_0_f32_bitmask",
+        "freesasa",
+        "rustsasa",
+        "pdbtools_jl",
+    }
+    if set(single_mmcif.get("full_rerun", {}).get("tools", [])) != expected_mmcif_tools:
+        fail("mmCIF single-file manifest must mirror the PDB tool matrix using zsasa 0.9.0")
 
     schema = ROOT.joinpath("schemas/benchmark.sql").read_text(encoding="utf-8")
     for table in [

@@ -58,11 +58,18 @@ three-decimal JSONL output. Interpret the result as a warm-cache end-to-end
 batch benchmark because `prepare = "sync"` does not drop the operating-system
 page cache.
 
-The native mmCIF single-file manifest is separate from the cleaned-PDB
-single-file manifest. It currently compares versioned `zsasa` with PDBTools.jl
-only, because FreeSASA/RustSASA/Lahuta mmCIF compatibility needs separate
-verification. Do not merge those result sets unless the analysis clearly labels
-the input format.
+The native mmCIF single-file manifest replaces the cleaned-PDB matrix for new
+measurements. It mirrors all eight structures, thread counts, precisions, and
+standard/bitmask modes with zsasa 0.9.0, FreeSASA, RustSASA, and PDBTools.jl.
+Use uncompressed `.cif` inputs so every comparator measures the same bytes;
+FreeSASA must be invoked with `--cif`. Lahuta remains excluded because its file
+mode requires AlphaFold-style model metadata and skips general PDB-derived
+assemblies. FreeSASA is additionally excluded for the two NVDA structures,
+where it aborts without producing atomic radii, and for 9fqr, where its pinned
+mmCIF parser aborts on a valid 9,696-character assembly text field. Record these
+as parser limitations rather than changing the native inputs. Keep historical
+cleaned-PDB results separate and label the input format explicitly when comparing
+them with native mmCIF results.
 
 ## Selective rerun policy
 
