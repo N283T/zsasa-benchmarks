@@ -63,6 +63,18 @@ three-decimal JSONL output. Interpret the result as a warm-cache end-to-end
 batch benchmark because `prepare = "sync"` does not drop the operating-system
 page cache.
 
+The E. coli AFDB mmCIF plan is not adopted for the 0.9.0 refresh. Human mmCIF
+already answers the parser, input-I/O, and worker-overcommit questions, while
+E. coli PDB supplies the smaller batch-throughput workload. Keep the E. coli
+mmCIF manifest for decision provenance rather than running a redundant matrix.
+
+Native trajectory scaling is measured separately at 10, 20, and 40 workers.
+The 20/40-worker manifests contain only zsasa native standard and bitmask paths;
+unchanged Python integrations and external comparators are not rerun. Do not
+extend the single-file matrix above 10 threads for zsasa 0.9.0: the calculation
+thread pool caps effective workers to the CPU count, so t20/t40 would repeat t10
+on the benchmark machine.
+
 The mmCIF single-file manifest replaces the cleaned-PDB matrix for new
 measurements. It mirrors all eight structures, thread counts, precisions, and
 standard/bitmask modes with zsasa 0.9.0, FreeSASA, RustSASA, and PDBTools.jl.

@@ -1,7 +1,14 @@
-# E. coli CIF zsasa 0.9.0 batch thread-overcommit manifest.
+# E. coli CIF zsasa 0.9.0 batch thread-overcommit plan (not adopted).
+#
+# Human AFDB mmCIF already covers parser, input-I/O, and worker-overcommit
+# behavior, while E. coli PDB covers the smaller batch-throughput workload.
+# Running this matrix would duplicate those adopted suites without adding a
+# distinct benchmark question, so the plan is retained only for provenance.
 
 id = "batch-ecoli-cif-zsasa-0-9-overcommit"
-status = "planning"
+status = "not_adopted"
+decision_date = "2026-07-16"
+decision_reason = "Covered by the adopted Human AFDB mmCIF parser/I/O/thread-scaling suite and E. coli PDB batch-throughput suite."
 
 [dataset]
 id = "UP000000625_83333_ECOLI_v6_cif"

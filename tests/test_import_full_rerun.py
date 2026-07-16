@@ -336,6 +336,58 @@ def test_manifest_id_from_config_reads_batch_overcommit_manifest(tmp_path: Path)
     )
 
 
+def test_import_full_rerun_reads_trajectory_manifest_id(tmp_path: Path) -> None:
+    results_root = tmp_path.joinpath("full_rerun", "t40")
+    md_dir = results_root.joinpath("md")
+    hyperfine_dir = md_dir.joinpath("hyperfine")
+    hyperfine_dir.mkdir(parents=True)
+    md_dir.joinpath("config.json").write_text(
+        json.dumps({"manifest": "manifests/trajectory-zsasa-t40.toml"}),
+        encoding="utf-8",
+    )
+    record_name = "5wvo_C_analysis_zig_f64_40t_100p"
+    hyperfine_dir.joinpath(f"{record_name}.json").write_text(
+        json.dumps(
+            {
+                "results": [
+                    {
+                        "command": record_name,
+                        "mean": 1.5,
+                        "stddev": 0.0,
+                        "median": 1.5,
+                        "min": 1.5,
+                        "max": 1.5,
+                        "times": [1.5],
+                        "user": 10.0,
+                        "system": 1.0,
+                        "memory_usage_byte": [100],
+                        "exit_codes": [0],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    db = tmp_path.joinpath("benchmark.duckdb")
+    import_full_rerun(
+        db,
+        results_root,
+        "t40",
+        Path("config/datasets.toml.example"),
+    )
+
+    conn = duckdb.connect(str(db), read_only=True)
+    try:
+        manifest_id = conn.execute(
+            "SELECT manifest_id FROM benchmark_runs WHERE benchmark_kind = 'trajectory'"
+        ).fetchone()[0]
+    finally:
+        conn.close()
+
+    assert manifest_id == "trajectory-zsasa-t40"
+
+
 def test_import_full_rerun_imports_human_cif_variant_batch(tmp_path: Path) -> None:
     results_root = tmp_path.joinpath("full_rerun", "cif_overcommit")
     human_cif = results_root.joinpath("batch", "human_cif")
