@@ -117,15 +117,8 @@ def _read_structure(path: Path) -> gemmi.Structure:
     return gemmi.read_structure(str(path))
 
 
-def clean_structure_to_pdb(
-    source_path: Path, output_path: Path, *, structure_id: str
-) -> PreparedStructure:
-    """Clean a PDB/mmCIF structure and write a comparator-compatible PDB.
-
-    The cleaning policy removes hydrogens, alternative conformations, ligands,
-    waters, empty chains, and non-L-peptide chains. PDB field limits are handled
-    explicitly to avoid hybrid36 output that pdbtbx/RustSASA may not parse.
-    """
+def _clean_protein_structure(source_path: Path) -> tuple[gemmi.Structure, gemmi.Model, int]:
+    """Apply the shared protein-only cleaning policy to a structure."""
     structure = _read_structure(source_path)
     structure.setup_entities()
     structure.remove_hydrogens()
@@ -143,10 +136,24 @@ def clean_structure_to_pdb(
             chains_to_remove.append(chain.name)
     for chain_name in chains_to_remove:
         model.remove_chain(chain_name)
+    structure.remove_empty_chains()
 
     n_atoms = sum(1 for chain in model for residue in chain for _atom in residue)
     if n_atoms == 0:
         raise PreprocessError(f"no protein atoms after cleaning: {source_path}")
+    return structure, model, n_atoms
+
+
+def clean_structure_to_pdb(
+    source_path: Path, output_path: Path, *, structure_id: str
+) -> PreparedStructure:
+    """Clean a PDB/mmCIF structure and write a comparator-compatible PDB.
+
+    The cleaning policy removes hydrogens, alternative conformations, ligands,
+    waters, empty chains, and non-L-peptide chains. PDB field limits are handled
+    explicitly to avoid hybrid36 output that pdbtbx/RustSASA may not parse.
+    """
+    structure, model, n_atoms = _clean_protein_structure(source_path)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     structure.shorten_chain_names()
@@ -179,6 +186,69 @@ def clean_structure_to_pdb(
         output_path=output_path,
         n_atoms=counted_atoms,
         n_chains=counted_chains,
+        status="cleaned",
+    )
+
+
+def clean_structure_to_cif(
+    source_path: Path, output_path: Path, *, structure_id: str
+) -> PreparedStructure:
+    """Clean a PDB/mmCIF structure and write protein-only mmCIF."""
+    structure, model, n_atoms = _clean_protein_structure(source_path)
+    n_chains = sum(1 for _chain in model)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    if source_path.name.endswith((".cif", ".cif.gz", ".mmcif", ".mmcif.gz")):
+        document = gemmi.cif.read_file(str(source_path))
+        block = document.sole_block()
+        entity_poly = block.get_mmcif_category("_entity_poly.")
+        protein_entities = {
+            str(entity_id)
+            for entity_id, polymer_type in zip(
+                entity_poly.get("entity_id", []),
+                entity_poly.get("type", []),
+                strict=True,
+            )
+            if polymer_type == "polypeptide(L)"
+        }
+        atom_site = block.get_mmcif_category("_atom_site.", raw=True)
+        keep_indices = [
+            index
+            for index, entity_id in enumerate(atom_site["label_entity_id"])
+            if entity_id in protein_entities
+            and atom_site["type_symbol"][index] not in {"H", "D"}
+            and atom_site["label_alt_id"][index] in {".", "?", "A"}
+        ]
+        if len(keep_indices) != n_atoms:
+            raise PreprocessError(
+                f"{structure_id}: CIF row filter selected {len(keep_indices)} atoms, "
+                f"but structure cleaning selected {n_atoms}"
+            )
+        cleaned_atom_site = {
+            tag: [values[index] for index in keep_indices]
+            for tag, values in atom_site.items()
+        }
+        block.set_mmcif_category("_atom_site.", cleaned_atom_site, raw=True)
+    else:
+        document = gemmi.cif.Document()
+        block = document.add_new_block(structure_id)
+        block.set_pair("_entry.id", structure_id)
+        generated = structure.make_mmcif_document().sole_block()
+        block.set_mmcif_category(
+            "_atom_site.", generated.get_mmcif_category("_atom_site.")
+        )
+    assembly_gen = block.find_mmcif_category("_pdbx_struct_assembly_gen.")
+    if assembly_gen:
+        assembly_gen.erase()
+    document.write_file(str(output_path))
+    return PreparedStructure(
+        structure_id=structure_id,
+        role="",
+        source_kind="cleaned",
+        source_dataset="",
+        source_path=source_path,
+        output_path=output_path,
+        n_atoms=n_atoms,
+        n_chains=n_chains,
         status="cleaned",
     )
 

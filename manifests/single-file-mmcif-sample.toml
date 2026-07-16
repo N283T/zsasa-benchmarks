@@ -1,4 +1,4 @@
-# Native mmCIF replacement for the cleaned-PDB single-file benchmark subset.
+# mmCIF replacement for the cleaned-PDB single-file benchmark subset.
 
 id = "single-file-mmcif-subset"
 status = "ready"
@@ -6,12 +6,12 @@ status = "ready"
 [dataset]
 id = "single_file_large_structure_mmcif_subset"
 expected_count = 8
-role = ["single-file-throughput", "parser-stress", "mmcif-native"]
-notes = "Native uncompressed mmCIF inputs matching the eight-structure cleaned-PDB subset without PDB field wrapping."
+role = ["single-file-throughput", "parser-stress", "mmcif"]
+notes = "Uncompressed mmCIF inputs matching the eight-structure cleaned-PDB subset. 5vyc and 9fqr are protein-only cleaned because their native atom sets include additional non-protein atoms."
 
 [preprocess]
 output_dir_default = "datasets/single-file-large-structure-mmcif"
-policy = "decompress_native_mmcif"
+policy = "decompress_native_mmcif_with_targeted_protein_cleanup"
 
 [[structures]]
 id = "AF-P49792-F10-model_v6"
@@ -75,9 +75,10 @@ source_kind = "cif_gz"
 source_dataset = "single_file_large_structure_sources"
 source_file = "pdb_mmcif/5vyc.cif.gz"
 input_file = "5vyc.cif"
+preprocess = "protein_only_clean_cif"
 expected_atoms = 249168
-expected_chains = 4
-notes = "Historical RustSASA parser outlier represented as native mmCIF."
+expected_chains = 216
+notes = "Historical RustSASA parser outlier written as protein-only mmCIF so its 249,168-atom workload matches the cleaned PDB input."
 
 [[structures]]
 id = "8rbs"
@@ -97,9 +98,10 @@ source_kind = "cif_gz"
 source_dataset = "single_file_large_structure_sources"
 source_file = "pdb_mmcif/9fqr.cif.gz"
 input_file = "9fqr.cif"
-expected_atoms = 4506514
-expected_chains = 57
-notes = "Maximum PDB-derived structure represented as native mmCIF without wrapped PDB fields. The native protein selection contains 4,506,514 atoms; the cleaned-PDB predecessor removed 98 alternative-conformation atoms."
+preprocess = "protein_only_clean_cif"
+expected_atoms = 4506416
+expected_chains = 1574
+notes = "Maximum PDB-derived structure written as protein-only mmCIF so its 4,506,416-atom workload matches the cleaned PDB input after alternative-conformation removal."
 
 [full_rerun]
 source_kind = "full_rerun"
@@ -123,9 +125,8 @@ timing_repeats = 3
 excluded_records = [
   "single_*_freesasa_AF-0000000065781219_*",
   "single_*_freesasa_AF-0000000066638622_*",
-  "single_*_freesasa_9fqr_*",
 ]
 rerun_zsasa = true
 rerun_comparators = true
 excluded_tools = ["lahuta"]
-excluded_tools_notes = "Lahuta file mode requires AlphaFold-style model metadata and skips general PDB-derived mmCIF assemblies such as 3jc8. FreeSASA remains in the matrix but is excluded for the two NVDA structures because freesasa_calc aborts after CIF parsing without producing radii, and for 9fqr because its parser aborts on the valid 9,696-character assembly asym_id_list text field."
+excluded_tools_notes = "Lahuta file mode requires AlphaFold-style model metadata and skips general PDB-derived mmCIF assemblies such as 3jc8. FreeSASA remains in the matrix but is excluded for the two NVDA structures because freesasa_calc aborts after CIF parsing without producing radii."

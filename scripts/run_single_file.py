@@ -283,8 +283,7 @@ def build_records(
     prepare = str(settings["prepare"]) if settings.get("prepare") else None
 
     binaries = {
-        tool.tool_id: require_binary(specs, tool.tool_id, execute=execute)
-        for tool in tools
+        tool.tool_id: require_binary(specs, tool.tool_id, execute=execute) for tool in tools
     }
     for phase in phases:
         if phase not in {"wall", "timing"}:
@@ -331,9 +330,7 @@ def build_records(
                                 threads=thread,
                                 n_points=n_points,
                                 hyperfine_json=hyperfine_json,
-                                results_csv=output_base.joinpath(
-                                    "wall", tool.name, "results.csv"
-                                ),
+                                results_csv=output_base.joinpath("wall", tool.name, "results.csv"),
                             )
                         )
                     else:
@@ -349,9 +346,7 @@ def build_records(
                                 expected_atoms=structure.expected_atoms,
                                 threads=thread,
                                 n_points=n_points,
-                                results_csv=output_base.joinpath(
-                                    "timing", tool.name, "timing.csv"
-                                ),
+                                results_csv=output_base.joinpath("timing", tool.name, "timing.csv"),
                             )
                         )
     return records
@@ -422,11 +417,34 @@ def run_timing_records(records: list[SingleFileRecord], *, execute: bool, replac
             }
         )
     for csv_path, rows in rows_by_csv.items():
-        csv_path.parent.mkdir(parents=True, exist_ok=True)
-        with csv_path.open("w", newline="", encoding="utf-8") as handle:
-            writer = csv.DictWriter(handle, fieldnames=list(rows[0].keys()))
-            writer.writeheader()
-            writer.writerows(rows)
+        merge_result_rows(csv_path, rows)
+
+
+def merge_result_rows(
+    csv_path: Path,
+    rows: list[dict[str, Any]],
+    *,
+    key_fields: tuple[str, ...] = (
+        "tool",
+        "structure",
+        "threads",
+        "n_points",
+    ),
+) -> None:
+    """Merge selective rerun rows without dropping unselected results."""
+    combined: dict[tuple[str, ...], dict[str, Any]] = {}
+    if csv_path.is_file():
+        with csv_path.open(newline="", encoding="utf-8") as handle:
+            for row in csv.DictReader(handle):
+                combined[tuple(str(row[field]) for field in key_fields)] = row
+    for row in rows:
+        combined[tuple(str(row[field]) for field in key_fields)] = row
+    csv_path.parent.mkdir(parents=True, exist_ok=True)
+    fieldnames = list(rows[0].keys())
+    with csv_path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(combined[key] for key in sorted(combined))
 
 
 def write_wall_results(records: list[SingleFileRecord]) -> None:
@@ -447,11 +465,7 @@ def write_wall_results(records: list[SingleFileRecord]) -> None:
             }
         )
     for csv_path, rows in rows_by_csv.items():
-        csv_path.parent.mkdir(parents=True, exist_ok=True)
-        with csv_path.open("w", newline="", encoding="utf-8") as handle:
-            writer = csv.DictWriter(handle, fieldnames=list(rows[0].keys()))
-            writer.writeheader()
-            writer.writerows(rows)
+        merge_result_rows(csv_path, rows)
 
 
 def run_single_file_records(

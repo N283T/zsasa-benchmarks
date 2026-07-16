@@ -22,6 +22,7 @@ from scripts.benchlib.datasets import (  # noqa: E402
 )
 from scripts.benchlib.manifest import load_manifest  # noqa: E402
 from scripts.benchlib.paths import resolve_repo_path  # noqa: E402
+from scripts.benchlib.preprocess import clean_structure_to_cif  # noqa: E402
 
 DEFAULT_MANIFEST = Path("manifests/single-file-mmcif-sample.toml")
 
@@ -41,35 +42,68 @@ def parse_args() -> argparse.Namespace:
 
 def structure_rows(
     manifest: dict[str, Any], catalog: dict[str, dict[str, Any]], output_dir: Path
-) -> list[tuple[Path, Path]]:
+) -> list[tuple[str, Path, Path, str, int | None, int | None]]:
     structures = manifest.get("structures")
     if not isinstance(structures, list) or not structures:
         raise PreparationError("manifest must define non-empty [[structures]] entries")
-    rows: list[tuple[Path, Path]] = []
+    rows: list[tuple[str, Path, Path, str, int | None, int | None]] = []
     for item in structures:
         if not isinstance(item, dict):
             raise PreparationError("each structure entry must be a table")
         source_dataset = str(item.get("source_dataset") or "")
         source_file = str(item.get("source_file") or "")
         input_file = Path(str(item.get("input_file") or ""))
-        if not source_dataset or not source_file or not input_file.name:
+        structure_id = str(item.get("id") or "")
+        preprocess = str(item.get("preprocess") or "decompress")
+        expected_atoms = int(item["expected_atoms"]) if "expected_atoms" in item else None
+        expected_chains = int(item["expected_chains"]) if "expected_chains" in item else None
+        if not structure_id or not source_dataset or not source_file or not input_file.name:
             raise PreparationError(
-                "mmCIF structures require source_dataset, source_file, and input_file"
+                "mmCIF structures require id, source_dataset, source_file, and input_file"
             )
         if input_file.is_absolute() or ".." in input_file.parts or input_file.suffix != ".cif":
             raise PreparationError(f"unsafe or non-CIF input_file: {input_file}")
         source = dataset_path(catalog, source_dataset, "path").joinpath(source_file)
         if not source.is_file():
             raise PreparationError(f"source file not found: {source}")
-        rows.append((source, output_dir.joinpath(input_file)))
+        if preprocess not in {"decompress", "protein_only_clean_cif"}:
+            raise PreparationError(f"unsupported mmCIF preprocess policy: {preprocess}")
+        rows.append(
+            (
+                structure_id,
+                source,
+                output_dir.joinpath(input_file),
+                preprocess,
+                expected_atoms,
+                expected_chains,
+            )
+        )
     return rows
 
 
-def materialize(source: Path, output: Path) -> None:
+def materialize(
+    structure_id: str,
+    source: Path,
+    output: Path,
+    *,
+    preprocess: str,
+    expected_atoms: int | None,
+    expected_chains: int | None,
+) -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = output.with_suffix(f"{output.suffix}.tmp")
     try:
-        if source.name.endswith(".gz"):
+        if preprocess == "protein_only_clean_cif":
+            result = clean_structure_to_cif(source, temporary, structure_id=structure_id)
+            if expected_atoms is not None and result.n_atoms != expected_atoms:
+                raise PreparationError(
+                    f"{structure_id}: expected {expected_atoms} atoms, got {result.n_atoms}"
+                )
+            if expected_chains is not None and result.n_chains != expected_chains:
+                raise PreparationError(
+                    f"{structure_id}: expected {expected_chains} chains, got {result.n_chains}"
+                )
+        elif source.name.endswith(".gz"):
             with gzip.open(source, "rb") as source_handle, temporary.open("wb") as output_handle:
                 shutil.copyfileobj(source_handle, output_handle)
         elif source.name.endswith(".zst"):
@@ -105,10 +139,17 @@ def main() -> None:
     print(f"output_dir={output_dir}")
     print(f"mode={'execute' if args.execute else 'dry-run'}")
     print(f"structures={len(rows)}")
-    for source, output in rows:
-        print(f"{source}\t->\t{output}")
+    for structure_id, source, output, preprocess, expected_atoms, expected_chains in rows:
+        print(f"{structure_id}\t{preprocess}\t{source}\t->\t{output}")
         if args.execute:
-            materialize(source, output)
+            materialize(
+                structure_id,
+                source,
+                output,
+                preprocess=preprocess,
+                expected_atoms=expected_atoms,
+                expected_chains=expected_chains,
+            )
 
 
 if __name__ == "__main__":
