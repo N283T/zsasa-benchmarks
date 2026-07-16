@@ -265,10 +265,21 @@ def main() -> None:
 
     trajectory = read_toml(ROOT.joinpath("manifests/trajectory.toml"))
     trajectory_full = trajectory.get("full_rerun", {})
-    if "mdtraj" not in trajectory_full.get("default_tools", []):
-        fail("trajectory full_rerun must include native mdtraj")
-    if "mdsasa_bolt" not in trajectory_full.get("default_tools", []):
-        fail("trajectory full_rerun must include mdsasa_bolt")
+    if any(
+        tool in trajectory_full.get("default_tools", [])
+        for tool in ["mdtraj", "mdsasa_bolt"]
+    ):
+        fail("zsasa 0.9 trajectory refresh must reuse unchanged comparator results")
+    if trajectory_full.get("zsasa_tool") != "zsasa_0_9_0":
+        fail("trajectory full_rerun must use zsasa 0.9.0")
+    if trajectory_full.get("cli_bitmask_variants") != [
+        "single",
+        "single_corrected",
+        "per_frame",
+        "cycle",
+        "cycle_corrected",
+    ]:
+        fail("trajectory full_rerun must cover bitmask LUT and correction variants")
     if len(trajectory.get("datasets", [])) != 3:
         fail("trajectory manifest must describe the three benchmark datasets")
 
