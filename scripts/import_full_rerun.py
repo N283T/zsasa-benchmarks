@@ -899,7 +899,9 @@ def import_full_rerun(
             run_label=run_label,
             benchmark_kind="trajectory",
             dataset_id="",
-            manifest_id="trajectory-full-rerun",
+            manifest_id=manifest_id_from_config(
+                results_root.joinpath("md"), "trajectory-full-rerun"
+            ),
             name_parser=parse_trajectory_record_name,
         )
         import_single_file_results(

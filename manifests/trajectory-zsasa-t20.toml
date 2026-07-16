@@ -1,0 +1,52 @@
+# zsasa 0.9.0 native trajectory t20 scaling check.
+#
+# The existing t10 measurements remain the baseline. This focused manifest adds
+# t20 results without rerunning unchanged comparators. The two 1001-frame
+# trajectories were measured first; the 10001-frame trajectory can be selected
+# separately with the runner's --only filter.
+
+id = "trajectory-zsasa-t20"
+status = "ready"
+
+[[datasets]]
+id = "5wvo_C_analysis"
+atoms = 3858
+frames = 1001
+
+[[datasets]]
+id = "6sup_A_analysis"
+atoms = 33377
+frames = 1001
+
+[[datasets]]
+id = "5vz0_A_protein"
+atoms = 17910
+frames = 10001
+
+[full_rerun]
+source_kind = "full_rerun"
+run_id_default = "v0_9_0_md_zsasa_t20"
+zsasa_tool = "zsasa_0_9_0"
+default_tools = ["zig", "zig_bitmask"]
+large_trajectory_tools = ["zig", "zig_bitmask"]
+n_points = 100
+cli_bitmask_variants = [
+  "single",
+  "single_corrected",
+  "per_frame",
+  "cycle",
+  "cycle_corrected",
+]
+stride = 1
+threads = [20]
+cli_precisions = ["f64", "f32"]
+classifier = "naccess"
+include_hydrogens = true
+runs = 3
+warmup = 1
+prepare = "sync"
+rerun_zsasa = true
+# Required by the native runner's full-rerun guard; the tool lists above contain
+# only zsasa, so no comparator commands are generated.
+rerun_comparators = true
+output_base = "results/full_rerun/v0_9_0_md_zsasa_t20/md"
