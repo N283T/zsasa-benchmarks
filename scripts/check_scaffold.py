@@ -321,16 +321,21 @@ def main() -> None:
         pdb_full = pdb_refresh.get("full_rerun", {})
         if pdb_refresh.get("dataset", {}).get("id") != dataset_id:
             fail(f"{manifest_name} must use {dataset_id}")
+        expected_threads = (
+            [1, 4, 8, 10, 20, 40]
+            if manifest_name == "batch-ecoli-zsasa-0.9.toml"
+            else [10, 20, 40]
+        )
         expected_pdb_jobs = [
             {
                 "tool": "zsasa_0_9_0",
-                "threads": [10, 20, 40],
+                "threads": expected_threads,
                 "precisions": ["f64", "f32"],
                 "modes": ["standard", "bitmask"],
             }
         ]
-        if pdb_full.get("threads") != [10, 20, 40] or pdb_full.get("jobs") != expected_pdb_jobs:
-            fail(f"{manifest_name} must encode the zsasa 0.9.0 10/20/40t matrix")
+        if pdb_full.get("threads") != expected_threads or pdb_full.get("jobs") != expected_pdb_jobs:
+            fail(f"{manifest_name} must encode the expected zsasa 0.9.0 thread matrix")
 
     human_cif = read_toml(ROOT.joinpath("manifests/batch-human-cif-zsasa-0.9.toml"))
     human_cif_full = human_cif.get("full_rerun", {})

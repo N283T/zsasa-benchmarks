@@ -1,6 +1,6 @@
 # E. coli batch figures
 
-Generated 13 PNG figures.
+Generated 13 figures in PNG/SVG/PDF.
 
 - `png/ecoli_cpu_utilization_vs_threads.png`
 - `png/ecoli_parallel_efficiency_heatmap.png`

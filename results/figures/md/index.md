@@ -1,11 +1,13 @@
 # MD performance figures
 
-Generated 11 PNG figures.
+Generated 13 figures in PNG/SVG/PDF.
 
 - `png/md_atom_frames_per_sec_bar_grid.png`
+- `png/md_bitmask_lut_runtime_grid.png`
 - `png/md_cpu_utilization_bar_grid.png`
 - `png/md_frames_per_sec_bar_grid.png`
 - `png/md_frames_per_sec_per_mib_bar_grid.png`
+- `png/md_native_worker_speedup_grid.png`
 - `png/md_peak_rss_bar_grid.png`
 - `png/md_rss_reduction_vs_comparators_grid.png`
 - `png/md_runtime_bar_grid.png`

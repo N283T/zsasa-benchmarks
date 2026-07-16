@@ -22,6 +22,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 try:
+    from scripts.benchlib.reporting import adopted_for_reporting
+except ModuleNotFoundError:  # pragma: no cover - supports direct script execution
+    from benchlib.reporting import adopted_for_reporting
+
+try:
     from scripts.benchlib.metrics import r2_score, relative_error_percent
 except ModuleNotFoundError:  # pragma: no cover - supports direct script execution
     from benchlib.metrics import r2_score, relative_error_percent
@@ -38,6 +43,8 @@ TOOL_ORDER = [
     "zsasa_f32",
     "zsasa_bitmask_f64",
     "zsasa_bitmask_f32",
+    "zsasa_bitmask_corrected_f64",
+    "zsasa_bitmask_corrected_f32",
     "zsasa_cli_f64",
     "zsasa_cli_f32",
     "zsasa_cli_bitmask_f64",
@@ -62,6 +69,8 @@ COLORS = {
     "zsasa_f32": "#f6c85f",
     "zsasa_bitmask_f64": "#e67e22",
     "zsasa_bitmask_f32": "#ffb347",
+    "zsasa_bitmask_corrected_f64": "#d35400",
+    "zsasa_bitmask_corrected_f32": "#f5b041",
     "zsasa_cli_f64": "#f39c12",
     "zsasa_cli_f32": "#f6c85f",
     "zsasa_cli_bitmask_f64": "#e67e22",
@@ -79,6 +88,8 @@ DISPLAY_NAMES = {
     "zsasa_f32": "zsasa f32",
     "zsasa_bitmask_f64": "zsasa bitmask f64",
     "zsasa_bitmask_f32": "zsasa bitmask f32",
+    "zsasa_bitmask_corrected_f64": "zsasa bitmask corrected f64",
+    "zsasa_bitmask_corrected_f32": "zsasa bitmask corrected f32",
     "zsasa_cli_f64": "zsasa CLI f64",
     "zsasa_cli_f32": "zsasa CLI f32",
     "zsasa_cli_bitmask_f64": "zsasa CLI bitmask f64",
@@ -127,6 +138,7 @@ def run_column_name(run: dict[str, object]) -> str:
     tool_id = str(run.get("tool_id") or "")
     precision = str(run.get("precision") or "")
     mode = str(run.get("mode") or "")
+    variant = str(run.get("variant") or "")
 
     if tool_id == "freesasa_batch":
         return "freesasa"
@@ -140,6 +152,8 @@ def run_column_name(run: dict[str, object]) -> str:
         return "lahuta_bitmask" if mode == "bitmask" else "lahuta"
     if tool_id == "zsasa":
         prefix = "zsasa_bitmask" if mode == "bitmask" else "zsasa"
+        if variant == "corrected":
+            prefix = "zsasa_bitmask_corrected"
         return f"{prefix}_{precision}"
     if tool_id == "zig":
         prefix = "zsasa_cli" if benchmark_kind == "trajectory_validation" else "zsasa"
@@ -148,7 +162,7 @@ def run_column_name(run: dict[str, object]) -> str:
         prefix = (
             "zsasa_cli_bitmask" if benchmark_kind == "trajectory_validation" else "zsasa_bitmask"
         )
-        return f"{prefix}_{precision}"
+        return f"{prefix}_{precision}_{variant}" if variant else f"{prefix}_{precision}"
     if precision and mode == "bitmask":
         return f"{tool_id}_bitmask_{precision}"
     if precision:
@@ -199,9 +213,20 @@ def load_validation_tables_from_db(
     """Load validation results from DuckDB and pivot runs into figure-ready tables."""
     con = duckdb.connect(str(db_path), read_only=True)
     try:
-        query = """
+        available_columns = {
+            row[1] for row in con.execute("PRAGMA table_info('benchmark_runs')").fetchall()
+        }
+        optional_columns = {
+            "variant": "variant" if "variant" in available_columns else "NULL AS variant",
+            "source_path": (
+                "source_path" if "source_path" in available_columns else "NULL AS source_path"
+            ),
+            "status": "status" if "status" in available_columns else "'imported' AS status",
+        }
+        query = f"""
             SELECT run_id, benchmark_kind, dataset_id, tool_id, algorithm, precision, mode,
-                   n_points, n_slices, threads, source_kind
+                   {optional_columns['variant']}, n_points, n_slices, threads, source_kind,
+                   {optional_columns['source_path']}, {optional_columns['status']}
             FROM benchmark_runs
             WHERE benchmark_kind = ?
               AND (? IS NULL OR algorithm = ?)
@@ -217,16 +242,24 @@ def load_validation_tables_from_db(
             "algorithm",
             "precision",
             "mode",
+            "variant",
             "n_points",
             "n_slices",
             "threads",
             "source_kind",
+            "source_path",
+            "status",
         ]
         run_rows = con.execute(
             query,
             [benchmark_kind, algorithm, algorithm, dataset_id, dataset_id],
         ).fetchall()
-        runs = [dict(zip(columns, row, strict=True)) for row in run_rows]
+        filter_adopted = "source_path" in available_columns and "status" in available_columns
+        runs = [
+            dict(zip(columns, row, strict=True))
+            for row in run_rows
+            if not filter_adopted or adopted_for_reporting(benchmark_kind, row[-2], row[-1])
+        ]
 
         grouped: dict[tuple[str, str, int], list[dict[str, object]]] = {}
         for run in runs:
@@ -303,6 +336,22 @@ def read_rows(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle))
 
 
+def select_columns(csvs: list[ResultCsv], columns: set[str]) -> list[ResultCsv]:
+    """Return copies of validation tables restricted to primary reporting columns."""
+    return [
+        ResultCsv(
+            path=table.path,
+            points=table.points,
+            label=table.label,
+            rows=[
+                {key: value for key, value in row.items() if key in columns or key in ID_COLUMNS}
+                for row in table.rows
+            ],
+        )
+        for table in csvs
+    ]
+
+
 def load_result_csvs(directory: Path, label_prefix: str) -> list[ResultCsv]:
     return [
         ResultCsv(
@@ -316,6 +365,9 @@ def load_result_csvs(directory: Path, label_prefix: str) -> list[ResultCsv]:
 
 
 def tool_sort_key(name: str) -> tuple[int, str]:
+    if name.startswith("zsasa_cli_bitmask_"):
+        precision = name.split("_")[3]
+        return (TOOL_ORDER.index(f"zsasa_cli_bitmask_{precision}"), name)
     try:
         return (TOOL_ORDER.index(name), name)
     except ValueError:
@@ -323,11 +375,22 @@ def tool_sort_key(name: str) -> tuple[int, str]:
 
 
 def display_name(name: str) -> str:
+    match = re.fullmatch(r"zsasa_cli_bitmask_(f32|f64)_(.+)", name)
+    if match:
+        precision, variant = match.groups()
+        option = variant.replace("per_frame", "per-frame").replace(
+            "_corrected", " + corrected"
+        )
+        return f"zsasa CLI bitmask {precision} ({option})"
     return DISPLAY_NAMES.get(name, name)
 
 
 def tool_color(name: str) -> str:
     """Return the globally consistent color for a plotted tool/variant."""
+    if name.startswith("zsasa_cli_bitmask_f64_"):
+        return COLORS["zsasa_cli_bitmask_f64"]
+    if name.startswith("zsasa_cli_bitmask_f32_"):
+        return COLORS["zsasa_cli_bitmask_f32"]
     return COLORS.get(name, "#7f8c8d")
 
 
@@ -435,7 +498,7 @@ def setup_style() -> None:
 
 def save_figure(fig: plt.Figure, out_dir: Path, name: str) -> list[Path]:
     written: list[Path] = []
-    for ext in ("png", "svg"):
+    for ext in ("png", "svg", "pdf"):
         path = out_dir.joinpath(ext, f"{name}.{ext}")
         path.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(path, bbox_inches="tight")
@@ -872,7 +935,18 @@ def generate_md_validation(db_path: Path, out_dir: Path) -> list[Path]:
     if not md_csvs:
         return outputs
 
-    specs = collect_scatter_specs(md_csvs, "mdtraj")
+    primary_columns = {
+        "mdtraj",
+        "zsasa_cli_f64",
+        "zsasa_cli_f32",
+        "zsasa_cli_bitmask_f64_single_corrected",
+        "zsasa_cli_bitmask_f32_single_corrected",
+        "zsasa_mdtraj",
+        "zsasa_mdanalysis",
+    }
+    primary_csvs = select_columns(md_csvs, primary_columns)
+
+    specs = collect_scatter_specs(primary_csvs, "mdtraj")
     outputs.extend(
         make_point_grid(
             specs,
@@ -895,33 +969,72 @@ def generate_md_validation(db_path: Path, out_dir: Path) -> list[Path]:
     records = collect_summary_records(md_csvs, "mdtraj", "md")
     outputs.extend(plot_metric_lines(records, out_dir, "md", "MD validation"))
     outputs.extend(
-        plot_error_boxplots(md_csvs, "mdtraj", out_dir, "md", "MD validation error distributions")
+        plot_error_boxplots(
+            primary_csvs, "mdtraj", out_dir, "md", "MD validation error distributions"
+        )
     )
-    outputs.extend(plot_md_error_vs_frame(md_csvs, out_dir, "md"))
+    outputs.extend(plot_md_error_vs_frame(primary_csvs, out_dir, "md"))
     outputs.extend(
         plot_delta_pairs(
             md_csvs,
             [
-                ("zsasa_cli_f64", "zsasa_cli_bitmask_f64", "zsasa CLI f64: standard vs bitmask"),
-                ("zsasa_cli_f32", "zsasa_cli_bitmask_f32", "zsasa CLI f32: standard vs bitmask"),
+                (
+                    "zsasa_cli_f64",
+                    "zsasa_cli_bitmask_f64_single_corrected",
+                    "zsasa CLI f64: standard vs corrected bitmask",
+                ),
+                (
+                    "zsasa_cli_f32",
+                    "zsasa_cli_bitmask_f32_single_corrected",
+                    "zsasa CLI f32: standard vs corrected bitmask",
+                ),
                 ("zsasa_cli_f64", "zsasa_cli_f32", "zsasa CLI standard: f64 vs f32"),
-                ("zsasa_cli_bitmask_f64", "zsasa_cli_bitmask_f32", "zsasa CLI bitmask: f64 vs f32"),
+                (
+                    "zsasa_cli_bitmask_f64_single_corrected",
+                    "zsasa_cli_bitmask_f32_single_corrected",
+                    "zsasa CLI corrected bitmask: f64 vs f32",
+                ),
                 ("zsasa_mdtraj", "zsasa_cli_f64", "zsasa MDTraj-XTC vs CLI-XTC"),
                 ("mdtraj", "zsasa_mdanalysis", "MDTraj vs zsasa MDAnalysis"),
+                (
+                    "zsasa_cli_bitmask_f64_single",
+                    "zsasa_cli_bitmask_f64_single_corrected",
+                    "bitmask f64 single: raw vs corrected",
+                ),
+                (
+                    "zsasa_cli_bitmask_f32_single",
+                    "zsasa_cli_bitmask_f32_single_corrected",
+                    "bitmask f32 single: raw vs corrected",
+                ),
+                (
+                    "zsasa_cli_bitmask_f64_cycle",
+                    "zsasa_cli_bitmask_f64_cycle_corrected",
+                    "bitmask f64 cycle: raw vs corrected",
+                ),
+                (
+                    "zsasa_cli_bitmask_f32_cycle",
+                    "zsasa_cli_bitmask_f32_cycle_corrected",
+                    "bitmask f32 cycle: raw vs corrected",
+                ),
             ],
             out_dir,
             "md",
             "MD validation variant deltas",
         )
     )
-    outputs.extend(plot_frame_series(md_csvs, out_dir, "md"))
+    outputs.extend(plot_frame_series(primary_csvs, out_dir, "md"))
     return outputs
 
 
 def write_index(out_dir: Path, outputs: list[Path]) -> Path:
     index = out_dir.joinpath("index.md")
     png_outputs = sorted(path for path in outputs if path.suffix == ".png")
-    lines = ["# Validation figures", "", f"Generated {len(png_outputs)} PNG figures.", ""]
+    lines = [
+        "# Validation figures",
+        "",
+        f"Generated {len(png_outputs)} figures in PNG/SVG/PDF.",
+        "",
+    ]
     for path in png_outputs:
         rel = path.relative_to(out_dir)
         lines.append(f"- `{rel}`")
@@ -949,8 +1062,7 @@ def main() -> None:
         outputs.extend(generate_md_validation(args.db, args.out_dir))
     index = write_index(args.out_dir, outputs)
     png_count = sum(1 for path in outputs if path.suffix == ".png")
-    svg_count = sum(1 for path in outputs if path.suffix == ".svg")
-    print(f"wrote {png_count} PNG and {svg_count} SVG validation figures under {args.out_dir}")
+    print(f"wrote {png_count} validation figure sets in PNG/SVG/PDF under {args.out_dir}")
     print(f"wrote {index}")
 
 

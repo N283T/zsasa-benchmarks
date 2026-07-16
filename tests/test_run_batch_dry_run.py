@@ -248,7 +248,7 @@ def test_run_batch_swissprot_version_refresh_targets_0_9_thread_overcommit() -> 
     assert "--use-bitmask" in proc.stdout
 
 
-def test_run_batch_ecoli_overcommit_targets_zsasa_0_9_matrix() -> None:
+def test_run_batch_ecoli_scaling_targets_zsasa_0_9_matrix() -> None:
     proc = subprocess.run(
         [
             sys.executable,
@@ -267,7 +267,10 @@ def test_run_batch_ecoli_overcommit_targets_zsasa_0_9_matrix() -> None:
     )
 
     assert "dataset=ecoli" in proc.stdout
-    assert "selected_commands=12/12" in proc.stdout
+    assert "selected_commands=24/24" in proc.stdout
+    assert "# name: zsasa_0_9_0_batch_f64_standard_1t_128p" in proc.stdout
+    assert "# name: zsasa_0_9_0_batch_f32_bitmask_4t_128p" in proc.stdout
+    assert "# name: zsasa_0_9_0_batch_f64_standard_8t_128p" in proc.stdout
     assert "# name: zsasa_0_9_0_batch_f64_standard_10t_128p" in proc.stdout
     assert "# name: zsasa_0_9_0_batch_f64_bitmask_20t_128p" in proc.stdout
     assert "# name: zsasa_0_9_0_batch_f32_standard_40t_128p" in proc.stdout

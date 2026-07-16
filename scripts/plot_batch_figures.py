@@ -13,6 +13,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import Patch
 
+try:
+    from scripts.benchlib.reporting import adopted_for_reporting, run_set
+except ModuleNotFoundError:  # pragma: no cover - supports direct script execution
+    from benchlib.reporting import adopted_for_reporting, run_set
+
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DB = ROOT.joinpath("results", "benchmark.duckdb")
 DEFAULT_OUT_DIR = ROOT.joinpath("results", "figures")
@@ -180,7 +185,7 @@ def setup_style() -> None:
 
 def save_figure(fig: plt.Figure, out_dir: Path, name: str) -> list[Path]:
     written: list[Path] = []
-    for ext in ("png", "svg"):
+    for ext in ("png", "svg", "pdf"):
         path = out_dir.joinpath(ext, f"{name}.{ext}")
         path.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(path, bbox_inches="tight")
@@ -202,11 +207,12 @@ def load_batch_rows(db_path: Path, dataset_id: str) -> list[dict[str, Any]]:
             "threads",
             "expected_count",
             "source_path",
+            "status",
         ]
         run_rows = con.execute(
             """
             SELECT r.run_id, r.dataset_id, r.tool_id, r.precision, r.mode, r.variant, r.threads,
-                   d.expected_count, r.source_path
+                   d.expected_count, r.source_path, r.status
             FROM benchmark_runs r
             LEFT JOIN datasets d USING (dataset_id)
             WHERE r.benchmark_kind = 'batch'
@@ -219,6 +225,17 @@ def load_batch_rows(db_path: Path, dataset_id: str) -> list[dict[str, Any]]:
         rows: list[dict[str, Any]] = []
         for raw_run in run_rows:
             run = dict(zip(run_cols, raw_run, strict=True))
+            if not adopted_for_reporting("batch", run["source_path"], run["status"]):
+                continue
+            source = run_set(run["source_path"])
+            if dataset_id in {ECOLI_DATASET, HUMAN_DATASET}:
+                if run["tool_id"] == "zsasa":
+                    continue
+                if run["tool_id"] == "zsasa_0_9_0":
+                    run["tool_id"] = "zsasa"
+                    run["run_variant"] = None
+                elif source != "v0_6_0_full":
+                    continue
             stats = {
                 (metric, statistic): value
                 for metric, statistic, value in con.execute(
@@ -931,7 +948,7 @@ def plot_t10_ms_per_structure_comparison(
 def write_index(out_dir: Path, outputs: list[Path], title: str = "E. coli batch figures") -> Path:
     index = out_dir.joinpath("index.md")
     pngs = sorted(path for path in outputs if path.suffix == ".png")
-    lines = [f"# {title}", "", f"Generated {len(pngs)} PNG figures.", ""]
+    lines = [f"# {title}", "", f"Generated {len(pngs)} figures in PNG/SVG/PDF.", ""]
     for path in pngs:
         lines.append(f"- `{path.relative_to(out_dir)}`")
     index.parent.mkdir(parents=True, exist_ok=True)
@@ -947,7 +964,13 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def ecoli_comparison_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Keep the release-comparable E. coli thread range in the primary figures."""
+    return [row for row in rows if int(row["threads"]) <= 10]
+
+
 def generate_ecoli(rows: list[dict[str, Any]], out_dir: Path) -> tuple[list[Path], Path]:
+    rows = ecoli_comparison_rows(rows)
     outputs: list[Path] = []
     outputs.extend(plot_throughput(rows, out_dir))
     outputs.extend(plot_runtime(rows, out_dir))
@@ -1059,7 +1082,7 @@ def main() -> None:
         outputs, index = generate_ecoli(rows, args.out_dir)
         total_outputs = sum(1 for path in outputs if path.suffix == ".png")
         written_indexes.append(index)
-    print(f"wrote {total_outputs} PNG figures")
+    print(f"wrote {total_outputs} figure sets in PNG/SVG/PDF")
     for index in written_indexes:
         print(f"wrote {index}")
 

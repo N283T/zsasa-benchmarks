@@ -147,7 +147,7 @@ def speedup_against_baseline(
 
 def save_figure(fig: plt.Figure, out_dir: Path, name: str) -> list[Path]:
     written: list[Path] = []
-    for ext in ("png", "svg"):
+    for ext in ("png", "svg", "pdf"):
         path = out_dir.joinpath(ext, f"{name}.{ext}")
         path.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(path, bbox_inches="tight")
@@ -346,7 +346,12 @@ def plot_md_speedup_grid(
 
 def write_overview_index(out_dir: Path, outputs: list[Path]) -> Path:
     pngs = sorted(path for path in outputs if path.suffix == ".png")
-    lines = ["# Overview summary figures", "", f"Generated {len(pngs)} PNG figures.", ""]
+    lines = [
+        "# Overview summary figures",
+        "",
+        f"Generated {len(pngs)} figures in PNG/SVG/PDF.",
+        "",
+    ]
     for path in pngs:
         lines.append(f"- `{path.relative_to(out_dir)}`")
     index = out_dir.joinpath("index.md")
@@ -376,7 +381,7 @@ def write_top_index(figures_dir: Path, db_path: Path) -> Path:
     lines = [
         "# Benchmark figure index",
         "",
-        "Exploratory figures generated from `results/benchmark.duckdb`.",
+        "Exploratory figures generated from `results/benchmark.duckdb` in PNG/SVG/PDF formats.",
         "",
         "## Sections",
         "",
@@ -441,7 +446,7 @@ def main() -> None:
     overview_index = write_overview_index(overview_dir, outputs)
     top_index = write_top_index(args.figures_dir, args.db)
     png_count = sum(1 for path in outputs if path.suffix == ".png")
-    print(f"wrote {png_count} PNG overview figures under {overview_dir}")
+    print(f"wrote {png_count} overview figure sets in PNG/SVG/PDF under {overview_dir}")
     print(f"wrote {overview_index}")
     print(f"wrote {top_index}")
 

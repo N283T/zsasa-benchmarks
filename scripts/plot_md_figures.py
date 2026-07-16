@@ -14,6 +14,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import Patch
 
+try:
+    from scripts.benchlib.reporting import adopted_for_reporting, run_set
+except ModuleNotFoundError:  # pragma: no cover - supports direct script execution
+    from benchlib.reporting import adopted_for_reporting, run_set
+
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DB = ROOT.joinpath("results", "benchmark.duckdb")
 DEFAULT_OUT_DIR = ROOT.joinpath("results", "figures", "md")
@@ -219,7 +224,7 @@ def setup_style() -> None:
 
 def save_figure(fig: plt.Figure, out_dir: Path, name: str) -> list[Path]:
     written: list[Path] = []
-    for ext in ("png", "svg"):
+    for ext in ("png", "svg", "pdf"):
         path = out_dir.joinpath(ext, f"{name}.{ext}")
         path.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(path, bbox_inches="tight")
@@ -228,7 +233,7 @@ def save_figure(fig: plt.Figure, out_dir: Path, name: str) -> list[Path]:
     return written
 
 
-def load_md_rows(db_path: Path) -> list[dict[str, Any]]:
+def load_md_rows(db_path: Path, *, include_options: bool = False) -> list[dict[str, Any]]:
     con = duckdb.connect(str(db_path), read_only=True)
     try:
         columns = [
@@ -237,15 +242,18 @@ def load_md_rows(db_path: Path) -> list[dict[str, Any]]:
             "tool_id",
             "precision",
             "mode",
+            "bitmask_variant",
             "threads",
             "n_points",
             "frame_count",
             "notes",
+            "source_path",
+            "status",
         ]
         run_rows = con.execute(
             """
-            SELECT r.run_id, r.dataset_id, r.tool_id, r.precision, r.mode, r.threads,
-                   r.n_points, d.expected_count, d.notes
+            SELECT r.run_id, r.dataset_id, r.tool_id, r.precision, r.mode, r.variant,
+                   r.threads, r.n_points, d.expected_count, d.notes, r.source_path, r.status
             FROM benchmark_runs r
             JOIN datasets d USING (dataset_id)
             WHERE r.benchmark_kind = 'trajectory'
@@ -255,6 +263,17 @@ def load_md_rows(db_path: Path) -> list[dict[str, Any]]:
         rows: list[dict[str, Any]] = []
         for raw in run_rows:
             run = dict(zip(columns, raw, strict=True))
+            if not adopted_for_reporting("trajectory", run["source_path"], run["status"]):
+                continue
+            source = run_set(run["source_path"])
+            if source == "v0_6_0_full":
+                if run["tool_id"] not in {"mdtraj", "mdsasa_bolt"}:
+                    continue
+            elif not include_options:
+                if source != "v0_9_0_md_zsasa":
+                    continue
+                if run["tool_id"] == "zig_bitmask" and run["bitmask_variant"] != "single_corrected":
+                    continue
             stats = {
                 (metric, statistic): value
                 for metric, statistic, value in con.execute(
@@ -267,6 +286,7 @@ def load_md_rows(db_path: Path) -> list[dict[str, Any]]:
                 ).fetchall()
             }
             mean_s = float(stats[("runtime", "mean")])
+            median_s = float(stats.get(("runtime", "median")) or mean_s)
             stddev_s = float(stats.get(("runtime", "stddev")) or 0.0)
             frame_count = int(run["frame_count"])
             atom_count = parse_atom_count(run.get("notes")) or 0
@@ -279,8 +299,11 @@ def load_md_rows(db_path: Path) -> list[dict[str, Any]]:
                     "dataset_id": run["dataset_id"],
                     "variant": variant,
                     "threads": run["threads"],
+                    "bitmask_variant": run["bitmask_variant"],
+                    "run_set": source,
                     "n_points": run["n_points"],
                     "mean_s": mean_s,
+                    "median_s": median_s,
                     "stddev_s": stddev_s,
                     "frame_count": frame_count,
                     "atom_count": atom_count,
@@ -529,10 +552,125 @@ def plot_cpu_utilization_grid(rows: list[dict[str, Any]], out_dir: Path) -> list
     )
 
 
+def native_condition_label(row: dict[str, Any]) -> str:
+    """Return a compact label that keeps native trajectory options distinct."""
+    precision = row["variant"].rsplit("_", 1)[-1]
+    option = row.get("bitmask_variant")
+    if not option:
+        return f"standard {precision}"
+    labels = {
+        "single": "single",
+        "single_corrected": "single + corrected",
+        "per_frame": "per-frame",
+        "cycle": "cycle",
+        "cycle_corrected": "cycle + corrected",
+    }
+    return f"{labels.get(option, option)} {precision}"
+
+
+def plot_native_worker_speedup_grid(
+    rows: list[dict[str, Any]], out_dir: Path
+) -> list[Path]:
+    native = [
+        row
+        for row in rows
+        if row["run_set"].startswith("v0_9_0_md_zsasa")
+        and row["variant"].startswith("zsasa_cli")
+    ]
+    grouped = group_by_dataset(native)
+    datasets = sorted(grouped, key=dataset_sort_key)
+    fig, axes = plt.subplots(
+        1,
+        len(datasets),
+        figsize=(7.2 * len(datasets), 5.8),
+        squeeze=False,
+        layout="constrained",
+    )
+    fig.suptitle("Native trajectory worker scaling vs 10 workers")
+    for dataset_index, (ax, dataset_id) in enumerate(
+        zip(axes[0], datasets, strict=True)
+    ):
+        items = grouped[dataset_id]
+        by_condition: dict[tuple[str, str | None], dict[int, dict[str, Any]]] = defaultdict(dict)
+        for row in items:
+            key = (row["variant"], row.get("bitmask_variant"))
+            by_condition[key][int(row["threads"])] = row
+        conditions = sorted(
+            by_condition,
+            key=lambda key: (key[1] is not None, key[1] or "", key[0]),
+        )
+        x = np.arange(len(conditions))
+        width = 0.38
+        for index, threads in enumerate((20, 40)):
+            values = []
+            for condition in conditions:
+                runs = by_condition[condition]
+                baseline = runs.get(10)
+                candidate = runs.get(threads)
+                values.append(
+                    baseline["median_s"] / candidate["median_s"]
+                    if baseline and candidate
+                    else np.nan
+                )
+            ax.bar(
+                x + (index - 0.5) * width,
+                values,
+                width=width,
+                label=f"{threads} workers" if dataset_index == 0 else None,
+            )
+        ax.axhline(1.0, color="0.35", linestyle="--", linewidth=0.8, alpha=0.55)
+        ax.set_title(dataset_label(dataset_id))
+        ax.set_ylabel("median runtime speedup")
+        ax.set_xticks(
+            x,
+            [native_condition_label(by_condition[key][10]) for key in conditions],
+            rotation=50,
+            ha="right",
+        )
+    fig.legend(loc="outside lower center", ncol=2)
+    return save_figure(fig, out_dir, "md_native_worker_speedup_grid")
+
+
+def plot_bitmask_lut_runtime_grid(rows: list[dict[str, Any]], out_dir: Path) -> list[Path]:
+    selected = [
+        row
+        for row in rows
+        if row["run_set"] == "v0_9_0_md_zsasa"
+        and row["variant"].startswith("zsasa_cli_bitmask")
+        and row["threads"] == 10
+    ]
+    grouped = group_by_dataset(selected)
+    datasets = sorted(grouped, key=dataset_sort_key)
+    fig, axes = plt.subplots(
+        1,
+        len(datasets),
+        figsize=(6.8 * len(datasets), 5.5),
+        squeeze=False,
+        layout="constrained",
+    )
+    fig.suptitle("Native bitmask LUT runtime at 10 workers")
+    for ax, dataset_id in zip(axes[0], datasets, strict=True):
+        items = sorted(grouped[dataset_id], key=lambda row: native_condition_label(row))
+        ax.bar(
+            [native_condition_label(row) for row in items],
+            [row["mean_s"] for row in items],
+            color=[color_for(row["variant"]) for row in items],
+        )
+        ax.set_title(dataset_label(dataset_id))
+        ax.set_ylabel("runtime (s), lower is better")
+        plt.setp(ax.get_xticklabels(), rotation=50, ha="right", rotation_mode="anchor")
+    return save_figure(fig, out_dir, "md_bitmask_lut_runtime_grid")
+
+
 def write_index(out_dir: Path, outputs: list[Path]) -> Path:
     index = out_dir.joinpath("index.md")
     pngs = sorted(path for path in outputs if path.suffix == ".png")
-    lines = ["# MD performance figures", "", f"Generated {len(pngs)} PNG figures.", ""]
+    lines = [
+        "# MD performance figures",
+        "",
+        f"Generated {len(pngs)} figures in PNG/SVG/PDF.",
+        "",
+    ]
     for path in pngs:
         lines.append(f"- `{path.relative_to(out_dir)}`")
     index.parent.mkdir(parents=True, exist_ok=True)
@@ -551,6 +689,10 @@ def main() -> None:
     args = parse_args()
     setup_style()
     rows = load_md_rows(args.db)
+    try:
+        option_rows = load_md_rows(args.db, include_options=True)
+    except TypeError:  # pragma: no cover - compatibility for injected test loaders
+        option_rows = rows
     outputs: list[Path] = []
     outputs.extend(
         plot_bar_grid(
@@ -650,9 +792,12 @@ def main() -> None:
         )
     )
     outputs.extend(plot_cpu_utilization_grid(rows, args.out_dir))
+    if option_rows and all("run_set" in row for row in option_rows):
+        outputs.extend(plot_bitmask_lut_runtime_grid(option_rows, args.out_dir))
+        outputs.extend(plot_native_worker_speedup_grid(option_rows, args.out_dir))
     index = write_index(args.out_dir, outputs)
     png_count = sum(1 for path in outputs if path.suffix == ".png")
-    print(f"wrote {png_count} PNG figures under {args.out_dir}")
+    print(f"wrote {png_count} figure sets in PNG/SVG/PDF under {args.out_dir}")
     print(f"wrote {index}")
 
 
