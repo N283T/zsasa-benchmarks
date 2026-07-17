@@ -383,6 +383,8 @@ def write_top_index(figures_dir: Path, db_path: Path) -> Path:
         "",
         "Exploratory figures generated from `results/benchmark.duckdb` in PNG/SVG/PDF formats.",
         "",
+        "[Open the filterable figure gallery](gallery.html).",
+        "",
         "## Sections",
         "",
         format_markdown_table(["section", "png_figures"], section_rows),

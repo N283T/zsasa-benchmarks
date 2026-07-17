@@ -2,6 +2,8 @@
 
 Exploratory figures generated from `results/benchmark.duckdb` in PNG/SVG/PDF formats.
 
+[Open the filterable figure gallery](gallery.html).
+
 ## Sections
 
 | section | png_figures |
