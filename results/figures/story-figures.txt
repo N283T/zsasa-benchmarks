@@ -1,0 +1,4 @@
+# One PNG path per figure, relative to results/figures/.
+validation/png/static_sr_standard_and_bitmask_vs_freesasa_1024p.png
+validation/png/static_sr_bitmask_f32_error_vs_points.png
+validation/png/static_sr_bitmask_correction_vs_points.png

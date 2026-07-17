@@ -9,7 +9,7 @@ Exploratory figures generated from `results/benchmark.duckdb` in PNG/SVG/PDF for
 | section | png_figures |
 | --- | --- |
 | [Overview summaries](overview/index.md) | 3 |
-| [Validation](validation/index.md) | 96 |
+| [Validation](validation/index.md) | 99 |
 | [E. coli batch](batch_ecoli/index.md) | 13 |
 | [Human batch](batch_human/index.md) | 8 |
 | [Batch t10 comparison](batch_t10_comparison/index.md) | 3 |

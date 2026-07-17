@@ -78,6 +78,11 @@ COLORS = {
     "zsasa_mdtraj": "#d35400",
     "zsasa_mdanalysis": "#b9770e",
 }
+STATIC_STORY_COLORS = {
+    "zsasa_f64": COLORS["zsasa_f64"],
+    "zsasa_bitmask_f32": "#d35400",
+    "zsasa_bitmask_corrected_f32": "#b9770e",
+}
 DISPLAY_NAMES = {
     "freesasa": "FreeSASA",
     "mdtraj": "MDTraj",
@@ -398,6 +403,18 @@ def slugify(text: str) -> str:
     return re.sub(r"[^A-Za-z0-9_.-]+", "_", text).strip("_").lower()
 
 
+def format_percentage(value: float) -> str:
+    """Format a percentage compactly for an in-panel publication annotation."""
+    if value == 0.0:
+        return "0%"
+    if abs(value) >= 0.001:
+        return f"{value:.3g}%"
+    exponent = math.floor(math.log10(abs(value)))
+    coefficient = value / (10**exponent)
+    superscript = str(exponent).translate(str.maketrans("-0123456789", "⁻⁰¹²³⁴⁵⁶⁷⁸⁹"))
+    return f"{coefficient:.3g} × 10{superscript}%"
+
+
 def numeric_value(value: object) -> float | None:
     if value is None:
         return None
@@ -467,6 +484,18 @@ def relative_errors(rows: list[dict[str, str]], reference: str, candidate: str) 
     errors = [
         relative_error_percent(obs, ref)
         for ref, obs in zip(reference_values, candidate_values, strict=True)
+    ]
+    return [value for value in errors if math.isfinite(value)]
+
+
+def signed_relative_errors(
+    rows: list[dict[str, str]], reference: str, candidate: str
+) -> list[float]:
+    reference_values, candidate_values = paired_values(rows, reference, candidate)
+    errors = [
+        100.0 * (obs - ref) / abs(ref)
+        for ref, obs in zip(reference_values, candidate_values, strict=True)
+        if ref != 0.0
     ]
     return [value for value in errors if math.isfinite(value)]
 
@@ -761,6 +790,218 @@ def plot_static_error_vs_atoms(csvs: list[ResultCsv], out_dir: Path, prefix: str
     )
 
 
+def plot_static_standard_and_bitmask_comparison(
+    csvs: list[ResultCsv], out_dir: Path, points: int = 1024
+) -> list[Path]:
+    table = next((csv_data for csv_data in csvs if csv_data.points == points), None)
+    if table is None or not table.rows:
+        return []
+
+    candidates = ["zsasa_f64", "zsasa_bitmask_f32"]
+    if any(candidate not in table.rows[0] for candidate in candidates):
+        return []
+
+    fig, axes = plt.subplots(1, 2, figsize=(9, 4.5), layout="constrained")
+    panel_titles = ["zsasa f64 (standard)", "zsasa f32 (bitmask)"]
+    for ax, candidate, panel_title, panel_letter in zip(
+        axes, candidates, panel_titles, "ab", strict=True
+    ):
+        reference_values, candidate_values = paired_values(
+            table.rows, "freesasa", candidate
+        )
+        ref = np.asarray(reference_values, dtype=float)
+        obs = np.asarray(candidate_values, dtype=float)
+        high = max(float(ref.max()), float(obs.max())) * 1.02
+        ax.plot(
+            [0.0, high],
+            [0.0, high],
+            color="0.2",
+            linestyle="--",
+            linewidth=1.3,
+            alpha=0.8,
+            zorder=1,
+        )
+        ax.scatter(
+            ref,
+            obs,
+            s=9,
+            alpha=0.5,
+            edgecolors="none",
+            color=STATIC_STORY_COLORS[candidate],
+            rasterized=True,
+            zorder=2,
+        )
+        ax.set_xlim(0.0, high)
+        ax.set_ylim(0.0, high)
+        ax.set_aspect("equal", adjustable="box")
+        ax.set_xlabel("FreeSASA total SASA (Å²)", fontsize=10.5)
+        ax.set_ylabel(f"{display_name(candidate)} total SASA (Å²)", fontsize=10.5)
+        ax.set_title(f"{panel_title}; {points:,} points", fontsize=11)
+        ax.tick_params(axis="both", labelsize=9.5, width=1.0)
+        ax.grid(linewidth=0.7, alpha=0.3)
+        ax.spines["left"].set_linewidth(1.1)
+        ax.spines["bottom"].set_linewidth(1.1)
+        ax.text(
+            -0.07,
+            1.04,
+            f"({panel_letter})",
+            transform=ax.transAxes,
+            va="bottom",
+            ha="right",
+            fontsize=12,
+            fontweight="bold",
+        )
+        stats = summarize_pair(table.rows, "freesasa", candidate)
+        ax.text(
+            0.04,
+            0.96,
+            "\n".join(
+                [
+                    rf"$n$ = {stats.n:,}",
+                    rf"$R^2$ = {stats.r2:.6f}",
+                    f"mean rel. diff. = {format_percentage(stats.mean_error_percent)}",
+                    f"max rel. diff. = {format_percentage(stats.max_error_percent)}",
+                ]
+            ),
+            transform=ax.transAxes,
+            va="top",
+            ha="left",
+            fontsize=8.5,
+            linespacing=1.25,
+            bbox={
+                "boxstyle": "round,pad=0.3",
+                "facecolor": "white",
+                "edgecolor": "0.55",
+                "linewidth": 0.9,
+                "alpha": 0.95,
+            },
+        )
+    return save_figure(fig, out_dir, f"static_sr_standard_and_bitmask_vs_freesasa_{points}p")
+
+
+def plot_static_bitmask_error_vs_points(
+    csvs: list[ResultCsv], out_dir: Path, candidate: str = "zsasa_bitmask_f32"
+) -> list[Path]:
+    points: list[int] = []
+    medians: list[float] = []
+    lower_bounds: list[float] = []
+    upper_bounds: list[float] = []
+    for table in sorted(csvs, key=lambda csv_data: csv_data.points):
+        errors = signed_relative_errors(table.rows, "freesasa", candidate)
+        if not errors:
+            continue
+        points.append(table.points)
+        medians.append(float(np.median(errors)))
+        lower_bounds.append(float(np.percentile(errors, 5)))
+        upper_bounds.append(float(np.percentile(errors, 95)))
+
+    if not points:
+        return []
+
+    positions = list(range(len(points)))
+    color = STATIC_STORY_COLORS.get(candidate, tool_color(candidate))
+    fig, ax = plt.subplots(figsize=(7.2, 4.6), layout="constrained")
+    ax.fill_between(
+        positions,
+        lower_bounds,
+        upper_bounds,
+        color=color,
+        alpha=0.3,
+        linewidth=0.8,
+        label="5th–95th percentile",
+    )
+    ax.plot(
+        positions,
+        medians,
+        color=color,
+        marker="o",
+        markersize=6,
+        linewidth=2.2,
+        label="Median",
+    )
+    ax.axhline(0.0, color="0.2", linestyle="--", linewidth=1.3, alpha=0.8)
+    ax.set_xticks(positions, [str(point) for point in points])
+    ax.set_xlabel("Sphere-point count", fontsize=10.5)
+    ax.set_ylabel("Signed relative difference (%)", fontsize=10.5)
+    ax.set_title("zsasa bitmask f32 vs FreeSASA", fontsize=11)
+    ax.tick_params(axis="both", labelsize=9.5, width=1.0)
+    ax.grid(linewidth=0.7, alpha=0.3)
+    ax.spines["left"].set_linewidth(1.1)
+    ax.spines["bottom"].set_linewidth(1.1)
+    ax.legend(loc="lower right", fontsize=9, framealpha=0.95)
+    return save_figure(fig, out_dir, "static_sr_bitmask_f32_error_vs_points")
+
+
+def plot_static_bitmask_correction_vs_points(
+    csvs: list[ResultCsv], out_dir: Path
+) -> list[Path]:
+    series = [
+        ("zsasa_bitmask_f32", "Raw bitmask", "o", "-"),
+        ("zsasa_bitmask_corrected_f32", "Corrected bitmask", "s", "--"),
+    ]
+    fig, ax = plt.subplots(figsize=(7.2, 4.6), layout="constrained")
+    plotted = False
+    for candidate, label, marker, linestyle in series:
+        points: list[int] = []
+        medians: list[float] = []
+        lower_bounds: list[float] = []
+        upper_bounds: list[float] = []
+        for table in sorted(csvs, key=lambda csv_data: csv_data.points):
+            errors = signed_relative_errors(table.rows, "freesasa", candidate)
+            if not errors:
+                continue
+            points.append(table.points)
+            medians.append(float(np.median(errors)))
+            lower_bounds.append(float(np.percentile(errors, 5)))
+            upper_bounds.append(float(np.percentile(errors, 95)))
+        if not points:
+            continue
+
+        plotted = True
+        positions = list(range(len(points)))
+        color = STATIC_STORY_COLORS[candidate]
+        ax.fill_between(
+            positions,
+            lower_bounds,
+            upper_bounds,
+            color=color,
+            alpha=0.16,
+            linewidth=0.8,
+        )
+        ax.plot(
+            positions,
+            medians,
+            color=color,
+            marker=marker,
+            markersize=6,
+            linestyle=linestyle,
+            linewidth=2.2,
+            label=label,
+        )
+
+    if not plotted:
+        plt.close(fig)
+        return []
+
+    ax.axhline(0.0, color="0.2", linestyle=":", linewidth=1.3, alpha=0.8)
+    ax.set_xticks(range(len(points)), [str(point) for point in points])
+    ax.set_xlabel("Sphere-point count", fontsize=10.5)
+    ax.set_ylabel("Signed relative difference (%)", fontsize=10.5)
+    ax.set_title("Bitmask quantization correction vs FreeSASA", fontsize=11)
+    ax.tick_params(axis="both", labelsize=9.5, width=1.0)
+    ax.grid(linewidth=0.7, alpha=0.3)
+    ax.spines["left"].set_linewidth(1.1)
+    ax.spines["bottom"].set_linewidth(1.1)
+    ax.legend(
+        loc="center right",
+        title="Median; shading = 5th–95th percentile",
+        fontsize=9,
+        title_fontsize=8.5,
+        framealpha=0.95,
+    )
+    return save_figure(fig, out_dir, "static_sr_bitmask_correction_vs_points")
+
+
 def plot_md_error_vs_frame(csvs: list[ResultCsv], out_dir: Path, prefix: str) -> list[Path]:
     specs = collect_scatter_specs(csvs, "mdtraj")
 
@@ -871,6 +1112,9 @@ def generate_static_validation(db_path: Path, out_dir: Path) -> list[Path]:
     )
 
     if sr_csvs:
+        outputs.extend(plot_static_standard_and_bitmask_comparison(sr_csvs, out_dir))
+        outputs.extend(plot_static_bitmask_error_vs_points(sr_csvs, out_dir))
+        outputs.extend(plot_static_bitmask_correction_vs_points(sr_csvs, out_dir))
         sr_specs = collect_scatter_specs(sr_csvs, "freesasa")
         outputs.extend(
             make_point_grid(

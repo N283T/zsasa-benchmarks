@@ -11,12 +11,18 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_FIGURES_DIR = ROOT.joinpath("results", "figures")
 DEFAULT_OUTPUT = DEFAULT_FIGURES_DIR.joinpath("gallery.html")
+STORY_FILE_NAME = "story-figures.txt"
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--figures-dir", type=Path, default=DEFAULT_FIGURES_DIR)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument(
+        "--story-file",
+        type=Path,
+        help=f"figure paths to highlight (default: FIGURES_DIR/{STORY_FILE_NAME})",
+    )
     return parser.parse_args()
 
 
@@ -30,19 +36,38 @@ def counterpart(relative_png: Path, format_name: str) -> Path:
     return Path(*parts).with_suffix(f".{format_name}")
 
 
-def figure_cards(figures_dir: Path) -> tuple[list[str], Counter[str]]:
+def load_story_paths(path: Path) -> set[str]:
+    if not path.exists():
+        return set()
+    return {
+        line
+        for raw_line in path.read_text(encoding="utf-8").splitlines()
+        if (line := raw_line.strip()) and not line.startswith("#")
+    }
+
+
+def figure_cards(
+    figures_dir: Path, story_paths: set[str]
+) -> tuple[list[str], Counter[str]]:
     cards: list[str] = []
     counts: Counter[str] = Counter()
-    png_paths = sorted(figures_dir.glob("*/png/**/*.png"))
+    png_paths = list(figures_dir.glob("*/png/**/*.png"))
+    png_paths.sort(
+        key=lambda path: (
+            path.relative_to(figures_dir).as_posix() not in story_paths,
+            path.relative_to(figures_dir).as_posix(),
+        )
+    )
 
     for png_path in png_paths:
         relative_png = png_path.relative_to(figures_dir)
+        is_story = relative_png.as_posix() in story_paths
         group = relative_png.parts[0]
         counts[group] += 1
         label = display_name(png_path.stem)
         context_parts = relative_png.parts[2:-1]
         context = " / ".join(display_name(part) for part in context_parts)
-        searchable = " ".join((group, context, label)).lower()
+        searchable = " ".join((group, context, label, "story" if is_story else "")).lower()
         svg_path = counterpart(relative_png, "svg")
         pdf_path = counterpart(relative_png, "pdf")
         links = [
@@ -58,12 +83,16 @@ def figure_cards(figures_dir: Path) -> tuple[list[str], Counter[str]]:
             )
 
         context_html = (
-            f'<span class="context">{html.escape(context)}</span>' if context else ""
+            f'\n          <span class="context">{html.escape(context)}</span>'
+            if context
+            else ""
         )
+        story_badge = '<span class="story-badge">STORY</span>' if is_story else ""
         cards.append(
             f"""
       <article class="figure-card"
                data-group="{html.escape(group)}"
+               data-story="{str(is_story).lower()}"
                data-search="{html.escape(searchable)}">
         <button class="preview" type="button"
                 data-image="{html.escape(relative_png.as_posix())}"
@@ -71,8 +100,7 @@ def figure_cards(figures_dir: Path) -> tuple[list[str], Counter[str]]:
           <img src="{html.escape(relative_png.as_posix())}"
                alt="{html.escape(label)}" loading="lazy">
         </button>
-        <div class="metadata">
-          {context_html}
+        <div class="metadata">{story_badge}{context_html}
           <strong>{html.escape(label)}</strong>
           <span class="formats">{' · '.join(links)}</span>
         </div>
@@ -82,8 +110,9 @@ def figure_cards(figures_dir: Path) -> tuple[list[str], Counter[str]]:
     return cards, counts
 
 
-def build_html(figures_dir: Path) -> str:
-    cards, counts = figure_cards(figures_dir)
+def build_html(figures_dir: Path, story_paths: set[str]) -> str:
+    cards, counts = figure_cards(figures_dir, story_paths)
+    story_count = len(story_paths)
     group_buttons = [
         f'<button type="button" data-group="{html.escape(group)}">'
         f"{html.escape(display_name(group))} ({count})</button>"
@@ -132,6 +161,7 @@ def build_html(figures_dir: Path) -> str:
       background: color-mix(in srgb, CanvasText 3%, Canvas);
     }}
     .figure-card[hidden] {{ display: none; }}
+    .figure-card[data-story="true"] {{ border-color: Highlight; }}
     .preview {{
       display: block;
       width: 100%;
@@ -144,6 +174,16 @@ def build_html(figures_dir: Path) -> str:
     .preview img {{ display: block; width: 100%; height: 100%; object-fit: contain; }}
     .metadata {{ display: grid; gap: .25rem; padding: .7rem .8rem .8rem; }}
     .metadata strong {{ overflow-wrap: anywhere; font-size: .95rem; font-weight: 600; }}
+    .story-badge {{
+      width: fit-content;
+      padding: .15rem .4rem;
+      border-radius: .3rem;
+      color: HighlightText;
+      background: Highlight;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+    }}
     .context {{ color: GrayText; font-size: .8rem; }}
     .formats {{ font-size: .85rem; }}
     .formats a {{ color: LinkText; }}
@@ -187,6 +227,7 @@ def build_html(figures_dir: Path) -> str:
              aria-label="Filter figures">
       <div class="filters" aria-label="Figure groups">
         <button type="button" data-group="all" aria-pressed="true">all ({len(cards)})</button>
+        <button type="button" data-group="story">story ({story_count})</button>
         {' '.join(group_buttons)}
       </div>
     </div>
@@ -217,7 +258,9 @@ def build_html(figures_dir: Path) -> str:
       const query = search.value.trim().toLowerCase();
       let visible = 0;
       cards.forEach(card => {{
-        const matchesGroup = activeGroup === 'all' || card.dataset.group === activeGroup;
+        const matchesGroup = activeGroup === 'all'
+          || (activeGroup === 'story' && card.dataset.story === 'true')
+          || card.dataset.group === activeGroup;
         const matchesSearch = !query || card.dataset.search.includes(query);
         card.hidden = !(matchesGroup && matchesSearch);
         if (!card.hidden) visible += 1;
@@ -252,8 +295,15 @@ def main() -> None:
     args = parse_args()
     figures_dir = args.figures_dir.resolve()
     output = args.output.resolve()
+    story_file = (
+        args.story_file.resolve()
+        if args.story_file
+        else figures_dir.joinpath(STORY_FILE_NAME)
+    )
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(build_html(figures_dir), encoding="utf-8")
+    output.write_text(
+        build_html(figures_dir, load_story_paths(story_file)), encoding="utf-8"
+    )
     print(f"Wrote {output}")
 
 

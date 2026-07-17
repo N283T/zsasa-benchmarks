@@ -41,6 +41,7 @@
       background: color-mix(in srgb, CanvasText 3%, Canvas);
     }
     .figure-card[hidden] { display: none; }
+    .figure-card[data-story="true"] { border-color: Highlight; }
     .preview {
       display: block;
       width: 100%;
@@ -53,6 +54,16 @@
     .preview img { display: block; width: 100%; height: 100%; object-fit: contain; }
     .metadata { display: grid; gap: .25rem; padding: .7rem .8rem .8rem; }
     .metadata strong { overflow-wrap: anywhere; font-size: .95rem; font-weight: 600; }
+    .story-badge {
+      width: fit-content;
+      padding: .15rem .4rem;
+      border-radius: .3rem;
+      color: HighlightText;
+      background: Highlight;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+    }
     .context { color: GrayText; font-size: .8rem; }
     .formats { font-size: .85rem; }
     .formats a { color: LinkText; }
@@ -95,17 +106,64 @@
       <input id="search" type="search" placeholder="Filter by figure name…"
              aria-label="Filter figures">
       <div class="filters" aria-label="Figure groups">
-        <button type="button" data-group="all" aria-pressed="true">all (146)</button>
-        <button type="button" data-group="batch_ecoli">batch ecoli (13)</button> <button type="button" data-group="batch_human">batch human (8)</button> <button type="button" data-group="batch_t10_comparison">batch t10 comparison (3)</button> <button type="button" data-group="md">md (13)</button> <button type="button" data-group="overview">overview (3)</button> <button type="button" data-group="single_file">single file (10)</button> <button type="button" data-group="validation">validation (96)</button>
+        <button type="button" data-group="all" aria-pressed="true">all (149)</button>
+        <button type="button" data-group="story">story (3)</button>
+        <button type="button" data-group="batch_ecoli">batch ecoli (13)</button> <button type="button" data-group="batch_human">batch human (8)</button> <button type="button" data-group="batch_t10_comparison">batch t10 comparison (3)</button> <button type="button" data-group="md">md (13)</button> <button type="button" data-group="overview">overview (3)</button> <button type="button" data-group="single_file">single file (10)</button> <button type="button" data-group="validation">validation (99)</button>
       </div>
     </div>
-    <p id="status">Showing 146 figures</p>
+    <p id="status">Showing 149 figures</p>
   </header>
   <main id="gallery">
     
       <article class="figure-card"
+               data-group="validation"
+               data-story="true"
+               data-search="validation  static sr bitmask correction vs points story">
+        <button class="preview" type="button"
+                data-image="validation/png/static_sr_bitmask_correction_vs_points.png"
+                data-label="static sr bitmask correction vs points">
+          <img src="validation/png/static_sr_bitmask_correction_vs_points.png"
+               alt="static sr bitmask correction vs points" loading="lazy">
+        </button>
+        <div class="metadata"><span class="story-badge">STORY</span>
+          <strong>static sr bitmask correction vs points</strong>
+          <span class="formats"><a href="validation/png/static_sr_bitmask_correction_vs_points.png" target="_blank">PNG</a> · <a href="validation/svg/static_sr_bitmask_correction_vs_points.svg" target="_blank">SVG</a> · <a href="validation/pdf/static_sr_bitmask_correction_vs_points.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="validation"
+               data-story="true"
+               data-search="validation  static sr bitmask f32 error vs points story">
+        <button class="preview" type="button"
+                data-image="validation/png/static_sr_bitmask_f32_error_vs_points.png"
+                data-label="static sr bitmask f32 error vs points">
+          <img src="validation/png/static_sr_bitmask_f32_error_vs_points.png"
+               alt="static sr bitmask f32 error vs points" loading="lazy">
+        </button>
+        <div class="metadata"><span class="story-badge">STORY</span>
+          <strong>static sr bitmask f32 error vs points</strong>
+          <span class="formats"><a href="validation/png/static_sr_bitmask_f32_error_vs_points.png" target="_blank">PNG</a> · <a href="validation/svg/static_sr_bitmask_f32_error_vs_points.svg" target="_blank">SVG</a> · <a href="validation/pdf/static_sr_bitmask_f32_error_vs_points.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="validation"
+               data-story="true"
+               data-search="validation  static sr standard and bitmask vs freesasa 1024p story">
+        <button class="preview" type="button"
+                data-image="validation/png/static_sr_standard_and_bitmask_vs_freesasa_1024p.png"
+                data-label="static sr standard and bitmask vs freesasa 1024p">
+          <img src="validation/png/static_sr_standard_and_bitmask_vs_freesasa_1024p.png"
+               alt="static sr standard and bitmask vs freesasa 1024p" loading="lazy">
+        </button>
+        <div class="metadata"><span class="story-badge">STORY</span>
+          <strong>static sr standard and bitmask vs freesasa 1024p</strong>
+          <span class="formats"><a href="validation/png/static_sr_standard_and_bitmask_vs_freesasa_1024p.png" target="_blank">PNG</a> · <a href="validation/svg/static_sr_standard_and_bitmask_vs_freesasa_1024p.svg" target="_blank">SVG</a> · <a href="validation/pdf/static_sr_standard_and_bitmask_vs_freesasa_1024p.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
                data-group="batch_ecoli"
-               data-search="batch_ecoli  ecoli cpu utilization vs threads">
+               data-story="false"
+               data-search="batch_ecoli  ecoli cpu utilization vs threads ">
         <button class="preview" type="button"
                 data-image="batch_ecoli/png/ecoli_cpu_utilization_vs_threads.png"
                 data-label="ecoli cpu utilization vs threads">
@@ -113,14 +171,14 @@
                alt="ecoli cpu utilization vs threads" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>ecoli cpu utilization vs threads</strong>
           <span class="formats"><a href="batch_ecoli/png/ecoli_cpu_utilization_vs_threads.png" target="_blank">PNG</a> · <a href="batch_ecoli/svg/ecoli_cpu_utilization_vs_threads.svg" target="_blank">SVG</a> · <a href="batch_ecoli/pdf/ecoli_cpu_utilization_vs_threads.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="batch_ecoli"
-               data-search="batch_ecoli  ecoli parallel efficiency heatmap">
+               data-story="false"
+               data-search="batch_ecoli  ecoli parallel efficiency heatmap ">
         <button class="preview" type="button"
                 data-image="batch_ecoli/png/ecoli_parallel_efficiency_heatmap.png"
                 data-label="ecoli parallel efficiency heatmap">
@@ -128,14 +186,14 @@
                alt="ecoli parallel efficiency heatmap" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>ecoli parallel efficiency heatmap</strong>
           <span class="formats"><a href="batch_ecoli/png/ecoli_parallel_efficiency_heatmap.png" target="_blank">PNG</a> · <a href="batch_ecoli/svg/ecoli_parallel_efficiency_heatmap.svg" target="_blank">SVG</a> · <a href="batch_ecoli/pdf/ecoli_parallel_efficiency_heatmap.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="batch_ecoli"
-               data-search="batch_ecoli  ecoli peak rss vs threads">
+               data-story="false"
+               data-search="batch_ecoli  ecoli peak rss vs threads ">
         <button class="preview" type="button"
                 data-image="batch_ecoli/png/ecoli_peak_rss_vs_threads.png"
                 data-label="ecoli peak rss vs threads">
@@ -143,14 +201,14 @@
                alt="ecoli peak rss vs threads" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>ecoli peak rss vs threads</strong>
           <span class="formats"><a href="batch_ecoli/png/ecoli_peak_rss_vs_threads.png" target="_blank">PNG</a> · <a href="batch_ecoli/svg/ecoli_peak_rss_vs_threads.svg" target="_blank">SVG</a> · <a href="batch_ecoli/pdf/ecoli_peak_rss_vs_threads.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="batch_ecoli"
-               data-search="batch_ecoli  ecoli runtime vs threads">
+               data-story="false"
+               data-search="batch_ecoli  ecoli runtime vs threads ">
         <button class="preview" type="button"
                 data-image="batch_ecoli/png/ecoli_runtime_vs_threads.png"
                 data-label="ecoli runtime vs threads">
@@ -158,14 +216,14 @@
                alt="ecoli runtime vs threads" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>ecoli runtime vs threads</strong>
           <span class="formats"><a href="batch_ecoli/png/ecoli_runtime_vs_threads.png" target="_blank">PNG</a> · <a href="batch_ecoli/svg/ecoli_runtime_vs_threads.svg" target="_blank">SVG</a> · <a href="batch_ecoli/pdf/ecoli_runtime_vs_threads.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="batch_ecoli"
-               data-search="batch_ecoli  ecoli t10 peak rss bar">
+               data-story="false"
+               data-search="batch_ecoli  ecoli t10 peak rss bar ">
         <button class="preview" type="button"
                 data-image="batch_ecoli/png/ecoli_t10_peak_rss_bar.png"
                 data-label="ecoli t10 peak rss bar">
@@ -173,14 +231,14 @@
                alt="ecoli t10 peak rss bar" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>ecoli t10 peak rss bar</strong>
           <span class="formats"><a href="batch_ecoli/png/ecoli_t10_peak_rss_bar.png" target="_blank">PNG</a> · <a href="batch_ecoli/svg/ecoli_t10_peak_rss_bar.svg" target="_blank">SVG</a> · <a href="batch_ecoli/pdf/ecoli_t10_peak_rss_bar.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="batch_ecoli"
-               data-search="batch_ecoli  ecoli t10 rss reduction vs comparators">
+               data-story="false"
+               data-search="batch_ecoli  ecoli t10 rss reduction vs comparators ">
         <button class="preview" type="button"
                 data-image="batch_ecoli/png/ecoli_t10_rss_reduction_vs_comparators.png"
                 data-label="ecoli t10 rss reduction vs comparators">
@@ -188,14 +246,14 @@
                alt="ecoli t10 rss reduction vs comparators" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>ecoli t10 rss reduction vs comparators</strong>
           <span class="formats"><a href="batch_ecoli/png/ecoli_t10_rss_reduction_vs_comparators.png" target="_blank">PNG</a> · <a href="batch_ecoli/svg/ecoli_t10_rss_reduction_vs_comparators.svg" target="_blank">SVG</a> · <a href="batch_ecoli/pdf/ecoli_t10_rss_reduction_vs_comparators.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="batch_ecoli"
-               data-search="batch_ecoli  ecoli t10 runtime speedup vs comparators">
+               data-story="false"
+               data-search="batch_ecoli  ecoli t10 runtime speedup vs comparators ">
         <button class="preview" type="button"
                 data-image="batch_ecoli/png/ecoli_t10_runtime_speedup_vs_comparators.png"
                 data-label="ecoli t10 runtime speedup vs comparators">
@@ -203,14 +261,14 @@
                alt="ecoli t10 runtime speedup vs comparators" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>ecoli t10 runtime speedup vs comparators</strong>
           <span class="formats"><a href="batch_ecoli/png/ecoli_t10_runtime_speedup_vs_comparators.png" target="_blank">PNG</a> · <a href="batch_ecoli/svg/ecoli_t10_runtime_speedup_vs_comparators.svg" target="_blank">SVG</a> · <a href="batch_ecoli/pdf/ecoli_t10_runtime_speedup_vs_comparators.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="batch_ecoli"
-               data-search="batch_ecoli  ecoli t10 throughput bar">
+               data-story="false"
+               data-search="batch_ecoli  ecoli t10 throughput bar ">
         <button class="preview" type="button"
                 data-image="batch_ecoli/png/ecoli_t10_throughput_bar.png"
                 data-label="ecoli t10 throughput bar">
@@ -218,14 +276,14 @@
                alt="ecoli t10 throughput bar" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>ecoli t10 throughput bar</strong>
           <span class="formats"><a href="batch_ecoli/png/ecoli_t10_throughput_bar.png" target="_blank">PNG</a> · <a href="batch_ecoli/svg/ecoli_t10_throughput_bar.svg" target="_blank">SVG</a> · <a href="batch_ecoli/pdf/ecoli_t10_throughput_bar.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="batch_ecoli"
-               data-search="batch_ecoli  ecoli t10 throughput vs peak rss">
+               data-story="false"
+               data-search="batch_ecoli  ecoli t10 throughput vs peak rss ">
         <button class="preview" type="button"
                 data-image="batch_ecoli/png/ecoli_t10_throughput_vs_peak_rss.png"
                 data-label="ecoli t10 throughput vs peak rss">
@@ -233,14 +291,14 @@
                alt="ecoli t10 throughput vs peak rss" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>ecoli t10 throughput vs peak rss</strong>
           <span class="formats"><a href="batch_ecoli/png/ecoli_t10_throughput_vs_peak_rss.png" target="_blank">PNG</a> · <a href="batch_ecoli/svg/ecoli_t10_throughput_vs_peak_rss.svg" target="_blank">SVG</a> · <a href="batch_ecoli/pdf/ecoli_t10_throughput_vs_peak_rss.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="batch_ecoli"
-               data-search="batch_ecoli  ecoli thread scaling">
+               data-story="false"
+               data-search="batch_ecoli  ecoli thread scaling ">
         <button class="preview" type="button"
                 data-image="batch_ecoli/png/ecoli_thread_scaling.png"
                 data-label="ecoli thread scaling">
@@ -248,14 +306,14 @@
                alt="ecoli thread scaling" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>ecoli thread scaling</strong>
           <span class="formats"><a href="batch_ecoli/png/ecoli_thread_scaling.png" target="_blank">PNG</a> · <a href="batch_ecoli/svg/ecoli_thread_scaling.svg" target="_blank">SVG</a> · <a href="batch_ecoli/pdf/ecoli_thread_scaling.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="batch_ecoli"
-               data-search="batch_ecoli  ecoli throughput per mib vs threads">
+               data-story="false"
+               data-search="batch_ecoli  ecoli throughput per mib vs threads ">
         <button class="preview" type="button"
                 data-image="batch_ecoli/png/ecoli_throughput_per_mib_vs_threads.png"
                 data-label="ecoli throughput per mib vs threads">
@@ -263,14 +321,14 @@
                alt="ecoli throughput per mib vs threads" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>ecoli throughput per mib vs threads</strong>
           <span class="formats"><a href="batch_ecoli/png/ecoli_throughput_per_mib_vs_threads.png" target="_blank">PNG</a> · <a href="batch_ecoli/svg/ecoli_throughput_per_mib_vs_threads.svg" target="_blank">SVG</a> · <a href="batch_ecoli/pdf/ecoli_throughput_per_mib_vs_threads.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="batch_ecoli"
-               data-search="batch_ecoli  ecoli throughput replicates">
+               data-story="false"
+               data-search="batch_ecoli  ecoli throughput replicates ">
         <button class="preview" type="button"
                 data-image="batch_ecoli/png/ecoli_throughput_replicates.png"
                 data-label="ecoli throughput replicates">
@@ -278,14 +336,14 @@
                alt="ecoli throughput replicates" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>ecoli throughput replicates</strong>
           <span class="formats"><a href="batch_ecoli/png/ecoli_throughput_replicates.png" target="_blank">PNG</a> · <a href="batch_ecoli/svg/ecoli_throughput_replicates.svg" target="_blank">SVG</a> · <a href="batch_ecoli/pdf/ecoli_throughput_replicates.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="batch_ecoli"
-               data-search="batch_ecoli  ecoli throughput vs threads">
+               data-story="false"
+               data-search="batch_ecoli  ecoli throughput vs threads ">
         <button class="preview" type="button"
                 data-image="batch_ecoli/png/ecoli_throughput_vs_threads.png"
                 data-label="ecoli throughput vs threads">
@@ -293,14 +351,14 @@
                alt="ecoli throughput vs threads" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>ecoli throughput vs threads</strong>
           <span class="formats"><a href="batch_ecoli/png/ecoli_throughput_vs_threads.png" target="_blank">PNG</a> · <a href="batch_ecoli/svg/ecoli_throughput_vs_threads.svg" target="_blank">SVG</a> · <a href="batch_ecoli/pdf/ecoli_throughput_vs_threads.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="batch_human"
-               data-search="batch_human  human t10 cpu utilization bar">
+               data-story="false"
+               data-search="batch_human  human t10 cpu utilization bar ">
         <button class="preview" type="button"
                 data-image="batch_human/png/human_t10_cpu_utilization_bar.png"
                 data-label="human t10 cpu utilization bar">
@@ -308,14 +366,14 @@
                alt="human t10 cpu utilization bar" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>human t10 cpu utilization bar</strong>
           <span class="formats"><a href="batch_human/png/human_t10_cpu_utilization_bar.png" target="_blank">PNG</a> · <a href="batch_human/svg/human_t10_cpu_utilization_bar.svg" target="_blank">SVG</a> · <a href="batch_human/pdf/human_t10_cpu_utilization_bar.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="batch_human"
-               data-search="batch_human  human t10 peak rss bar">
+               data-story="false"
+               data-search="batch_human  human t10 peak rss bar ">
         <button class="preview" type="button"
                 data-image="batch_human/png/human_t10_peak_rss_bar.png"
                 data-label="human t10 peak rss bar">
@@ -323,14 +381,14 @@
                alt="human t10 peak rss bar" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>human t10 peak rss bar</strong>
           <span class="formats"><a href="batch_human/png/human_t10_peak_rss_bar.png" target="_blank">PNG</a> · <a href="batch_human/svg/human_t10_peak_rss_bar.svg" target="_blank">SVG</a> · <a href="batch_human/pdf/human_t10_peak_rss_bar.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="batch_human"
-               data-search="batch_human  human t10 rss reduction vs comparators">
+               data-story="false"
+               data-search="batch_human  human t10 rss reduction vs comparators ">
         <button class="preview" type="button"
                 data-image="batch_human/png/human_t10_rss_reduction_vs_comparators.png"
                 data-label="human t10 rss reduction vs comparators">
@@ -338,14 +396,14 @@
                alt="human t10 rss reduction vs comparators" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>human t10 rss reduction vs comparators</strong>
           <span class="formats"><a href="batch_human/png/human_t10_rss_reduction_vs_comparators.png" target="_blank">PNG</a> · <a href="batch_human/svg/human_t10_rss_reduction_vs_comparators.svg" target="_blank">SVG</a> · <a href="batch_human/pdf/human_t10_rss_reduction_vs_comparators.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="batch_human"
-               data-search="batch_human  human t10 runtime bar">
+               data-story="false"
+               data-search="batch_human  human t10 runtime bar ">
         <button class="preview" type="button"
                 data-image="batch_human/png/human_t10_runtime_bar.png"
                 data-label="human t10 runtime bar">
@@ -353,14 +411,14 @@
                alt="human t10 runtime bar" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>human t10 runtime bar</strong>
           <span class="formats"><a href="batch_human/png/human_t10_runtime_bar.png" target="_blank">PNG</a> · <a href="batch_human/svg/human_t10_runtime_bar.svg" target="_blank">SVG</a> · <a href="batch_human/pdf/human_t10_runtime_bar.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="batch_human"
-               data-search="batch_human  human t10 runtime speedup vs comparators">
+               data-story="false"
+               data-search="batch_human  human t10 runtime speedup vs comparators ">
         <button class="preview" type="button"
                 data-image="batch_human/png/human_t10_runtime_speedup_vs_comparators.png"
                 data-label="human t10 runtime speedup vs comparators">
@@ -368,14 +426,14 @@
                alt="human t10 runtime speedup vs comparators" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>human t10 runtime speedup vs comparators</strong>
           <span class="formats"><a href="batch_human/png/human_t10_runtime_speedup_vs_comparators.png" target="_blank">PNG</a> · <a href="batch_human/svg/human_t10_runtime_speedup_vs_comparators.svg" target="_blank">SVG</a> · <a href="batch_human/pdf/human_t10_runtime_speedup_vs_comparators.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="batch_human"
-               data-search="batch_human  human t10 throughput bar">
+               data-story="false"
+               data-search="batch_human  human t10 throughput bar ">
         <button class="preview" type="button"
                 data-image="batch_human/png/human_t10_throughput_bar.png"
                 data-label="human t10 throughput bar">
@@ -383,14 +441,14 @@
                alt="human t10 throughput bar" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>human t10 throughput bar</strong>
           <span class="formats"><a href="batch_human/png/human_t10_throughput_bar.png" target="_blank">PNG</a> · <a href="batch_human/svg/human_t10_throughput_bar.svg" target="_blank">SVG</a> · <a href="batch_human/pdf/human_t10_throughput_bar.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="batch_human"
-               data-search="batch_human  human t10 throughput per mib bar">
+               data-story="false"
+               data-search="batch_human  human t10 throughput per mib bar ">
         <button class="preview" type="button"
                 data-image="batch_human/png/human_t10_throughput_per_mib_bar.png"
                 data-label="human t10 throughput per mib bar">
@@ -398,14 +456,14 @@
                alt="human t10 throughput per mib bar" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>human t10 throughput per mib bar</strong>
           <span class="formats"><a href="batch_human/png/human_t10_throughput_per_mib_bar.png" target="_blank">PNG</a> · <a href="batch_human/svg/human_t10_throughput_per_mib_bar.svg" target="_blank">SVG</a> · <a href="batch_human/pdf/human_t10_throughput_per_mib_bar.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="batch_human"
-               data-search="batch_human  human t10 throughput vs peak rss">
+               data-story="false"
+               data-search="batch_human  human t10 throughput vs peak rss ">
         <button class="preview" type="button"
                 data-image="batch_human/png/human_t10_throughput_vs_peak_rss.png"
                 data-label="human t10 throughput vs peak rss">
@@ -413,14 +471,14 @@
                alt="human t10 throughput vs peak rss" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>human t10 throughput vs peak rss</strong>
           <span class="formats"><a href="batch_human/png/human_t10_throughput_vs_peak_rss.png" target="_blank">PNG</a> · <a href="batch_human/svg/human_t10_throughput_vs_peak_rss.svg" target="_blank">SVG</a> · <a href="batch_human/pdf/human_t10_throughput_vs_peak_rss.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="batch_t10_comparison"
-               data-search="batch_t10_comparison  t10 human ecoli throughput ratio">
+               data-story="false"
+               data-search="batch_t10_comparison  t10 human ecoli throughput ratio ">
         <button class="preview" type="button"
                 data-image="batch_t10_comparison/png/t10_human_ecoli_throughput_ratio.png"
                 data-label="t10 human ecoli throughput ratio">
@@ -428,14 +486,14 @@
                alt="t10 human ecoli throughput ratio" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>t10 human ecoli throughput ratio</strong>
           <span class="formats"><a href="batch_t10_comparison/png/t10_human_ecoli_throughput_ratio.png" target="_blank">PNG</a> · <a href="batch_t10_comparison/svg/t10_human_ecoli_throughput_ratio.svg" target="_blank">SVG</a> · <a href="batch_t10_comparison/pdf/t10_human_ecoli_throughput_ratio.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="batch_t10_comparison"
-               data-search="batch_t10_comparison  t10 ms per structure ecoli human">
+               data-story="false"
+               data-search="batch_t10_comparison  t10 ms per structure ecoli human ">
         <button class="preview" type="button"
                 data-image="batch_t10_comparison/png/t10_ms_per_structure_ecoli_human.png"
                 data-label="t10 ms per structure ecoli human">
@@ -443,14 +501,14 @@
                alt="t10 ms per structure ecoli human" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>t10 ms per structure ecoli human</strong>
           <span class="formats"><a href="batch_t10_comparison/png/t10_ms_per_structure_ecoli_human.png" target="_blank">PNG</a> · <a href="batch_t10_comparison/svg/t10_ms_per_structure_ecoli_human.svg" target="_blank">SVG</a> · <a href="batch_t10_comparison/pdf/t10_ms_per_structure_ecoli_human.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="batch_t10_comparison"
-               data-search="batch_t10_comparison  t10 throughput ecoli vs human">
+               data-story="false"
+               data-search="batch_t10_comparison  t10 throughput ecoli vs human ">
         <button class="preview" type="button"
                 data-image="batch_t10_comparison/png/t10_throughput_ecoli_vs_human.png"
                 data-label="t10 throughput ecoli vs human">
@@ -458,14 +516,14 @@
                alt="t10 throughput ecoli vs human" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>t10 throughput ecoli vs human</strong>
           <span class="formats"><a href="batch_t10_comparison/png/t10_throughput_ecoli_vs_human.png" target="_blank">PNG</a> · <a href="batch_t10_comparison/svg/t10_throughput_ecoli_vs_human.svg" target="_blank">SVG</a> · <a href="batch_t10_comparison/pdf/t10_throughput_ecoli_vs_human.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="md"
-               data-search="md  md atom frames per sec bar grid">
+               data-story="false"
+               data-search="md  md atom frames per sec bar grid ">
         <button class="preview" type="button"
                 data-image="md/png/md_atom_frames_per_sec_bar_grid.png"
                 data-label="md atom frames per sec bar grid">
@@ -473,14 +531,14 @@
                alt="md atom frames per sec bar grid" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>md atom frames per sec bar grid</strong>
           <span class="formats"><a href="md/png/md_atom_frames_per_sec_bar_grid.png" target="_blank">PNG</a> · <a href="md/svg/md_atom_frames_per_sec_bar_grid.svg" target="_blank">SVG</a> · <a href="md/pdf/md_atom_frames_per_sec_bar_grid.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="md"
-               data-search="md  md bitmask lut runtime grid">
+               data-story="false"
+               data-search="md  md bitmask lut runtime grid ">
         <button class="preview" type="button"
                 data-image="md/png/md_bitmask_lut_runtime_grid.png"
                 data-label="md bitmask lut runtime grid">
@@ -488,14 +546,14 @@
                alt="md bitmask lut runtime grid" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>md bitmask lut runtime grid</strong>
           <span class="formats"><a href="md/png/md_bitmask_lut_runtime_grid.png" target="_blank">PNG</a> · <a href="md/svg/md_bitmask_lut_runtime_grid.svg" target="_blank">SVG</a> · <a href="md/pdf/md_bitmask_lut_runtime_grid.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="md"
-               data-search="md  md cpu utilization bar grid">
+               data-story="false"
+               data-search="md  md cpu utilization bar grid ">
         <button class="preview" type="button"
                 data-image="md/png/md_cpu_utilization_bar_grid.png"
                 data-label="md cpu utilization bar grid">
@@ -503,14 +561,14 @@
                alt="md cpu utilization bar grid" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>md cpu utilization bar grid</strong>
           <span class="formats"><a href="md/png/md_cpu_utilization_bar_grid.png" target="_blank">PNG</a> · <a href="md/svg/md_cpu_utilization_bar_grid.svg" target="_blank">SVG</a> · <a href="md/pdf/md_cpu_utilization_bar_grid.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="md"
-               data-search="md  md frames per sec bar grid">
+               data-story="false"
+               data-search="md  md frames per sec bar grid ">
         <button class="preview" type="button"
                 data-image="md/png/md_frames_per_sec_bar_grid.png"
                 data-label="md frames per sec bar grid">
@@ -518,14 +576,14 @@
                alt="md frames per sec bar grid" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>md frames per sec bar grid</strong>
           <span class="formats"><a href="md/png/md_frames_per_sec_bar_grid.png" target="_blank">PNG</a> · <a href="md/svg/md_frames_per_sec_bar_grid.svg" target="_blank">SVG</a> · <a href="md/pdf/md_frames_per_sec_bar_grid.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="md"
-               data-search="md  md frames per sec per mib bar grid">
+               data-story="false"
+               data-search="md  md frames per sec per mib bar grid ">
         <button class="preview" type="button"
                 data-image="md/png/md_frames_per_sec_per_mib_bar_grid.png"
                 data-label="md frames per sec per mib bar grid">
@@ -533,14 +591,14 @@
                alt="md frames per sec per mib bar grid" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>md frames per sec per mib bar grid</strong>
           <span class="formats"><a href="md/png/md_frames_per_sec_per_mib_bar_grid.png" target="_blank">PNG</a> · <a href="md/svg/md_frames_per_sec_per_mib_bar_grid.svg" target="_blank">SVG</a> · <a href="md/pdf/md_frames_per_sec_per_mib_bar_grid.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="md"
-               data-search="md  md native worker speedup grid">
+               data-story="false"
+               data-search="md  md native worker speedup grid ">
         <button class="preview" type="button"
                 data-image="md/png/md_native_worker_speedup_grid.png"
                 data-label="md native worker speedup grid">
@@ -548,14 +606,14 @@
                alt="md native worker speedup grid" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>md native worker speedup grid</strong>
           <span class="formats"><a href="md/png/md_native_worker_speedup_grid.png" target="_blank">PNG</a> · <a href="md/svg/md_native_worker_speedup_grid.svg" target="_blank">SVG</a> · <a href="md/pdf/md_native_worker_speedup_grid.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="md"
-               data-search="md  md peak rss bar grid">
+               data-story="false"
+               data-search="md  md peak rss bar grid ">
         <button class="preview" type="button"
                 data-image="md/png/md_peak_rss_bar_grid.png"
                 data-label="md peak rss bar grid">
@@ -563,14 +621,14 @@
                alt="md peak rss bar grid" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>md peak rss bar grid</strong>
           <span class="formats"><a href="md/png/md_peak_rss_bar_grid.png" target="_blank">PNG</a> · <a href="md/svg/md_peak_rss_bar_grid.svg" target="_blank">SVG</a> · <a href="md/pdf/md_peak_rss_bar_grid.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="md"
-               data-search="md  md rss reduction vs comparators grid">
+               data-story="false"
+               data-search="md  md rss reduction vs comparators grid ">
         <button class="preview" type="button"
                 data-image="md/png/md_rss_reduction_vs_comparators_grid.png"
                 data-label="md rss reduction vs comparators grid">
@@ -578,14 +636,14 @@
                alt="md rss reduction vs comparators grid" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>md rss reduction vs comparators grid</strong>
           <span class="formats"><a href="md/png/md_rss_reduction_vs_comparators_grid.png" target="_blank">PNG</a> · <a href="md/svg/md_rss_reduction_vs_comparators_grid.svg" target="_blank">SVG</a> · <a href="md/pdf/md_rss_reduction_vs_comparators_grid.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="md"
-               data-search="md  md runtime bar grid">
+               data-story="false"
+               data-search="md  md runtime bar grid ">
         <button class="preview" type="button"
                 data-image="md/png/md_runtime_bar_grid.png"
                 data-label="md runtime bar grid">
@@ -593,14 +651,14 @@
                alt="md runtime bar grid" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>md runtime bar grid</strong>
           <span class="formats"><a href="md/png/md_runtime_bar_grid.png" target="_blank">PNG</a> · <a href="md/svg/md_runtime_bar_grid.svg" target="_blank">SVG</a> · <a href="md/pdf/md_runtime_bar_grid.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="md"
-               data-search="md  md runtime speedup vs comparators grid">
+               data-story="false"
+               data-search="md  md runtime speedup vs comparators grid ">
         <button class="preview" type="button"
                 data-image="md/png/md_runtime_speedup_vs_comparators_grid.png"
                 data-label="md runtime speedup vs comparators grid">
@@ -608,14 +666,14 @@
                alt="md runtime speedup vs comparators grid" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>md runtime speedup vs comparators grid</strong>
           <span class="formats"><a href="md/png/md_runtime_speedup_vs_comparators_grid.png" target="_blank">PNG</a> · <a href="md/svg/md_runtime_speedup_vs_comparators_grid.svg" target="_blank">SVG</a> · <a href="md/pdf/md_runtime_speedup_vs_comparators_grid.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="md"
-               data-search="md  md throughput vs peak rss logx grid">
+               data-story="false"
+               data-search="md  md throughput vs peak rss logx grid ">
         <button class="preview" type="button"
                 data-image="md/png/md_throughput_vs_peak_rss_logx_grid.png"
                 data-label="md throughput vs peak rss logx grid">
@@ -623,14 +681,14 @@
                alt="md throughput vs peak rss logx grid" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>md throughput vs peak rss logx grid</strong>
           <span class="formats"><a href="md/png/md_throughput_vs_peak_rss_logx_grid.png" target="_blank">PNG</a> · <a href="md/svg/md_throughput_vs_peak_rss_logx_grid.svg" target="_blank">SVG</a> · <a href="md/pdf/md_throughput_vs_peak_rss_logx_grid.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="md"
-               data-search="md  md zsasa peak rss bar grid">
+               data-story="false"
+               data-search="md  md zsasa peak rss bar grid ">
         <button class="preview" type="button"
                 data-image="md/png/md_zsasa_peak_rss_bar_grid.png"
                 data-label="md zsasa peak rss bar grid">
@@ -638,14 +696,14 @@
                alt="md zsasa peak rss bar grid" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>md zsasa peak rss bar grid</strong>
           <span class="formats"><a href="md/png/md_zsasa_peak_rss_bar_grid.png" target="_blank">PNG</a> · <a href="md/svg/md_zsasa_peak_rss_bar_grid.svg" target="_blank">SVG</a> · <a href="md/pdf/md_zsasa_peak_rss_bar_grid.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="md"
-               data-search="md  md zsasa runtime bar grid">
+               data-story="false"
+               data-search="md  md zsasa runtime bar grid ">
         <button class="preview" type="button"
                 data-image="md/png/md_zsasa_runtime_bar_grid.png"
                 data-label="md zsasa runtime bar grid">
@@ -653,14 +711,14 @@
                alt="md zsasa runtime bar grid" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>md zsasa runtime bar grid</strong>
           <span class="formats"><a href="md/png/md_zsasa_runtime_bar_grid.png" target="_blank">PNG</a> · <a href="md/svg/md_zsasa_runtime_bar_grid.svg" target="_blank">SVG</a> · <a href="md/pdf/md_zsasa_runtime_bar_grid.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="overview"
-               data-search="overview  batch t10 speedup vs freesasa">
+               data-story="false"
+               data-search="overview  batch t10 speedup vs freesasa ">
         <button class="preview" type="button"
                 data-image="overview/png/batch_t10_speedup_vs_freesasa.png"
                 data-label="batch t10 speedup vs freesasa">
@@ -668,14 +726,14 @@
                alt="batch t10 speedup vs freesasa" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>batch t10 speedup vs freesasa</strong>
           <span class="formats"><a href="overview/png/batch_t10_speedup_vs_freesasa.png" target="_blank">PNG</a> · <a href="overview/svg/batch_t10_speedup_vs_freesasa.svg" target="_blank">SVG</a> · <a href="overview/pdf/batch_t10_speedup_vs_freesasa.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="overview"
-               data-search="overview  md speedup vs mdsasa bolt grid">
+               data-story="false"
+               data-search="overview  md speedup vs mdsasa bolt grid ">
         <button class="preview" type="button"
                 data-image="overview/png/md_speedup_vs_mdsasa-bolt_grid.png"
                 data-label="md speedup vs mdsasa bolt grid">
@@ -683,14 +741,14 @@
                alt="md speedup vs mdsasa bolt grid" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>md speedup vs mdsasa bolt grid</strong>
           <span class="formats"><a href="overview/png/md_speedup_vs_mdsasa-bolt_grid.png" target="_blank">PNG</a> · <a href="overview/svg/md_speedup_vs_mdsasa-bolt_grid.svg" target="_blank">SVG</a> · <a href="overview/pdf/md_speedup_vs_mdsasa-bolt_grid.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="overview"
-               data-search="overview  md speedup vs mdtraj grid">
+               data-story="false"
+               data-search="overview  md speedup vs mdtraj grid ">
         <button class="preview" type="button"
                 data-image="overview/png/md_speedup_vs_mdtraj_grid.png"
                 data-label="md speedup vs mdtraj grid">
@@ -698,14 +756,14 @@
                alt="md speedup vs mdtraj grid" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>md speedup vs mdtraj grid</strong>
           <span class="formats"><a href="overview/png/md_speedup_vs_mdtraj_grid.png" target="_blank">PNG</a> · <a href="overview/svg/md_speedup_vs_mdtraj_grid.svg" target="_blank">SVG</a> · <a href="overview/pdf/md_speedup_vs_mdtraj_grid.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="single_file"
-               data-search="single_file  single runtime vs threads grid">
+               data-story="false"
+               data-search="single_file  single runtime vs threads grid ">
         <button class="preview" type="button"
                 data-image="single_file/png/single_runtime_vs_threads_grid.png"
                 data-label="single runtime vs threads grid">
@@ -713,14 +771,14 @@
                alt="single runtime vs threads grid" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>single runtime vs threads grid</strong>
           <span class="formats"><a href="single_file/png/single_runtime_vs_threads_grid.png" target="_blank">PNG</a> · <a href="single_file/svg/single_runtime_vs_threads_grid.svg" target="_blank">SVG</a> · <a href="single_file/pdf/single_runtime_vs_threads_grid.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="single_file"
-               data-search="single_file  single t10 atoms per sec vs atoms">
+               data-story="false"
+               data-search="single_file  single t10 atoms per sec vs atoms ">
         <button class="preview" type="button"
                 data-image="single_file/png/single_t10_atoms_per_sec_vs_atoms.png"
                 data-label="single t10 atoms per sec vs atoms">
@@ -728,14 +786,14 @@
                alt="single t10 atoms per sec vs atoms" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>single t10 atoms per sec vs atoms</strong>
           <span class="formats"><a href="single_file/png/single_t10_atoms_per_sec_vs_atoms.png" target="_blank">PNG</a> · <a href="single_file/svg/single_t10_atoms_per_sec_vs_atoms.svg" target="_blank">SVG</a> · <a href="single_file/pdf/single_t10_atoms_per_sec_vs_atoms.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="single_file"
-               data-search="single_file  single t10 cpu utilization grid">
+               data-story="false"
+               data-search="single_file  single t10 cpu utilization grid ">
         <button class="preview" type="button"
                 data-image="single_file/png/single_t10_cpu_utilization_grid.png"
                 data-label="single t10 cpu utilization grid">
@@ -743,14 +801,14 @@
                alt="single t10 cpu utilization grid" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>single t10 cpu utilization grid</strong>
           <span class="formats"><a href="single_file/png/single_t10_cpu_utilization_grid.png" target="_blank">PNG</a> · <a href="single_file/svg/single_t10_cpu_utilization_grid.svg" target="_blank">SVG</a> · <a href="single_file/pdf/single_t10_cpu_utilization_grid.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="single_file"
-               data-search="single_file  single t10 parse sasa breakdown grid">
+               data-story="false"
+               data-search="single_file  single t10 parse sasa breakdown grid ">
         <button class="preview" type="button"
                 data-image="single_file/png/single_t10_parse_sasa_breakdown_grid.png"
                 data-label="single t10 parse sasa breakdown grid">
@@ -758,14 +816,14 @@
                alt="single t10 parse sasa breakdown grid" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>single t10 parse sasa breakdown grid</strong>
           <span class="formats"><a href="single_file/png/single_t10_parse_sasa_breakdown_grid.png" target="_blank">PNG</a> · <a href="single_file/svg/single_t10_parse_sasa_breakdown_grid.svg" target="_blank">SVG</a> · <a href="single_file/pdf/single_t10_parse_sasa_breakdown_grid.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="single_file"
-               data-search="single_file  single t10 peak rss bar grid">
+               data-story="false"
+               data-search="single_file  single t10 peak rss bar grid ">
         <button class="preview" type="button"
                 data-image="single_file/png/single_t10_peak_rss_bar_grid.png"
                 data-label="single t10 peak rss bar grid">
@@ -773,14 +831,14 @@
                alt="single t10 peak rss bar grid" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>single t10 peak rss bar grid</strong>
           <span class="formats"><a href="single_file/png/single_t10_peak_rss_bar_grid.png" target="_blank">PNG</a> · <a href="single_file/svg/single_t10_peak_rss_bar_grid.svg" target="_blank">SVG</a> · <a href="single_file/pdf/single_t10_peak_rss_bar_grid.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="single_file"
-               data-search="single_file  single t10 peak rss vs atoms">
+               data-story="false"
+               data-search="single_file  single t10 peak rss vs atoms ">
         <button class="preview" type="button"
                 data-image="single_file/png/single_t10_peak_rss_vs_atoms.png"
                 data-label="single t10 peak rss vs atoms">
@@ -788,14 +846,14 @@
                alt="single t10 peak rss vs atoms" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>single t10 peak rss vs atoms</strong>
           <span class="formats"><a href="single_file/png/single_t10_peak_rss_vs_atoms.png" target="_blank">PNG</a> · <a href="single_file/svg/single_t10_peak_rss_vs_atoms.svg" target="_blank">SVG</a> · <a href="single_file/pdf/single_t10_peak_rss_vs_atoms.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="single_file"
-               data-search="single_file  single t10 rss reduction vs comparators grid">
+               data-story="false"
+               data-search="single_file  single t10 rss reduction vs comparators grid ">
         <button class="preview" type="button"
                 data-image="single_file/png/single_t10_rss_reduction_vs_comparators_grid.png"
                 data-label="single t10 rss reduction vs comparators grid">
@@ -803,14 +861,14 @@
                alt="single t10 rss reduction vs comparators grid" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>single t10 rss reduction vs comparators grid</strong>
           <span class="formats"><a href="single_file/png/single_t10_rss_reduction_vs_comparators_grid.png" target="_blank">PNG</a> · <a href="single_file/svg/single_t10_rss_reduction_vs_comparators_grid.svg" target="_blank">SVG</a> · <a href="single_file/pdf/single_t10_rss_reduction_vs_comparators_grid.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="single_file"
-               data-search="single_file  single t10 runtime bar grid">
+               data-story="false"
+               data-search="single_file  single t10 runtime bar grid ">
         <button class="preview" type="button"
                 data-image="single_file/png/single_t10_runtime_bar_grid.png"
                 data-label="single t10 runtime bar grid">
@@ -818,14 +876,14 @@
                alt="single t10 runtime bar grid" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>single t10 runtime bar grid</strong>
           <span class="formats"><a href="single_file/png/single_t10_runtime_bar_grid.png" target="_blank">PNG</a> · <a href="single_file/svg/single_t10_runtime_bar_grid.svg" target="_blank">SVG</a> · <a href="single_file/pdf/single_t10_runtime_bar_grid.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="single_file"
-               data-search="single_file  single t10 runtime speedup vs comparators grid">
+               data-story="false"
+               data-search="single_file  single t10 runtime speedup vs comparators grid ">
         <button class="preview" type="button"
                 data-image="single_file/png/single_t10_runtime_speedup_vs_comparators_grid.png"
                 data-label="single t10 runtime speedup vs comparators grid">
@@ -833,14 +891,14 @@
                alt="single t10 runtime speedup vs comparators grid" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>single t10 runtime speedup vs comparators grid</strong>
           <span class="formats"><a href="single_file/png/single_t10_runtime_speedup_vs_comparators_grid.png" target="_blank">PNG</a> · <a href="single_file/svg/single_t10_runtime_speedup_vs_comparators_grid.svg" target="_blank">SVG</a> · <a href="single_file/pdf/single_t10_runtime_speedup_vs_comparators_grid.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="single_file"
-               data-search="single_file  single t10 runtime vs atoms">
+               data-story="false"
+               data-search="single_file  single t10 runtime vs atoms ">
         <button class="preview" type="button"
                 data-image="single_file/png/single_t10_runtime_vs_atoms.png"
                 data-label="single t10 runtime vs atoms">
@@ -848,14 +906,14 @@
                alt="single t10 runtime vs atoms" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>single t10 runtime vs atoms</strong>
           <span class="formats"><a href="single_file/png/single_t10_runtime_vs_atoms.png" target="_blank">PNG</a> · <a href="single_file/svg/single_t10_runtime_vs_atoms.svg" target="_blank">SVG</a> · <a href="single_file/pdf/single_t10_runtime_vs_atoms.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 1024p zsasa cli bitmask f32 single corrected vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 1024p zsasa cli bitmask f32 single corrected vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/1024p_zsasa_cli_bitmask_f32_single_corrected_vs_mdtraj.png"
                 data-label="1024p zsasa cli bitmask f32 single corrected vs mdtraj">
@@ -870,7 +928,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 1024p zsasa cli bitmask f64 single corrected vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 1024p zsasa cli bitmask f64 single corrected vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/1024p_zsasa_cli_bitmask_f64_single_corrected_vs_mdtraj.png"
                 data-label="1024p zsasa cli bitmask f64 single corrected vs mdtraj">
@@ -885,7 +944,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 1024p zsasa cli f32 vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 1024p zsasa cli f32 vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/1024p_zsasa_cli_f32_vs_mdtraj.png"
                 data-label="1024p zsasa cli f32 vs mdtraj">
@@ -900,7 +960,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 1024p zsasa cli f64 vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 1024p zsasa cli f64 vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/1024p_zsasa_cli_f64_vs_mdtraj.png"
                 data-label="1024p zsasa cli f64 vs mdtraj">
@@ -915,7 +976,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 1024p zsasa mdanalysis vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 1024p zsasa mdanalysis vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/1024p_zsasa_mdanalysis_vs_mdtraj.png"
                 data-label="1024p zsasa mdanalysis vs mdtraj">
@@ -930,7 +992,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 1024p zsasa mdtraj vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 1024p zsasa mdtraj vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/1024p_zsasa_mdtraj_vs_mdtraj.png"
                 data-label="1024p zsasa mdtraj vs mdtraj">
@@ -945,7 +1008,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 128p zsasa cli bitmask f32 single corrected vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 128p zsasa cli bitmask f32 single corrected vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/128p_zsasa_cli_bitmask_f32_single_corrected_vs_mdtraj.png"
                 data-label="128p zsasa cli bitmask f32 single corrected vs mdtraj">
@@ -960,7 +1024,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 128p zsasa cli bitmask f64 single corrected vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 128p zsasa cli bitmask f64 single corrected vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/128p_zsasa_cli_bitmask_f64_single_corrected_vs_mdtraj.png"
                 data-label="128p zsasa cli bitmask f64 single corrected vs mdtraj">
@@ -975,7 +1040,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 128p zsasa cli f32 vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 128p zsasa cli f32 vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/128p_zsasa_cli_f32_vs_mdtraj.png"
                 data-label="128p zsasa cli f32 vs mdtraj">
@@ -990,7 +1056,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 128p zsasa cli f64 vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 128p zsasa cli f64 vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/128p_zsasa_cli_f64_vs_mdtraj.png"
                 data-label="128p zsasa cli f64 vs mdtraj">
@@ -1005,7 +1072,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 128p zsasa mdanalysis vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 128p zsasa mdanalysis vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/128p_zsasa_mdanalysis_vs_mdtraj.png"
                 data-label="128p zsasa mdanalysis vs mdtraj">
@@ -1020,7 +1088,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 128p zsasa mdtraj vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 128p zsasa mdtraj vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/128p_zsasa_mdtraj_vs_mdtraj.png"
                 data-label="128p zsasa mdtraj vs mdtraj">
@@ -1035,7 +1104,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 256p zsasa cli bitmask f32 single corrected vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 256p zsasa cli bitmask f32 single corrected vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/256p_zsasa_cli_bitmask_f32_single_corrected_vs_mdtraj.png"
                 data-label="256p zsasa cli bitmask f32 single corrected vs mdtraj">
@@ -1050,7 +1120,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 256p zsasa cli bitmask f64 single corrected vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 256p zsasa cli bitmask f64 single corrected vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/256p_zsasa_cli_bitmask_f64_single_corrected_vs_mdtraj.png"
                 data-label="256p zsasa cli bitmask f64 single corrected vs mdtraj">
@@ -1065,7 +1136,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 256p zsasa cli f32 vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 256p zsasa cli f32 vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/256p_zsasa_cli_f32_vs_mdtraj.png"
                 data-label="256p zsasa cli f32 vs mdtraj">
@@ -1080,7 +1152,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 256p zsasa cli f64 vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 256p zsasa cli f64 vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/256p_zsasa_cli_f64_vs_mdtraj.png"
                 data-label="256p zsasa cli f64 vs mdtraj">
@@ -1095,7 +1168,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 256p zsasa mdanalysis vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 256p zsasa mdanalysis vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/256p_zsasa_mdanalysis_vs_mdtraj.png"
                 data-label="256p zsasa mdanalysis vs mdtraj">
@@ -1110,7 +1184,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 256p zsasa mdtraj vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 256p zsasa mdtraj vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/256p_zsasa_mdtraj_vs_mdtraj.png"
                 data-label="256p zsasa mdtraj vs mdtraj">
@@ -1125,7 +1200,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 512p zsasa cli bitmask f32 single corrected vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 512p zsasa cli bitmask f32 single corrected vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/512p_zsasa_cli_bitmask_f32_single_corrected_vs_mdtraj.png"
                 data-label="512p zsasa cli bitmask f32 single corrected vs mdtraj">
@@ -1140,7 +1216,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 512p zsasa cli bitmask f64 single corrected vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 512p zsasa cli bitmask f64 single corrected vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/512p_zsasa_cli_bitmask_f64_single_corrected_vs_mdtraj.png"
                 data-label="512p zsasa cli bitmask f64 single corrected vs mdtraj">
@@ -1155,7 +1232,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 512p zsasa cli f32 vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 512p zsasa cli f32 vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/512p_zsasa_cli_f32_vs_mdtraj.png"
                 data-label="512p zsasa cli f32 vs mdtraj">
@@ -1170,7 +1248,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 512p zsasa cli f64 vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 512p zsasa cli f64 vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/512p_zsasa_cli_f64_vs_mdtraj.png"
                 data-label="512p zsasa cli f64 vs mdtraj">
@@ -1185,7 +1264,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 512p zsasa mdanalysis vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 512p zsasa mdanalysis vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/512p_zsasa_mdanalysis_vs_mdtraj.png"
                 data-label="512p zsasa mdanalysis vs mdtraj">
@@ -1200,7 +1280,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 512p zsasa mdtraj vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 512p zsasa mdtraj vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/512p_zsasa_mdtraj_vs_mdtraj.png"
                 data-label="512p zsasa mdtraj vs mdtraj">
@@ -1215,7 +1296,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 64p zsasa cli bitmask f32 single corrected vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 64p zsasa cli bitmask f32 single corrected vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/64p_zsasa_cli_bitmask_f32_single_corrected_vs_mdtraj.png"
                 data-label="64p zsasa cli bitmask f32 single corrected vs mdtraj">
@@ -1230,7 +1312,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 64p zsasa cli bitmask f64 single corrected vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 64p zsasa cli bitmask f64 single corrected vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/64p_zsasa_cli_bitmask_f64_single_corrected_vs_mdtraj.png"
                 data-label="64p zsasa cli bitmask f64 single corrected vs mdtraj">
@@ -1245,7 +1328,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 64p zsasa cli f32 vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 64p zsasa cli f32 vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/64p_zsasa_cli_f32_vs_mdtraj.png"
                 data-label="64p zsasa cli f32 vs mdtraj">
@@ -1260,7 +1344,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 64p zsasa cli f64 vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 64p zsasa cli f64 vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/64p_zsasa_cli_f64_vs_mdtraj.png"
                 data-label="64p zsasa cli f64 vs mdtraj">
@@ -1275,7 +1360,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 64p zsasa mdanalysis vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 64p zsasa mdanalysis vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/64p_zsasa_mdanalysis_vs_mdtraj.png"
                 data-label="64p zsasa mdanalysis vs mdtraj">
@@ -1290,7 +1376,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation md / scatter 64p zsasa mdtraj vs mdtraj">
+               data-story="false"
+               data-search="validation md / scatter 64p zsasa mdtraj vs mdtraj ">
         <button class="preview" type="button"
                 data-image="validation/png/md/scatter/64p_zsasa_mdtraj_vs_mdtraj.png"
                 data-label="64p zsasa mdtraj vs mdtraj">
@@ -1305,7 +1392,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation  md error vs frame grid">
+               data-story="false"
+               data-search="validation  md error vs frame grid ">
         <button class="preview" type="button"
                 data-image="validation/png/md_error_vs_frame_grid.png"
                 data-label="md error vs frame grid">
@@ -1313,14 +1401,14 @@
                alt="md error vs frame grid" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>md error vs frame grid</strong>
           <span class="formats"><a href="validation/png/md_error_vs_frame_grid.png" target="_blank">PNG</a> · <a href="validation/svg/md_error_vs_frame_grid.svg" target="_blank">SVG</a> · <a href="validation/pdf/md_error_vs_frame_grid.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation  md frame series 1024p">
+               data-story="false"
+               data-search="validation  md frame series 1024p ">
         <button class="preview" type="button"
                 data-image="validation/png/md_frame_series_1024p.png"
                 data-label="md frame series 1024p">
@@ -1328,14 +1416,14 @@
                alt="md frame series 1024p" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>md frame series 1024p</strong>
           <span class="formats"><a href="validation/png/md_frame_series_1024p.png" target="_blank">PNG</a> · <a href="validation/svg/md_frame_series_1024p.svg" target="_blank">SVG</a> · <a href="validation/pdf/md_frame_series_1024p.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation  md frame series 128p">
+               data-story="false"
+               data-search="validation  md frame series 128p ">
         <button class="preview" type="button"
                 data-image="validation/png/md_frame_series_128p.png"
                 data-label="md frame series 128p">
@@ -1343,14 +1431,14 @@
                alt="md frame series 128p" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>md frame series 128p</strong>
           <span class="formats"><a href="validation/png/md_frame_series_128p.png" target="_blank">PNG</a> · <a href="validation/svg/md_frame_series_128p.svg" target="_blank">SVG</a> · <a href="validation/pdf/md_frame_series_128p.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation  md frame series 256p">
+               data-story="false"
+               data-search="validation  md frame series 256p ">
         <button class="preview" type="button"
                 data-image="validation/png/md_frame_series_256p.png"
                 data-label="md frame series 256p">
@@ -1358,14 +1446,14 @@
                alt="md frame series 256p" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>md frame series 256p</strong>
           <span class="formats"><a href="validation/png/md_frame_series_256p.png" target="_blank">PNG</a> · <a href="validation/svg/md_frame_series_256p.svg" target="_blank">SVG</a> · <a href="validation/pdf/md_frame_series_256p.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation  md frame series 512p">
+               data-story="false"
+               data-search="validation  md frame series 512p ">
         <button class="preview" type="button"
                 data-image="validation/png/md_frame_series_512p.png"
                 data-label="md frame series 512p">
@@ -1373,14 +1461,14 @@
                alt="md frame series 512p" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>md frame series 512p</strong>
           <span class="formats"><a href="validation/png/md_frame_series_512p.png" target="_blank">PNG</a> · <a href="validation/svg/md_frame_series_512p.svg" target="_blank">SVG</a> · <a href="validation/pdf/md_frame_series_512p.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation  md frame series 64p">
+               data-story="false"
+               data-search="validation  md frame series 64p ">
         <button class="preview" type="button"
                 data-image="validation/png/md_frame_series_64p.png"
                 data-label="md frame series 64p">
@@ -1388,14 +1476,14 @@
                alt="md frame series 64p" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>md frame series 64p</strong>
           <span class="formats"><a href="validation/png/md_frame_series_64p.png" target="_blank">PNG</a> · <a href="validation/svg/md_frame_series_64p.svg" target="_blank">SVG</a> · <a href="validation/pdf/md_frame_series_64p.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation  md max relative error">
+               data-story="false"
+               data-search="validation  md max relative error ">
         <button class="preview" type="button"
                 data-image="validation/png/md_max_relative_error.png"
                 data-label="md max relative error">
@@ -1403,14 +1491,14 @@
                alt="md max relative error" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>md max relative error</strong>
           <span class="formats"><a href="validation/png/md_max_relative_error.png" target="_blank">PNG</a> · <a href="validation/svg/md_max_relative_error.svg" target="_blank">SVG</a> · <a href="validation/pdf/md_max_relative_error.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation  md mean abs delta">
+               data-story="false"
+               data-search="validation  md mean abs delta ">
         <button class="preview" type="button"
                 data-image="validation/png/md_mean_abs_delta.png"
                 data-label="md mean abs delta">
@@ -1418,14 +1506,14 @@
                alt="md mean abs delta" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>md mean abs delta</strong>
           <span class="formats"><a href="validation/png/md_mean_abs_delta.png" target="_blank">PNG</a> · <a href="validation/svg/md_mean_abs_delta.svg" target="_blank">SVG</a> · <a href="validation/pdf/md_mean_abs_delta.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation  md mean relative error">
+               data-story="false"
+               data-search="validation  md mean relative error ">
         <button class="preview" type="button"
                 data-image="validation/png/md_mean_relative_error.png"
                 data-label="md mean relative error">
@@ -1433,14 +1521,14 @@
                alt="md mean relative error" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>md mean relative error</strong>
           <span class="formats"><a href="validation/png/md_mean_relative_error.png" target="_blank">PNG</a> · <a href="validation/svg/md_mean_relative_error.svg" target="_blank">SVG</a> · <a href="validation/pdf/md_mean_relative_error.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation  md r2">
+               data-story="false"
+               data-search="validation  md r2 ">
         <button class="preview" type="button"
                 data-image="validation/png/md_r2.png"
                 data-label="md r2">
@@ -1448,14 +1536,14 @@
                alt="md r2" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>md r2</strong>
           <span class="formats"><a href="validation/png/md_r2.png" target="_blank">PNG</a> · <a href="validation/svg/md_r2.svg" target="_blank">SVG</a> · <a href="validation/pdf/md_r2.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation  md relative error boxplots">
+               data-story="false"
+               data-search="validation  md relative error boxplots ">
         <button class="preview" type="button"
                 data-image="validation/png/md_relative_error_boxplots.png"
                 data-label="md relative error boxplots">
@@ -1463,14 +1551,14 @@
                alt="md relative error boxplots" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>md relative error boxplots</strong>
           <span class="formats"><a href="validation/png/md_relative_error_boxplots.png" target="_blank">PNG</a> · <a href="validation/svg/md_relative_error_boxplots.svg" target="_blank">SVG</a> · <a href="validation/pdf/md_relative_error_boxplots.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation  md scatter grid">
+               data-story="false"
+               data-search="validation  md scatter grid ">
         <button class="preview" type="button"
                 data-image="validation/png/md_scatter_grid.png"
                 data-label="md scatter grid">
@@ -1478,14 +1566,14 @@
                alt="md scatter grid" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>md scatter grid</strong>
           <span class="formats"><a href="validation/png/md_scatter_grid.png" target="_blank">PNG</a> · <a href="validation/svg/md_scatter_grid.svg" target="_blank">SVG</a> · <a href="validation/pdf/md_scatter_grid.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation  md variant deltas">
+               data-story="false"
+               data-search="validation  md variant deltas ">
         <button class="preview" type="button"
                 data-image="validation/png/md_variant_deltas.png"
                 data-label="md variant deltas">
@@ -1493,14 +1581,14 @@
                alt="md variant deltas" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>md variant deltas</strong>
           <span class="formats"><a href="validation/png/md_variant_deltas.png" target="_blank">PNG</a> · <a href="validation/svg/md_variant_deltas.svg" target="_blank">SVG</a> · <a href="validation/pdf/md_variant_deltas.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 1024p lahuta bitmask vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 1024p lahuta bitmask vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/1024p_lahuta_bitmask_vs_freesasa.png"
                 data-label="1024p lahuta bitmask vs freesasa">
@@ -1515,7 +1603,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 1024p lahuta vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 1024p lahuta vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/1024p_lahuta_vs_freesasa.png"
                 data-label="1024p lahuta vs freesasa">
@@ -1530,7 +1619,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 1024p rustsasa vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 1024p rustsasa vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/1024p_rustsasa_vs_freesasa.png"
                 data-label="1024p rustsasa vs freesasa">
@@ -1545,7 +1635,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 1024p zsasa bitmask corrected f32 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 1024p zsasa bitmask corrected f32 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/1024p_zsasa_bitmask_corrected_f32_vs_freesasa.png"
                 data-label="1024p zsasa bitmask corrected f32 vs freesasa">
@@ -1560,7 +1651,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 1024p zsasa bitmask corrected f64 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 1024p zsasa bitmask corrected f64 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/1024p_zsasa_bitmask_corrected_f64_vs_freesasa.png"
                 data-label="1024p zsasa bitmask corrected f64 vs freesasa">
@@ -1575,7 +1667,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 1024p zsasa bitmask f32 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 1024p zsasa bitmask f32 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/1024p_zsasa_bitmask_f32_vs_freesasa.png"
                 data-label="1024p zsasa bitmask f32 vs freesasa">
@@ -1590,7 +1683,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 1024p zsasa bitmask f64 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 1024p zsasa bitmask f64 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/1024p_zsasa_bitmask_f64_vs_freesasa.png"
                 data-label="1024p zsasa bitmask f64 vs freesasa">
@@ -1605,7 +1699,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 1024p zsasa f32 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 1024p zsasa f32 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/1024p_zsasa_f32_vs_freesasa.png"
                 data-label="1024p zsasa f32 vs freesasa">
@@ -1620,7 +1715,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 1024p zsasa f64 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 1024p zsasa f64 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/1024p_zsasa_f64_vs_freesasa.png"
                 data-label="1024p zsasa f64 vs freesasa">
@@ -1635,7 +1731,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 128p lahuta bitmask vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 128p lahuta bitmask vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/128p_lahuta_bitmask_vs_freesasa.png"
                 data-label="128p lahuta bitmask vs freesasa">
@@ -1650,7 +1747,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 128p lahuta vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 128p lahuta vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/128p_lahuta_vs_freesasa.png"
                 data-label="128p lahuta vs freesasa">
@@ -1665,7 +1763,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 128p rustsasa vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 128p rustsasa vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/128p_rustsasa_vs_freesasa.png"
                 data-label="128p rustsasa vs freesasa">
@@ -1680,7 +1779,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 128p zsasa bitmask corrected f32 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 128p zsasa bitmask corrected f32 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/128p_zsasa_bitmask_corrected_f32_vs_freesasa.png"
                 data-label="128p zsasa bitmask corrected f32 vs freesasa">
@@ -1695,7 +1795,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 128p zsasa bitmask corrected f64 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 128p zsasa bitmask corrected f64 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/128p_zsasa_bitmask_corrected_f64_vs_freesasa.png"
                 data-label="128p zsasa bitmask corrected f64 vs freesasa">
@@ -1710,7 +1811,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 128p zsasa bitmask f32 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 128p zsasa bitmask f32 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/128p_zsasa_bitmask_f32_vs_freesasa.png"
                 data-label="128p zsasa bitmask f32 vs freesasa">
@@ -1725,7 +1827,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 128p zsasa bitmask f64 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 128p zsasa bitmask f64 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/128p_zsasa_bitmask_f64_vs_freesasa.png"
                 data-label="128p zsasa bitmask f64 vs freesasa">
@@ -1740,7 +1843,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 128p zsasa f32 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 128p zsasa f32 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/128p_zsasa_f32_vs_freesasa.png"
                 data-label="128p zsasa f32 vs freesasa">
@@ -1755,7 +1859,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 128p zsasa f64 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 128p zsasa f64 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/128p_zsasa_f64_vs_freesasa.png"
                 data-label="128p zsasa f64 vs freesasa">
@@ -1770,7 +1875,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 256p lahuta bitmask vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 256p lahuta bitmask vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/256p_lahuta_bitmask_vs_freesasa.png"
                 data-label="256p lahuta bitmask vs freesasa">
@@ -1785,7 +1891,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 256p lahuta vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 256p lahuta vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/256p_lahuta_vs_freesasa.png"
                 data-label="256p lahuta vs freesasa">
@@ -1800,7 +1907,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 256p rustsasa vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 256p rustsasa vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/256p_rustsasa_vs_freesasa.png"
                 data-label="256p rustsasa vs freesasa">
@@ -1815,7 +1923,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 256p zsasa bitmask corrected f32 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 256p zsasa bitmask corrected f32 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/256p_zsasa_bitmask_corrected_f32_vs_freesasa.png"
                 data-label="256p zsasa bitmask corrected f32 vs freesasa">
@@ -1830,7 +1939,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 256p zsasa bitmask corrected f64 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 256p zsasa bitmask corrected f64 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/256p_zsasa_bitmask_corrected_f64_vs_freesasa.png"
                 data-label="256p zsasa bitmask corrected f64 vs freesasa">
@@ -1845,7 +1955,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 256p zsasa bitmask f32 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 256p zsasa bitmask f32 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/256p_zsasa_bitmask_f32_vs_freesasa.png"
                 data-label="256p zsasa bitmask f32 vs freesasa">
@@ -1860,7 +1971,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 256p zsasa bitmask f64 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 256p zsasa bitmask f64 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/256p_zsasa_bitmask_f64_vs_freesasa.png"
                 data-label="256p zsasa bitmask f64 vs freesasa">
@@ -1875,7 +1987,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 256p zsasa f32 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 256p zsasa f32 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/256p_zsasa_f32_vs_freesasa.png"
                 data-label="256p zsasa f32 vs freesasa">
@@ -1890,7 +2003,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 256p zsasa f64 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 256p zsasa f64 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/256p_zsasa_f64_vs_freesasa.png"
                 data-label="256p zsasa f64 vs freesasa">
@@ -1905,7 +2019,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 512p lahuta bitmask vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 512p lahuta bitmask vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/512p_lahuta_bitmask_vs_freesasa.png"
                 data-label="512p lahuta bitmask vs freesasa">
@@ -1920,7 +2035,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 512p lahuta vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 512p lahuta vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/512p_lahuta_vs_freesasa.png"
                 data-label="512p lahuta vs freesasa">
@@ -1935,7 +2051,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 512p rustsasa vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 512p rustsasa vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/512p_rustsasa_vs_freesasa.png"
                 data-label="512p rustsasa vs freesasa">
@@ -1950,7 +2067,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 512p zsasa bitmask corrected f32 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 512p zsasa bitmask corrected f32 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/512p_zsasa_bitmask_corrected_f32_vs_freesasa.png"
                 data-label="512p zsasa bitmask corrected f32 vs freesasa">
@@ -1965,7 +2083,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 512p zsasa bitmask corrected f64 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 512p zsasa bitmask corrected f64 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/512p_zsasa_bitmask_corrected_f64_vs_freesasa.png"
                 data-label="512p zsasa bitmask corrected f64 vs freesasa">
@@ -1980,7 +2099,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 512p zsasa bitmask f32 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 512p zsasa bitmask f32 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/512p_zsasa_bitmask_f32_vs_freesasa.png"
                 data-label="512p zsasa bitmask f32 vs freesasa">
@@ -1995,7 +2115,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 512p zsasa bitmask f64 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 512p zsasa bitmask f64 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/512p_zsasa_bitmask_f64_vs_freesasa.png"
                 data-label="512p zsasa bitmask f64 vs freesasa">
@@ -2010,7 +2131,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 512p zsasa f32 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 512p zsasa f32 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/512p_zsasa_f32_vs_freesasa.png"
                 data-label="512p zsasa f32 vs freesasa">
@@ -2025,7 +2147,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 512p zsasa f64 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 512p zsasa f64 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/512p_zsasa_f64_vs_freesasa.png"
                 data-label="512p zsasa f64 vs freesasa">
@@ -2040,7 +2163,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 64p lahuta bitmask vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 64p lahuta bitmask vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/64p_lahuta_bitmask_vs_freesasa.png"
                 data-label="64p lahuta bitmask vs freesasa">
@@ -2055,7 +2179,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 64p lahuta vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 64p lahuta vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/64p_lahuta_vs_freesasa.png"
                 data-label="64p lahuta vs freesasa">
@@ -2070,7 +2195,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 64p rustsasa vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 64p rustsasa vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/64p_rustsasa_vs_freesasa.png"
                 data-label="64p rustsasa vs freesasa">
@@ -2085,7 +2211,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 64p zsasa bitmask corrected f32 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 64p zsasa bitmask corrected f32 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/64p_zsasa_bitmask_corrected_f32_vs_freesasa.png"
                 data-label="64p zsasa bitmask corrected f32 vs freesasa">
@@ -2100,7 +2227,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 64p zsasa bitmask corrected f64 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 64p zsasa bitmask corrected f64 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/64p_zsasa_bitmask_corrected_f64_vs_freesasa.png"
                 data-label="64p zsasa bitmask corrected f64 vs freesasa">
@@ -2115,7 +2243,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 64p zsasa bitmask f32 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 64p zsasa bitmask f32 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/64p_zsasa_bitmask_f32_vs_freesasa.png"
                 data-label="64p zsasa bitmask f32 vs freesasa">
@@ -2130,7 +2259,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 64p zsasa bitmask f64 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 64p zsasa bitmask f64 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/64p_zsasa_bitmask_f64_vs_freesasa.png"
                 data-label="64p zsasa bitmask f64 vs freesasa">
@@ -2145,7 +2275,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 64p zsasa f32 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 64p zsasa f32 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/64p_zsasa_f32_vs_freesasa.png"
                 data-label="64p zsasa f32 vs freesasa">
@@ -2160,7 +2291,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation static sr / scatter 64p zsasa f64 vs freesasa">
+               data-story="false"
+               data-search="validation static sr / scatter 64p zsasa f64 vs freesasa ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr/scatter/64p_zsasa_f64_vs_freesasa.png"
                 data-label="64p zsasa f64 vs freesasa">
@@ -2175,7 +2307,8 @@
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation  static sr error vs atoms grid">
+               data-story="false"
+               data-search="validation  static sr error vs atoms grid ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr_error_vs_atoms_grid.png"
                 data-label="static sr error vs atoms grid">
@@ -2183,14 +2316,14 @@
                alt="static sr error vs atoms grid" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>static sr error vs atoms grid</strong>
           <span class="formats"><a href="validation/png/static_sr_error_vs_atoms_grid.png" target="_blank">PNG</a> · <a href="validation/svg/static_sr_error_vs_atoms_grid.svg" target="_blank">SVG</a> · <a href="validation/pdf/static_sr_error_vs_atoms_grid.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation  static sr max relative error">
+               data-story="false"
+               data-search="validation  static sr max relative error ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr_max_relative_error.png"
                 data-label="static sr max relative error">
@@ -2198,14 +2331,14 @@
                alt="static sr max relative error" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>static sr max relative error</strong>
           <span class="formats"><a href="validation/png/static_sr_max_relative_error.png" target="_blank">PNG</a> · <a href="validation/svg/static_sr_max_relative_error.svg" target="_blank">SVG</a> · <a href="validation/pdf/static_sr_max_relative_error.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation  static sr mean abs delta">
+               data-story="false"
+               data-search="validation  static sr mean abs delta ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr_mean_abs_delta.png"
                 data-label="static sr mean abs delta">
@@ -2213,14 +2346,14 @@
                alt="static sr mean abs delta" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>static sr mean abs delta</strong>
           <span class="formats"><a href="validation/png/static_sr_mean_abs_delta.png" target="_blank">PNG</a> · <a href="validation/svg/static_sr_mean_abs_delta.svg" target="_blank">SVG</a> · <a href="validation/pdf/static_sr_mean_abs_delta.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation  static sr mean relative error">
+               data-story="false"
+               data-search="validation  static sr mean relative error ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr_mean_relative_error.png"
                 data-label="static sr mean relative error">
@@ -2228,14 +2361,14 @@
                alt="static sr mean relative error" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>static sr mean relative error</strong>
           <span class="formats"><a href="validation/png/static_sr_mean_relative_error.png" target="_blank">PNG</a> · <a href="validation/svg/static_sr_mean_relative_error.svg" target="_blank">SVG</a> · <a href="validation/pdf/static_sr_mean_relative_error.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation  static sr r2">
+               data-story="false"
+               data-search="validation  static sr r2 ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr_r2.png"
                 data-label="static sr r2">
@@ -2243,14 +2376,14 @@
                alt="static sr r2" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>static sr r2</strong>
           <span class="formats"><a href="validation/png/static_sr_r2.png" target="_blank">PNG</a> · <a href="validation/svg/static_sr_r2.svg" target="_blank">SVG</a> · <a href="validation/pdf/static_sr_r2.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation  static sr relative error boxplots">
+               data-story="false"
+               data-search="validation  static sr relative error boxplots ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr_relative_error_boxplots.png"
                 data-label="static sr relative error boxplots">
@@ -2258,14 +2391,14 @@
                alt="static sr relative error boxplots" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>static sr relative error boxplots</strong>
           <span class="formats"><a href="validation/png/static_sr_relative_error_boxplots.png" target="_blank">PNG</a> · <a href="validation/svg/static_sr_relative_error_boxplots.svg" target="_blank">SVG</a> · <a href="validation/pdf/static_sr_relative_error_boxplots.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation  static sr scatter grid">
+               data-story="false"
+               data-search="validation  static sr scatter grid ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr_scatter_grid.png"
                 data-label="static sr scatter grid">
@@ -2273,14 +2406,14 @@
                alt="static sr scatter grid" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>static sr scatter grid</strong>
           <span class="formats"><a href="validation/png/static_sr_scatter_grid.png" target="_blank">PNG</a> · <a href="validation/svg/static_sr_scatter_grid.svg" target="_blank">SVG</a> · <a href="validation/pdf/static_sr_scatter_grid.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
                data-group="validation"
-               data-search="validation  static sr variant deltas">
+               data-story="false"
+               data-search="validation  static sr variant deltas ">
         <button class="preview" type="button"
                 data-image="validation/png/static_sr_variant_deltas.png"
                 data-label="static sr variant deltas">
@@ -2288,7 +2421,6 @@
                alt="static sr variant deltas" loading="lazy">
         </button>
         <div class="metadata">
-          
           <strong>static sr variant deltas</strong>
           <span class="formats"><a href="validation/png/static_sr_variant_deltas.png" target="_blank">PNG</a> · <a href="validation/svg/static_sr_variant_deltas.svg" target="_blank">SVG</a> · <a href="validation/pdf/static_sr_variant_deltas.pdf" target="_blank">PDF</a></span>
         </div>
@@ -2316,7 +2448,9 @@
       const query = search.value.trim().toLowerCase();
       let visible = 0;
       cards.forEach(card => {
-        const matchesGroup = activeGroup === 'all' || card.dataset.group === activeGroup;
+        const matchesGroup = activeGroup === 'all'
+          || (activeGroup === 'story' && card.dataset.story === 'true')
+          || card.dataset.group === activeGroup;
         const matchesSearch = !query || card.dataset.search.includes(query);
         card.hidden = !(matchesGroup && matchesSearch);
         if (!card.hidden) visible += 1;

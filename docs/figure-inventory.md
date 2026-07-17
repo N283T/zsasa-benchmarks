@@ -20,6 +20,8 @@ uv run python scripts/build_figure_gallery.py
 
 Open `results/figures/gallery.html` in a browser to review all PNG figures in a
 filterable gallery. The gallery links to the corresponding SVG and PDF files.
+Figures listed in `results/figures/story-figures.txt` are highlighted and shown
+first so the curated story figures remain distinguishable from exploratory output.
 
 ## Current sections
 
