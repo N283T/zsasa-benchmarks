@@ -1,6 +1,6 @@
 # Validation figures
 
-Generated 99 figures in PNG/SVG/PDF.
+Generated 101 figures in PNG/SVG/PDF.
 
 - `png/md/scatter/1024p_zsasa_cli_bitmask_f32_single_corrected_vs_mdtraj.png`
 - `png/md/scatter/1024p_zsasa_cli_bitmask_f64_single_corrected_vs_mdtraj.png`
@@ -32,6 +32,7 @@ Generated 99 figures in PNG/SVG/PDF.
 - `png/md/scatter/64p_zsasa_cli_f64_vs_mdtraj.png`
 - `png/md/scatter/64p_zsasa_mdanalysis_vs_mdtraj.png`
 - `png/md/scatter/64p_zsasa_mdtraj_vs_mdtraj.png`
+- `png/md_bitmask_correction_vs_standard.png`
 - `png/md_error_vs_frame_grid.png`
 - `png/md_frame_series_1024p.png`
 - `png/md_frame_series_128p.png`
@@ -44,6 +45,7 @@ Generated 99 figures in PNG/SVG/PDF.
 - `png/md_r2.png`
 - `png/md_relative_error_boxplots.png`
 - `png/md_scatter_grid.png`
+- `png/md_standard_f64_convergence_vs_mdtraj.png`
 - `png/md_variant_deltas.png`
 - `png/static_sr/scatter/1024p_lahuta_bitmask_vs_freesasa.png`
 - `png/static_sr/scatter/1024p_lahuta_vs_freesasa.png`

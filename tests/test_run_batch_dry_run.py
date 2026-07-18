@@ -332,24 +332,28 @@ def test_run_batch_human_cif_targets_parser_io_matrix() -> None:
     )
 
     assert "dataset=human_cif" in proc.stdout
-    assert "selected_commands=9/9" in proc.stdout
+    assert "selected_commands=13/13" in proc.stdout
     assert "# name: zsasa_0_9_0_generic_read_batch_f32_bitmask_10t_128p" in proc.stdout
     assert "# name: zsasa_0_9_0_generic_read_batch_f32_bitmask_20t_128p" in proc.stdout
     assert "# name: zsasa_0_9_0_generic_read_batch_f32_bitmask_40t_128p" in proc.stdout
     assert "# name: zsasa_0_9_0_af_fast_read_batch_f32_bitmask_10t_128p" in proc.stdout
     assert "# name: zsasa_0_9_0_af_fast_read_batch_f32_bitmask_20t_128p" in proc.stdout
     assert "# name: zsasa_0_9_0_af_fast_read_batch_f32_bitmask_40t_128p" in proc.stdout
+    assert "# name: zsasa_0_9_0_generic_mmap_batch_f32_bitmask_10t_128p" in proc.stdout
     assert "# name: zsasa_0_9_0_generic_mmap_batch_f32_bitmask_20t_128p" in proc.stdout
+    assert "# name: zsasa_0_9_0_generic_mmap_batch_f32_bitmask_40t_128p" in proc.stdout
+    assert "# name: zsasa_0_9_0_af_fast_mmap_batch_f32_bitmask_10t_128p" in proc.stdout
     assert "# name: zsasa_0_9_0_af_fast_mmap_batch_f32_bitmask_20t_128p" in proc.stdout
+    assert "# name: zsasa_0_9_0_af_fast_mmap_batch_f32_bitmask_40t_128p" in proc.stdout
     assert "# name: lahuta_bitmask_10t_128p" in proc.stdout
     assert "standard" not in proc.stdout
     assert "f64" not in proc.stdout
     assert "freesasa_batch" not in proc.stdout
     assert "rustsasa" not in proc.stdout
     assert "--use-bitmask" in proc.stdout
-    assert proc.stdout.count("--af-model-fast") == 4
+    assert proc.stdout.count("--af-model-fast") == 6
     assert proc.stdout.count("--input-io=read") == 6
-    assert proc.stdout.count("--input-io=mmap") == 2
+    assert proc.stdout.count("--input-io=mmap") == 6
     assert "--jsonl-decimals=3" in proc.stdout
     assert "/zsasa_0_9_0/generic_read/" in proc.stdout
     assert "/zsasa_0_9_0/af_fast_read/" in proc.stdout

@@ -93,6 +93,72 @@ def test_ecoli_comparison_rows_excludes_overcommit_threads() -> None:
     ]
 
 
+def test_ecoli_story_rows_selects_precision_extremes_and_comparators() -> None:
+    from scripts.plot_batch_figures import ecoli_story_rows
+
+    rows = [
+        {"variant": variant, "threads": threads}
+        for variant in (
+            "zsasa_f64",
+            "zsasa_f32",
+            "zsasa_bitmask_f64",
+            "zsasa_bitmask_f32",
+            "freesasa_batch",
+            "rustsasa",
+            "lahuta",
+            "lahuta_bitmask",
+        )
+        for threads in (1, 10, 20)
+    ]
+
+    assert {(row["variant"], row["threads"]) for row in ecoli_story_rows(rows)} == {
+        (variant, threads)
+        for variant in (
+            "zsasa_f64",
+            "zsasa_bitmask_f32",
+            "freesasa_batch",
+            "rustsasa",
+            "lahuta_bitmask",
+        )
+        for threads in (1, 10)
+    }
+
+
+def test_human_cif_t20_rows_selects_complete_parser_io_matrix() -> None:
+    from scripts.plot_batch_figures import human_cif_t20_rows
+
+    rows = [
+        {"variant": variant, "threads": threads}
+        for variant in (
+            "zsasa_generic_read",
+            "zsasa_generic_mmap",
+            "zsasa_af_fast_read",
+            "zsasa_af_fast_mmap",
+            "lahuta_bitmask",
+        )
+        for threads in (10, 20, 40)
+    ]
+
+    assert {row["variant"] for row in human_cif_t20_rows(rows)} == {
+        "zsasa_generic_read",
+        "zsasa_generic_mmap",
+        "zsasa_af_fast_read",
+        "zsasa_af_fast_mmap",
+    }
+    assert {row["threads"] for row in human_cif_t20_rows(rows)} == {20}
+
+
+def test_row_for_selects_variant_and_worker_count() -> None:
+    from scripts.plot_batch_figures import row_for
+
+    rows = [
+        {"variant": "zsasa_af_fast_read", "threads": 10, "value": "ten"},
+        {"variant": "zsasa_af_fast_read", "threads": 40, "value": "forty"},
+    ]
+
+    assert row_for(rows, "zsasa_af_fast_read", 40)["value"] == "forty"
+
+
 
 def test_batch_comparison_label_style_places_selected_labels() -> None:
     from scripts.plot_batch_figures import batch_comparison_label_style

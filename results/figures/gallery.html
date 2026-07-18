@@ -17,6 +17,7 @@
       backdrop-filter: blur(10px);
     }
     h1 { margin: 0 0 .75rem; font-size: 1.25rem; }
+    .caption-link { display: inline-block; margin: 0 0 .75rem; }
     .controls { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
     input { min-width: min(22rem, 80vw); padding: .55rem .7rem; font: inherit; }
     button { padding: .45rem .7rem; font: inherit; cursor: pointer; }
@@ -102,19 +103,185 @@
 <body>
   <header>
     <h1>Benchmark figure gallery</h1>
+    <a class="caption-link" href="story-captions.md" target="_blank">Draft STORY captions</a>
     <div class="controls">
       <input id="search" type="search" placeholder="Filter by figure name…"
              aria-label="Filter figures">
       <div class="filters" aria-label="Figure groups">
-        <button type="button" data-group="all" aria-pressed="true">all (149)</button>
-        <button type="button" data-group="story">story (3)</button>
-        <button type="button" data-group="batch_ecoli">batch ecoli (13)</button> <button type="button" data-group="batch_human">batch human (8)</button> <button type="button" data-group="batch_t10_comparison">batch t10 comparison (3)</button> <button type="button" data-group="md">md (13)</button> <button type="button" data-group="overview">overview (3)</button> <button type="button" data-group="single_file">single file (10)</button> <button type="button" data-group="validation">validation (99)</button>
+        <button type="button" data-group="all" aria-pressed="true">all (167)</button>
+        <button type="button" data-group="story">story (14)</button>
+        <button type="button" data-group="batch_ecoli">batch ecoli (15)</button> <button type="button" data-group="batch_human">batch human (8)</button> <button type="button" data-group="batch_human_cif">batch human cif (14)</button> <button type="button" data-group="batch_t10_comparison">batch t10 comparison (3)</button> <button type="button" data-group="md">md (13)</button> <button type="button" data-group="overview">overview (3)</button> <button type="button" data-group="single_file">single file (10)</button> <button type="button" data-group="validation">validation (101)</button>
       </div>
     </div>
-    <p id="status">Showing 149 figures</p>
+    <p id="status">Showing 167 figures</p>
   </header>
   <main id="gallery">
     
+      <article class="figure-card"
+               data-group="batch_ecoli"
+               data-story="true"
+               data-search="batch_ecoli  ecoli performance memory story story">
+        <button class="preview" type="button"
+                data-image="batch_ecoli/png/ecoli_performance_memory_story.png"
+                data-label="ecoli performance memory story">
+          <img src="batch_ecoli/png/ecoli_performance_memory_story.png"
+               alt="ecoli performance memory story" loading="lazy">
+        </button>
+        <div class="metadata"><span class="story-badge">STORY</span>
+          <strong>ecoli performance memory story</strong>
+          <span class="formats"><a href="batch_ecoli/png/ecoli_performance_memory_story.png" target="_blank">PNG</a> · <a href="batch_ecoli/svg/ecoli_performance_memory_story.svg" target="_blank">SVG</a> · <a href="batch_ecoli/pdf/ecoli_performance_memory_story.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="batch_ecoli"
+               data-story="true"
+               data-search="batch_ecoli  ecoli t10 rss reduction vs comparators story">
+        <button class="preview" type="button"
+                data-image="batch_ecoli/png/ecoli_t10_rss_reduction_vs_comparators.png"
+                data-label="ecoli t10 rss reduction vs comparators">
+          <img src="batch_ecoli/png/ecoli_t10_rss_reduction_vs_comparators.png"
+               alt="ecoli t10 rss reduction vs comparators" loading="lazy">
+        </button>
+        <div class="metadata"><span class="story-badge">STORY</span>
+          <strong>ecoli t10 rss reduction vs comparators</strong>
+          <span class="formats"><a href="batch_ecoli/png/ecoli_t10_rss_reduction_vs_comparators.png" target="_blank">PNG</a> · <a href="batch_ecoli/svg/ecoli_t10_rss_reduction_vs_comparators.svg" target="_blank">SVG</a> · <a href="batch_ecoli/pdf/ecoli_t10_rss_reduction_vs_comparators.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="batch_ecoli"
+               data-story="true"
+               data-search="batch_ecoli  ecoli t10 runtime speedup vs comparators story">
+        <button class="preview" type="button"
+                data-image="batch_ecoli/png/ecoli_t10_runtime_speedup_vs_comparators.png"
+                data-label="ecoli t10 runtime speedup vs comparators">
+          <img src="batch_ecoli/png/ecoli_t10_runtime_speedup_vs_comparators.png"
+               alt="ecoli t10 runtime speedup vs comparators" loading="lazy">
+        </button>
+        <div class="metadata"><span class="story-badge">STORY</span>
+          <strong>ecoli t10 runtime speedup vs comparators</strong>
+          <span class="formats"><a href="batch_ecoli/png/ecoli_t10_runtime_speedup_vs_comparators.png" target="_blank">PNG</a> · <a href="batch_ecoli/svg/ecoli_t10_runtime_speedup_vs_comparators.svg" target="_blank">SVG</a> · <a href="batch_ecoli/pdf/ecoli_t10_runtime_speedup_vs_comparators.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="batch_ecoli"
+               data-story="true"
+               data-search="batch_ecoli  ecoli throughput scaling story story">
+        <button class="preview" type="button"
+                data-image="batch_ecoli/png/ecoli_throughput_scaling_story.png"
+                data-label="ecoli throughput scaling story">
+          <img src="batch_ecoli/png/ecoli_throughput_scaling_story.png"
+               alt="ecoli throughput scaling story" loading="lazy">
+        </button>
+        <div class="metadata"><span class="story-badge">STORY</span>
+          <strong>ecoli throughput scaling story</strong>
+          <span class="formats"><a href="batch_ecoli/png/ecoli_throughput_scaling_story.png" target="_blank">PNG</a> · <a href="batch_ecoli/svg/ecoli_throughput_scaling_story.svg" target="_blank">SVG</a> · <a href="batch_ecoli/pdf/ecoli_throughput_scaling_story.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="batch_human"
+               data-story="true"
+               data-search="batch_human  human t10 rss reduction vs comparators story">
+        <button class="preview" type="button"
+                data-image="batch_human/png/human_t10_rss_reduction_vs_comparators.png"
+                data-label="human t10 rss reduction vs comparators">
+          <img src="batch_human/png/human_t10_rss_reduction_vs_comparators.png"
+               alt="human t10 rss reduction vs comparators" loading="lazy">
+        </button>
+        <div class="metadata"><span class="story-badge">STORY</span>
+          <strong>human t10 rss reduction vs comparators</strong>
+          <span class="formats"><a href="batch_human/png/human_t10_rss_reduction_vs_comparators.png" target="_blank">PNG</a> · <a href="batch_human/svg/human_t10_rss_reduction_vs_comparators.svg" target="_blank">SVG</a> · <a href="batch_human/pdf/human_t10_rss_reduction_vs_comparators.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="batch_human"
+               data-story="true"
+               data-search="batch_human  human t10 runtime speedup vs comparators story">
+        <button class="preview" type="button"
+                data-image="batch_human/png/human_t10_runtime_speedup_vs_comparators.png"
+                data-label="human t10 runtime speedup vs comparators">
+          <img src="batch_human/png/human_t10_runtime_speedup_vs_comparators.png"
+               alt="human t10 runtime speedup vs comparators" loading="lazy">
+        </button>
+        <div class="metadata"><span class="story-badge">STORY</span>
+          <strong>human t10 runtime speedup vs comparators</strong>
+          <span class="formats"><a href="batch_human/png/human_t10_runtime_speedup_vs_comparators.png" target="_blank">PNG</a> · <a href="batch_human/svg/human_t10_runtime_speedup_vs_comparators.svg" target="_blank">SVG</a> · <a href="batch_human/pdf/human_t10_runtime_speedup_vs_comparators.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="batch_human"
+               data-story="true"
+               data-search="batch_human  human t10 throughput vs peak rss story">
+        <button class="preview" type="button"
+                data-image="batch_human/png/human_t10_throughput_vs_peak_rss.png"
+                data-label="human t10 throughput vs peak rss">
+          <img src="batch_human/png/human_t10_throughput_vs_peak_rss.png"
+               alt="human t10 throughput vs peak rss" loading="lazy">
+        </button>
+        <div class="metadata"><span class="story-badge">STORY</span>
+          <strong>human t10 throughput vs peak rss</strong>
+          <span class="formats"><a href="batch_human/png/human_t10_throughput_vs_peak_rss.png" target="_blank">PNG</a> · <a href="batch_human/svg/human_t10_throughput_vs_peak_rss.svg" target="_blank">SVG</a> · <a href="batch_human/pdf/human_t10_throughput_vs_peak_rss.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="batch_human_cif"
+               data-story="true"
+               data-search="batch_human_cif  human cif af fast overcommit tradeoff story">
+        <button class="preview" type="button"
+                data-image="batch_human_cif/png/human_cif_af_fast_overcommit_tradeoff.png"
+                data-label="human cif af fast overcommit tradeoff">
+          <img src="batch_human_cif/png/human_cif_af_fast_overcommit_tradeoff.png"
+               alt="human cif af fast overcommit tradeoff" loading="lazy">
+        </button>
+        <div class="metadata"><span class="story-badge">STORY</span>
+          <strong>human cif af fast overcommit tradeoff</strong>
+          <span class="formats"><a href="batch_human_cif/png/human_cif_af_fast_overcommit_tradeoff.png" target="_blank">PNG</a> · <a href="batch_human_cif/svg/human_cif_af_fast_overcommit_tradeoff.svg" target="_blank">SVG</a> · <a href="batch_human_cif/pdf/human_cif_af_fast_overcommit_tradeoff.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="batch_human_cif"
+               data-story="true"
+               data-search="batch_human_cif  human cif ranking recovery story story">
+        <button class="preview" type="button"
+                data-image="batch_human_cif/png/human_cif_ranking_recovery_story.png"
+                data-label="human cif ranking recovery story">
+          <img src="batch_human_cif/png/human_cif_ranking_recovery_story.png"
+               alt="human cif ranking recovery story" loading="lazy">
+        </button>
+        <div class="metadata"><span class="story-badge">STORY</span>
+          <strong>human cif ranking recovery story</strong>
+          <span class="formats"><a href="batch_human_cif/png/human_cif_ranking_recovery_story.png" target="_blank">PNG</a> · <a href="batch_human_cif/svg/human_cif_ranking_recovery_story.svg" target="_blank">SVG</a> · <a href="batch_human_cif/pdf/human_cif_ranking_recovery_story.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="validation"
+               data-story="true"
+               data-search="validation  md bitmask correction vs standard story">
+        <button class="preview" type="button"
+                data-image="validation/png/md_bitmask_correction_vs_standard.png"
+                data-label="md bitmask correction vs standard">
+          <img src="validation/png/md_bitmask_correction_vs_standard.png"
+               alt="md bitmask correction vs standard" loading="lazy">
+        </button>
+        <div class="metadata"><span class="story-badge">STORY</span>
+          <strong>md bitmask correction vs standard</strong>
+          <span class="formats"><a href="validation/png/md_bitmask_correction_vs_standard.png" target="_blank">PNG</a> · <a href="validation/svg/md_bitmask_correction_vs_standard.svg" target="_blank">SVG</a> · <a href="validation/pdf/md_bitmask_correction_vs_standard.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="validation"
+               data-story="true"
+               data-search="validation  md standard f64 convergence vs mdtraj story">
+        <button class="preview" type="button"
+                data-image="validation/png/md_standard_f64_convergence_vs_mdtraj.png"
+                data-label="md standard f64 convergence vs mdtraj">
+          <img src="validation/png/md_standard_f64_convergence_vs_mdtraj.png"
+               alt="md standard f64 convergence vs mdtraj" loading="lazy">
+        </button>
+        <div class="metadata"><span class="story-badge">STORY</span>
+          <strong>md standard f64 convergence vs mdtraj</strong>
+          <span class="formats"><a href="validation/png/md_standard_f64_convergence_vs_mdtraj.png" target="_blank">PNG</a> · <a href="validation/svg/md_standard_f64_convergence_vs_mdtraj.svg" target="_blank">SVG</a> · <a href="validation/pdf/md_standard_f64_convergence_vs_mdtraj.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
       <article class="figure-card"
                data-group="validation"
                data-story="true"
@@ -233,36 +400,6 @@
         <div class="metadata">
           <strong>ecoli t10 peak rss bar</strong>
           <span class="formats"><a href="batch_ecoli/png/ecoli_t10_peak_rss_bar.png" target="_blank">PNG</a> · <a href="batch_ecoli/svg/ecoli_t10_peak_rss_bar.svg" target="_blank">SVG</a> · <a href="batch_ecoli/pdf/ecoli_t10_peak_rss_bar.pdf" target="_blank">PDF</a></span>
-        </div>
-      </article>
-      <article class="figure-card"
-               data-group="batch_ecoli"
-               data-story="false"
-               data-search="batch_ecoli  ecoli t10 rss reduction vs comparators ">
-        <button class="preview" type="button"
-                data-image="batch_ecoli/png/ecoli_t10_rss_reduction_vs_comparators.png"
-                data-label="ecoli t10 rss reduction vs comparators">
-          <img src="batch_ecoli/png/ecoli_t10_rss_reduction_vs_comparators.png"
-               alt="ecoli t10 rss reduction vs comparators" loading="lazy">
-        </button>
-        <div class="metadata">
-          <strong>ecoli t10 rss reduction vs comparators</strong>
-          <span class="formats"><a href="batch_ecoli/png/ecoli_t10_rss_reduction_vs_comparators.png" target="_blank">PNG</a> · <a href="batch_ecoli/svg/ecoli_t10_rss_reduction_vs_comparators.svg" target="_blank">SVG</a> · <a href="batch_ecoli/pdf/ecoli_t10_rss_reduction_vs_comparators.pdf" target="_blank">PDF</a></span>
-        </div>
-      </article>
-      <article class="figure-card"
-               data-group="batch_ecoli"
-               data-story="false"
-               data-search="batch_ecoli  ecoli t10 runtime speedup vs comparators ">
-        <button class="preview" type="button"
-                data-image="batch_ecoli/png/ecoli_t10_runtime_speedup_vs_comparators.png"
-                data-label="ecoli t10 runtime speedup vs comparators">
-          <img src="batch_ecoli/png/ecoli_t10_runtime_speedup_vs_comparators.png"
-               alt="ecoli t10 runtime speedup vs comparators" loading="lazy">
-        </button>
-        <div class="metadata">
-          <strong>ecoli t10 runtime speedup vs comparators</strong>
-          <span class="formats"><a href="batch_ecoli/png/ecoli_t10_runtime_speedup_vs_comparators.png" target="_blank">PNG</a> · <a href="batch_ecoli/svg/ecoli_t10_runtime_speedup_vs_comparators.svg" target="_blank">SVG</a> · <a href="batch_ecoli/pdf/ecoli_t10_runtime_speedup_vs_comparators.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
@@ -388,21 +525,6 @@
       <article class="figure-card"
                data-group="batch_human"
                data-story="false"
-               data-search="batch_human  human t10 rss reduction vs comparators ">
-        <button class="preview" type="button"
-                data-image="batch_human/png/human_t10_rss_reduction_vs_comparators.png"
-                data-label="human t10 rss reduction vs comparators">
-          <img src="batch_human/png/human_t10_rss_reduction_vs_comparators.png"
-               alt="human t10 rss reduction vs comparators" loading="lazy">
-        </button>
-        <div class="metadata">
-          <strong>human t10 rss reduction vs comparators</strong>
-          <span class="formats"><a href="batch_human/png/human_t10_rss_reduction_vs_comparators.png" target="_blank">PNG</a> · <a href="batch_human/svg/human_t10_rss_reduction_vs_comparators.svg" target="_blank">SVG</a> · <a href="batch_human/pdf/human_t10_rss_reduction_vs_comparators.pdf" target="_blank">PDF</a></span>
-        </div>
-      </article>
-      <article class="figure-card"
-               data-group="batch_human"
-               data-story="false"
                data-search="batch_human  human t10 runtime bar ">
         <button class="preview" type="button"
                 data-image="batch_human/png/human_t10_runtime_bar.png"
@@ -413,21 +535,6 @@
         <div class="metadata">
           <strong>human t10 runtime bar</strong>
           <span class="formats"><a href="batch_human/png/human_t10_runtime_bar.png" target="_blank">PNG</a> · <a href="batch_human/svg/human_t10_runtime_bar.svg" target="_blank">SVG</a> · <a href="batch_human/pdf/human_t10_runtime_bar.pdf" target="_blank">PDF</a></span>
-        </div>
-      </article>
-      <article class="figure-card"
-               data-group="batch_human"
-               data-story="false"
-               data-search="batch_human  human t10 runtime speedup vs comparators ">
-        <button class="preview" type="button"
-                data-image="batch_human/png/human_t10_runtime_speedup_vs_comparators.png"
-                data-label="human t10 runtime speedup vs comparators">
-          <img src="batch_human/png/human_t10_runtime_speedup_vs_comparators.png"
-               alt="human t10 runtime speedup vs comparators" loading="lazy">
-        </button>
-        <div class="metadata">
-          <strong>human t10 runtime speedup vs comparators</strong>
-          <span class="formats"><a href="batch_human/png/human_t10_runtime_speedup_vs_comparators.png" target="_blank">PNG</a> · <a href="batch_human/svg/human_t10_runtime_speedup_vs_comparators.svg" target="_blank">SVG</a> · <a href="batch_human/pdf/human_t10_runtime_speedup_vs_comparators.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"
@@ -461,18 +568,183 @@
         </div>
       </article>
       <article class="figure-card"
-               data-group="batch_human"
+               data-group="batch_human_cif"
                data-story="false"
-               data-search="batch_human  human t10 throughput vs peak rss ">
+               data-search="batch_human_cif  human cif af fast overcommit peak rss ">
         <button class="preview" type="button"
-                data-image="batch_human/png/human_t10_throughput_vs_peak_rss.png"
-                data-label="human t10 throughput vs peak rss">
-          <img src="batch_human/png/human_t10_throughput_vs_peak_rss.png"
-               alt="human t10 throughput vs peak rss" loading="lazy">
+                data-image="batch_human_cif/png/human_cif_af_fast_overcommit_peak_rss.png"
+                data-label="human cif af fast overcommit peak rss">
+          <img src="batch_human_cif/png/human_cif_af_fast_overcommit_peak_rss.png"
+               alt="human cif af fast overcommit peak rss" loading="lazy">
         </button>
         <div class="metadata">
-          <strong>human t10 throughput vs peak rss</strong>
-          <span class="formats"><a href="batch_human/png/human_t10_throughput_vs_peak_rss.png" target="_blank">PNG</a> · <a href="batch_human/svg/human_t10_throughput_vs_peak_rss.svg" target="_blank">SVG</a> · <a href="batch_human/pdf/human_t10_throughput_vs_peak_rss.pdf" target="_blank">PDF</a></span>
+          <strong>human cif af fast overcommit peak rss</strong>
+          <span class="formats"><a href="batch_human_cif/png/human_cif_af_fast_overcommit_peak_rss.png" target="_blank">PNG</a> · <a href="batch_human_cif/svg/human_cif_af_fast_overcommit_peak_rss.svg" target="_blank">SVG</a> · <a href="batch_human_cif/pdf/human_cif_af_fast_overcommit_peak_rss.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="batch_human_cif"
+               data-story="false"
+               data-search="batch_human_cif  human cif af fast overcommit throughput ">
+        <button class="preview" type="button"
+                data-image="batch_human_cif/png/human_cif_af_fast_overcommit_throughput.png"
+                data-label="human cif af fast overcommit throughput">
+          <img src="batch_human_cif/png/human_cif_af_fast_overcommit_throughput.png"
+               alt="human cif af fast overcommit throughput" loading="lazy">
+        </button>
+        <div class="metadata">
+          <strong>human cif af fast overcommit throughput</strong>
+          <span class="formats"><a href="batch_human_cif/png/human_cif_af_fast_overcommit_throughput.png" target="_blank">PNG</a> · <a href="batch_human_cif/svg/human_cif_af_fast_overcommit_throughput.svg" target="_blank">SVG</a> · <a href="batch_human_cif/pdf/human_cif_af_fast_overcommit_throughput.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="batch_human_cif"
+               data-story="false"
+               data-search="batch_human_cif  human cif parser effect summary ">
+        <button class="preview" type="button"
+                data-image="batch_human_cif/png/human_cif_parser_effect_summary.png"
+                data-label="human cif parser effect summary">
+          <img src="batch_human_cif/png/human_cif_parser_effect_summary.png"
+               alt="human cif parser effect summary" loading="lazy">
+        </button>
+        <div class="metadata">
+          <strong>human cif parser effect summary</strong>
+          <span class="formats"><a href="batch_human_cif/png/human_cif_parser_effect_summary.png" target="_blank">PNG</a> · <a href="batch_human_cif/svg/human_cif_parser_effect_summary.svg" target="_blank">SVG</a> · <a href="batch_human_cif/pdf/human_cif_parser_effect_summary.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="batch_human_cif"
+               data-story="false"
+               data-search="batch_human_cif  human cif parser io interaction peak rss ">
+        <button class="preview" type="button"
+                data-image="batch_human_cif/png/human_cif_parser_io_interaction_peak_rss.png"
+                data-label="human cif parser io interaction peak rss">
+          <img src="batch_human_cif/png/human_cif_parser_io_interaction_peak_rss.png"
+               alt="human cif parser io interaction peak rss" loading="lazy">
+        </button>
+        <div class="metadata">
+          <strong>human cif parser io interaction peak rss</strong>
+          <span class="formats"><a href="batch_human_cif/png/human_cif_parser_io_interaction_peak_rss.png" target="_blank">PNG</a> · <a href="batch_human_cif/svg/human_cif_parser_io_interaction_peak_rss.svg" target="_blank">SVG</a> · <a href="batch_human_cif/pdf/human_cif_parser_io_interaction_peak_rss.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="batch_human_cif"
+               data-story="false"
+               data-search="batch_human_cif  human cif parser io interaction throughput ">
+        <button class="preview" type="button"
+                data-image="batch_human_cif/png/human_cif_parser_io_interaction_throughput.png"
+                data-label="human cif parser io interaction throughput">
+          <img src="batch_human_cif/png/human_cif_parser_io_interaction_throughput.png"
+               alt="human cif parser io interaction throughput" loading="lazy">
+        </button>
+        <div class="metadata">
+          <strong>human cif parser io interaction throughput</strong>
+          <span class="formats"><a href="batch_human_cif/png/human_cif_parser_io_interaction_throughput.png" target="_blank">PNG</a> · <a href="batch_human_cif/svg/human_cif_parser_io_interaction_throughput.svg" target="_blank">SVG</a> · <a href="batch_human_cif/pdf/human_cif_parser_io_interaction_throughput.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="batch_human_cif"
+               data-story="false"
+               data-search="batch_human_cif  human cif parser io peak rss ">
+        <button class="preview" type="button"
+                data-image="batch_human_cif/png/human_cif_parser_io_peak_rss.png"
+                data-label="human cif parser io peak rss">
+          <img src="batch_human_cif/png/human_cif_parser_io_peak_rss.png"
+               alt="human cif parser io peak rss" loading="lazy">
+        </button>
+        <div class="metadata">
+          <strong>human cif parser io peak rss</strong>
+          <span class="formats"><a href="batch_human_cif/png/human_cif_parser_io_peak_rss.png" target="_blank">PNG</a> · <a href="batch_human_cif/svg/human_cif_parser_io_peak_rss.svg" target="_blank">SVG</a> · <a href="batch_human_cif/pdf/human_cif_parser_io_peak_rss.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="batch_human_cif"
+               data-story="false"
+               data-search="batch_human_cif  human cif parser io performance memory ">
+        <button class="preview" type="button"
+                data-image="batch_human_cif/png/human_cif_parser_io_performance_memory.png"
+                data-label="human cif parser io performance memory">
+          <img src="batch_human_cif/png/human_cif_parser_io_performance_memory.png"
+               alt="human cif parser io performance memory" loading="lazy">
+        </button>
+        <div class="metadata">
+          <strong>human cif parser io performance memory</strong>
+          <span class="formats"><a href="batch_human_cif/png/human_cif_parser_io_performance_memory.png" target="_blank">PNG</a> · <a href="batch_human_cif/svg/human_cif_parser_io_performance_memory.svg" target="_blank">SVG</a> · <a href="batch_human_cif/pdf/human_cif_parser_io_performance_memory.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="batch_human_cif"
+               data-story="false"
+               data-search="batch_human_cif  human cif parser io throughput ">
+        <button class="preview" type="button"
+                data-image="batch_human_cif/png/human_cif_parser_io_throughput.png"
+                data-label="human cif parser io throughput">
+          <img src="batch_human_cif/png/human_cif_parser_io_throughput.png"
+               alt="human cif parser io throughput" loading="lazy">
+        </button>
+        <div class="metadata">
+          <strong>human cif parser io throughput</strong>
+          <span class="formats"><a href="batch_human_cif/png/human_cif_parser_io_throughput.png" target="_blank">PNG</a> · <a href="batch_human_cif/svg/human_cif_parser_io_throughput.svg" target="_blank">SVG</a> · <a href="batch_human_cif/pdf/human_cif_parser_io_throughput.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="batch_human_cif"
+               data-story="false"
+               data-search="batch_human_cif  human cif parser recovery ">
+        <button class="preview" type="button"
+                data-image="batch_human_cif/png/human_cif_parser_recovery.png"
+                data-label="human cif parser recovery">
+          <img src="batch_human_cif/png/human_cif_parser_recovery.png"
+               alt="human cif parser recovery" loading="lazy">
+        </button>
+        <div class="metadata">
+          <strong>human cif parser recovery</strong>
+          <span class="formats"><a href="batch_human_cif/png/human_cif_parser_recovery.png" target="_blank">PNG</a> · <a href="batch_human_cif/svg/human_cif_parser_recovery.svg" target="_blank">SVG</a> · <a href="batch_human_cif/pdf/human_cif_parser_recovery.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="batch_human_cif"
+               data-story="false"
+               data-search="batch_human_cif  human cif worker scaling peak rss ">
+        <button class="preview" type="button"
+                data-image="batch_human_cif/png/human_cif_worker_scaling_peak_rss.png"
+                data-label="human cif worker scaling peak rss">
+          <img src="batch_human_cif/png/human_cif_worker_scaling_peak_rss.png"
+               alt="human cif worker scaling peak rss" loading="lazy">
+        </button>
+        <div class="metadata">
+          <strong>human cif worker scaling peak rss</strong>
+          <span class="formats"><a href="batch_human_cif/png/human_cif_worker_scaling_peak_rss.png" target="_blank">PNG</a> · <a href="batch_human_cif/svg/human_cif_worker_scaling_peak_rss.svg" target="_blank">SVG</a> · <a href="batch_human_cif/pdf/human_cif_worker_scaling_peak_rss.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="batch_human_cif"
+               data-story="false"
+               data-search="batch_human_cif  human cif worker scaling throughput ">
+        <button class="preview" type="button"
+                data-image="batch_human_cif/png/human_cif_worker_scaling_throughput.png"
+                data-label="human cif worker scaling throughput">
+          <img src="batch_human_cif/png/human_cif_worker_scaling_throughput.png"
+               alt="human cif worker scaling throughput" loading="lazy">
+        </button>
+        <div class="metadata">
+          <strong>human cif worker scaling throughput</strong>
+          <span class="formats"><a href="batch_human_cif/png/human_cif_worker_scaling_throughput.png" target="_blank">PNG</a> · <a href="batch_human_cif/svg/human_cif_worker_scaling_throughput.svg" target="_blank">SVG</a> · <a href="batch_human_cif/pdf/human_cif_worker_scaling_throughput.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="batch_human_cif"
+               data-story="false"
+               data-search="batch_human_cif  human format zsasa lahuta ranking ">
+        <button class="preview" type="button"
+                data-image="batch_human_cif/png/human_format_zsasa_lahuta_ranking.png"
+                data-label="human format zsasa lahuta ranking">
+          <img src="batch_human_cif/png/human_format_zsasa_lahuta_ranking.png"
+               alt="human format zsasa lahuta ranking" loading="lazy">
+        </button>
+        <div class="metadata">
+          <strong>human format zsasa lahuta ranking</strong>
+          <span class="formats"><a href="batch_human_cif/png/human_format_zsasa_lahuta_ranking.png" target="_blank">PNG</a> · <a href="batch_human_cif/svg/human_format_zsasa_lahuta_ranking.svg" target="_blank">SVG</a> · <a href="batch_human_cif/pdf/human_format_zsasa_lahuta_ranking.pdf" target="_blank">PDF</a></span>
         </div>
       </article>
       <article class="figure-card"

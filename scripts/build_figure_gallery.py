@@ -137,6 +137,7 @@ def build_html(figures_dir: Path, story_paths: set[str]) -> str:
       backdrop-filter: blur(10px);
     }}
     h1 {{ margin: 0 0 .75rem; font-size: 1.25rem; }}
+    .caption-link {{ display: inline-block; margin: 0 0 .75rem; }}
     .controls {{ display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }}
     input {{ min-width: min(22rem, 80vw); padding: .55rem .7rem; font: inherit; }}
     button {{ padding: .45rem .7rem; font: inherit; cursor: pointer; }}
@@ -222,6 +223,7 @@ def build_html(figures_dir: Path, story_paths: set[str]) -> str:
 <body>
   <header>
     <h1>Benchmark figure gallery</h1>
+    <a class="caption-link" href="story-captions.md" target="_blank">Draft STORY captions</a>
     <div class="controls">
       <input id="search" type="search" placeholder="Filter by figure name…"
              aria-label="Filter figures">

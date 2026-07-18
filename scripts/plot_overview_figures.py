@@ -385,6 +385,8 @@ def write_top_index(figures_dir: Path, db_path: Path) -> Path:
         "",
         "[Open the filterable figure gallery](gallery.html).",
         "",
+        "[Open the draft STORY figure captions](story-captions.md).",
+        "",
         "## Sections",
         "",
         format_markdown_table(["section", "png_figures"], section_rows),

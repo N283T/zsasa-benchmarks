@@ -4,14 +4,17 @@ Exploratory figures generated from `results/benchmark.duckdb` in PNG/SVG/PDF for
 
 [Open the filterable figure gallery](gallery.html).
 
+[Open the draft STORY figure captions](story-captions.md).
+
 ## Sections
 
 | section | png_figures |
 | --- | --- |
 | [Overview summaries](overview/index.md) | 3 |
-| [Validation](validation/index.md) | 99 |
-| [E. coli batch](batch_ecoli/index.md) | 13 |
+| [Validation](validation/index.md) | 101 |
+| [E. coli batch](batch_ecoli/index.md) | 15 |
 | [Human batch](batch_human/index.md) | 8 |
+| [Human mmCIF batch](batch_human_cif/index.md) | 8 |
 | [Batch t10 comparison](batch_t10_comparison/index.md) | 3 |
 | [MD / trajectory](md/index.md) | 13 |
 | [single_file](single_file/index.md) | 10 |

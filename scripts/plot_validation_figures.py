@@ -83,6 +83,11 @@ STATIC_STORY_COLORS = {
     "zsasa_bitmask_f32": "#d35400",
     "zsasa_bitmask_corrected_f32": "#b9770e",
 }
+MD_STORY_COLORS = {
+    "zsasa_cli_f64": COLORS["zsasa_cli_f64"],
+    "zsasa_cli_bitmask_f32_single": "#d35400",
+    "zsasa_cli_bitmask_f32_single_corrected": "#b9770e",
+}
 DISPLAY_NAMES = {
     "freesasa": "FreeSASA",
     "mdtraj": "MDTraj",
@@ -415,6 +420,15 @@ def format_percentage(value: float) -> str:
     return f"{coefficient:.3g} × 10{superscript}%"
 
 
+def format_r2(value: float) -> str:
+    """Format R² without rounding a near-perfect fit to exact agreement."""
+    if value == 1.0:
+        return "= 1.000000"
+    if value > 0.999999:
+        return "> 0.999999"
+    return f"= {value:.6f}"
+
+
 def numeric_value(value: object) -> float | None:
     if value is None:
         return None
@@ -515,6 +529,7 @@ def setup_style() -> None:
             "xtick.labelsize": 8,
             "ytick.labelsize": 8,
             "legend.fontsize": 8,
+            "legend.frameon": False,
             "figure.dpi": 140,
             "savefig.dpi": 200,
             "axes.grid": True,
@@ -534,6 +549,21 @@ def save_figure(fig: plt.Figure, out_dir: Path, name: str) -> list[Path]:
         written.append(path)
     plt.close(fig)
     return written
+
+
+def add_panel_label(ax: plt.Axes, label: str) -> None:
+    """Place a consistent publication-style label above a panel."""
+    ax.text(
+        -0.12,
+        1.04,
+        f"({label})",
+        transform=ax.transAxes,
+        ha="left",
+        va="bottom",
+        fontsize=11,
+        fontweight="bold",
+        clip_on=False,
+    )
 
 
 def subplot_shape(n_items: int) -> tuple[int, int]:
@@ -802,7 +832,7 @@ def plot_static_standard_and_bitmask_comparison(
         return []
 
     fig, axes = plt.subplots(1, 2, figsize=(9, 4.5), layout="constrained")
-    panel_titles = ["zsasa f64 (standard)", "zsasa f32 (bitmask)"]
+    panel_titles = ["zsasa f64", "zsasa bitmask f32"]
     for ax, candidate, panel_title, panel_letter in zip(
         axes, candidates, panel_titles, "ab", strict=True
     ):
@@ -836,21 +866,12 @@ def plot_static_standard_and_bitmask_comparison(
         ax.set_aspect("equal", adjustable="box")
         ax.set_xlabel("FreeSASA total SASA (Å²)", fontsize=10.5)
         ax.set_ylabel(f"{display_name(candidate)} total SASA (Å²)", fontsize=10.5)
-        ax.set_title(f"{panel_title}; {points:,} points", fontsize=11)
+        ax.set_title(f"{panel_title} ({points:,} points)", fontsize=11)
         ax.tick_params(axis="both", labelsize=9.5, width=1.0)
         ax.grid(linewidth=0.7, alpha=0.3)
         ax.spines["left"].set_linewidth(1.1)
         ax.spines["bottom"].set_linewidth(1.1)
-        ax.text(
-            -0.07,
-            1.04,
-            f"({panel_letter})",
-            transform=ax.transAxes,
-            va="bottom",
-            ha="right",
-            fontsize=12,
-            fontweight="bold",
-        )
+        add_panel_label(ax, panel_letter)
         stats = summarize_pair(table.rows, "freesasa", candidate)
         ax.text(
             0.04,
@@ -858,7 +879,7 @@ def plot_static_standard_and_bitmask_comparison(
             "\n".join(
                 [
                     rf"$n$ = {stats.n:,}",
-                    rf"$R^2$ = {stats.r2:.6f}",
+                    rf"$R^2$ {format_r2(stats.r2)}",
                     f"mean rel. diff. = {format_percentage(stats.mean_error_percent)}",
                     f"max rel. diff. = {format_percentage(stats.max_error_percent)}",
                 ]
@@ -919,7 +940,7 @@ def plot_static_bitmask_error_vs_points(
         linewidth=2.2,
         label="Median",
     )
-    ax.axhline(0.0, color="0.2", linestyle="--", linewidth=1.3, alpha=0.8)
+    ax.axhline(0.0, color="0.2", linestyle=":", linewidth=1.3, alpha=0.8)
     ax.set_xticks(positions, [str(point) for point in points])
     ax.set_xlabel("Sphere-point count", fontsize=10.5)
     ax.set_ylabel("Signed relative difference (%)", fontsize=10.5)
@@ -928,7 +949,7 @@ def plot_static_bitmask_error_vs_points(
     ax.grid(linewidth=0.7, alpha=0.3)
     ax.spines["left"].set_linewidth(1.1)
     ax.spines["bottom"].set_linewidth(1.1)
-    ax.legend(loc="lower right", fontsize=9, framealpha=0.95)
+    ax.legend(loc="lower right", fontsize=9, frameon=False)
     return save_figure(fig, out_dir, "static_sr_bitmask_f32_error_vs_points")
 
 
@@ -993,11 +1014,11 @@ def plot_static_bitmask_correction_vs_points(
     ax.spines["left"].set_linewidth(1.1)
     ax.spines["bottom"].set_linewidth(1.1)
     ax.legend(
-        loc="center right",
-        title="Median; shading = 5th–95th percentile",
+        loc="lower right",
+        title="Medians with 5th–95th percentile bands",
         fontsize=9,
         title_fontsize=8.5,
-        framealpha=0.95,
+        frameon=False,
     )
     return save_figure(fig, out_dir, "static_sr_bitmask_correction_vs_points")
 
@@ -1035,6 +1056,185 @@ def plot_md_error_vs_frame(csvs: list[ResultCsv], out_dir: Path, prefix: str) ->
         cell_width=4.2,
         cell_height=3.6,
     )
+
+
+def plot_md_standard_convergence_vs_mdtraj(csvs: list[ResultCsv], out_dir: Path) -> list[Path]:
+    """Show convergence between zsasa and MDTraj as points increase."""
+    candidate = "zsasa_cli_f64"
+    points: list[int] = []
+    medians: list[float] = []
+    lower_bounds: list[float] = []
+    upper_bounds: list[float] = []
+    for csv_data in sorted(csvs, key=lambda item: item.points):
+        errors = signed_relative_errors(csv_data.rows, "mdtraj", candidate)
+        if not errors:
+            continue
+        points.append(csv_data.points)
+        medians.append(float(np.median(errors)))
+        lower_bounds.append(float(np.percentile(errors, 5)))
+        upper_bounds.append(float(np.percentile(errors, 95)))
+
+    if not points:
+        return []
+
+    positions = list(range(len(points)))
+    color = MD_STORY_COLORS[candidate]
+    fig, ax = plt.subplots(figsize=(7.2, 4.6), layout="constrained")
+    ax.fill_between(
+        positions,
+        lower_bounds,
+        upper_bounds,
+        color=color,
+        alpha=0.18,
+        linewidth=0.8,
+        label="5th–95th percentile",
+    )
+    ax.plot(
+        positions,
+        medians,
+        color=color,
+        marker="o",
+        markersize=6,
+        linewidth=2.2,
+        label="Median",
+    )
+    ax.axhline(0.0, color="0.2", linestyle=":", linewidth=1.3, alpha=0.8)
+    ax.set_xticks(positions, [str(point) for point in points])
+    ax.set_xlabel("Sphere-point count", fontsize=10.5)
+    ax.set_ylabel("Signed relative difference (%)", fontsize=10.5)
+    ax.set_title("zsasa f64 vs MDTraj", fontsize=11)
+    ax.tick_params(axis="both", labelsize=9.5, width=1.0)
+    ax.grid(linewidth=0.7, alpha=0.3)
+    ax.spines["left"].set_linewidth(1.1)
+    ax.spines["bottom"].set_linewidth(1.1)
+    ax.legend(
+        loc="best",
+        fontsize=9,
+        frameon=False,
+    )
+    return save_figure(fig, out_dir, "md_standard_f64_convergence_vs_mdtraj")
+
+
+def plot_md_bitmask_correction_vs_standard(
+    csvs: list[ResultCsv], out_dir: Path, frame_points: int = 1024
+) -> list[Path]:
+    """Compare raw and corrected f32 bitmask results with f32 zsasa."""
+    reference = "zsasa_cli_f32"
+    candidates = [
+        (
+            "zsasa_cli_bitmask_f32_single",
+            "Raw bitmask f32",
+            "o",
+            "-",
+            1.9,
+        ),
+        (
+            "zsasa_cli_bitmask_f32_single_corrected",
+            "Corrected bitmask f32",
+            "s",
+            "--",
+            2.4,
+        ),
+    ]
+    fig, axes = plt.subplots(1, 2, figsize=(10.2, 4.6), sharey=True, layout="constrained")
+    plotted = False
+
+    point_values = sorted({csv_data.points for csv_data in csvs})
+    positions = list(range(len(point_values)))
+    csv_by_points = {csv_data.points: csv_data for csv_data in csvs}
+    for candidate, label, marker, linestyle, linewidth in candidates:
+        medians: list[float] = []
+        lower_bounds: list[float] = []
+        upper_bounds: list[float] = []
+        valid_positions: list[int] = []
+        for position, point in enumerate(point_values):
+            errors = signed_relative_errors(csv_by_points[point].rows, reference, candidate)
+            if not errors:
+                continue
+            valid_positions.append(position)
+            medians.append(float(np.median(errors)))
+            lower_bounds.append(float(np.percentile(errors, 5)))
+            upper_bounds.append(float(np.percentile(errors, 95)))
+        if not valid_positions:
+            continue
+        plotted = True
+        color = MD_STORY_COLORS[candidate]
+        line_alpha = 1.0 if candidate.endswith("_corrected") else 0.78
+        band_alpha = 0.15 if candidate.endswith("_corrected") else 0.1
+        axes[0].fill_between(
+            valid_positions,
+            lower_bounds,
+            upper_bounds,
+            color=color,
+            alpha=band_alpha,
+            linewidth=0.7,
+        )
+        axes[0].plot(
+            valid_positions,
+            medians,
+            color=color,
+            marker=marker,
+            markersize=5.5,
+            linestyle=linestyle,
+            linewidth=linewidth,
+            alpha=line_alpha,
+            label=label,
+        )
+
+        frame_csv = csv_by_points.get(frame_points)
+        if frame_csv is None:
+            continue
+        frames: list[float] = []
+        errors: list[float] = []
+        for row in frame_csv.rows:
+            frame = numeric_value(row.get("frame"))
+            ref = numeric_value(row.get(reference))
+            obs = numeric_value(row.get(candidate))
+            if frame is None or ref is None or obs is None or ref == 0.0:
+                continue
+            frames.append(frame)
+            errors.append(100.0 * (obs - ref) / abs(ref))
+        if frames:
+            axes[1].plot(
+                frames,
+                errors,
+                color=color,
+                linestyle=linestyle,
+                linewidth=linewidth,
+                alpha=line_alpha,
+                label=label,
+            )
+
+    if not plotted:
+        plt.close(fig)
+        return []
+
+    for ax in axes:
+        ax.tick_params(axis="both", labelsize=9.2, width=1.0)
+        ax.grid(linewidth=0.7, alpha=0.3)
+        ax.spines["left"].set_linewidth(1.1)
+        ax.spines["bottom"].set_linewidth(1.1)
+    axes[0].axhline(0.0, color="0.2", linestyle=":", linewidth=1.3, alpha=0.8)
+    axes[1].axhline(0.0, color="0.2", linestyle=":", linewidth=1.3, alpha=0.8)
+    axes[0].set_xticks(positions, [str(point) for point in point_values])
+    axes[0].set_xlabel("Sphere-point count", fontsize=10.5)
+    axes[0].set_ylabel("Signed relative difference (%)", fontsize=10.5)
+    axes[0].set_title("Difference from zsasa f32", fontsize=11)
+    axes[1].set_xlabel("Frame", fontsize=10.5)
+    axes[1].set_title(
+        f"Frame-wise difference from zsasa f32 ({frame_points:,} points)",
+        fontsize=11,
+    )
+    axes[0].legend(
+        loc="best",
+        title="Medians with 5th–95th percentile bands",
+        fontsize=8.7,
+        title_fontsize=8.2,
+        frameon=False,
+    )
+    add_panel_label(axes[0], "a")
+    add_panel_label(axes[1], "b")
+    return save_figure(fig, out_dir, "md_bitmask_correction_vs_standard")
 
 
 def plot_delta_pairs(
@@ -1178,6 +1378,9 @@ def generate_md_validation(db_path: Path, out_dir: Path) -> list[Path]:
     )
     if not md_csvs:
         return outputs
+
+    outputs.extend(plot_md_standard_convergence_vs_mdtraj(md_csvs, out_dir))
+    outputs.extend(plot_md_bitmask_correction_vs_standard(md_csvs, out_dir))
 
     primary_columns = {
         "mdtraj",
