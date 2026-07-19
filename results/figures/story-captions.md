@@ -26,6 +26,28 @@ These captions are manuscript-oriented drafts. They define the comparison, fixed
 
 **Caption.** Raw and corrected zsasa bitmask f32 results relative to zsasa f32 across 1,001 trajectory frames. (a) Median signed relative differences and 5th–95th percentile bands across sphere-point counts. (b) Frame-wise signed relative differences at 1,024 sphere points. The same colors and line styles identify the raw and corrected modes in both panels.
 
+## Molecular-dynamics performance
+
+### [Trajectory throughput and memory](md/png/md_performance_memory_story.png)
+
+**Caption.** Throughput–memory trade-offs for three trajectories at 10 threads and 128 sphere points. Native zsasa f64 and zsasa bitmask f32 are shown with zsasa Python integrations and available external tools. Points show three-run means, and error bars show standard deviations for throughput and peak resident set size (RSS). Each panel title states the trajectory length and atom count.
+
+### [Native thread overcommit](md/png/md_zsasa_performance_memory_detail.png)
+
+**Caption.** Throughput and peak RSS of native zsasa f64 and corrected zsasa bitmask f32 on the 5vz0_A trajectory over 10, 20, and 40 threads. The benchmark system had 10 logical CPUs. Points show three-run means and error bars show standard deviations. All calculations used 128 sphere points.
+
+### [Bitmask accuracy and throughput](md/png/md_correction_accuracy_throughput_story.png)
+
+**Caption.** Accuracy–throughput trade-off for zsasa f32 and raw or corrected zsasa bitmask f32 on the 5wvo_C trajectory at 128 sphere points and 10 threads. Horizontal positions show the mean absolute relative difference from zsasa f32, with intervals spanning the 5th–95th percentiles over 1,001 validation frames. Vertical positions show three-run mean throughput, with error bars showing standard deviations. Correction reduces the bitmask difference without a measurable throughput cost.
+
+### [6sup_A comparison with external tools](md/png/md_6sup_comparator_ratios_story.png)
+
+**Caption.** Relative performance of zsasa f64 and zsasa bitmask f32 against MDTraj and mdsasa-bolt for the 1,001-frame, 33,377-atom 6sup_A trajectory. (a) zsasa-to-comparator throughput ratios. (b) Comparator-to-zsasa peak RSS ratios, so values above 1 indicate lower peak memory for zsasa. Ratios use three-run means and error bars show propagated standard deviations. All calculations used 10 threads and 128 sphere points.
+
+### [5vz0_A comparison with mdsasa-bolt](md/png/md_5vz0_comparator_ratios_story.png)
+
+**Caption.** Relative performance of zsasa f64 and zsasa bitmask f32 against mdsasa-bolt for the 10,001-frame, 17,910-atom 5vz0_A trajectory. (a) zsasa-to-comparator throughput ratios. (b) Comparator-to-zsasa peak RSS ratios. Ratios use three-run means and error bars show propagated standard deviations. MDTraj was not measured for this trajectory. All calculations used 10 threads and 128 sphere points.
+
 ## E. coli AFDB batch benchmark
 
 ### [Throughput scaling](batch_ecoli/png/ecoli_throughput_scaling_story.png)
@@ -73,3 +95,21 @@ These captions are manuscript-oriented drafts. They define the comparison, fixed
 ### [Thread overcommit performance and memory](batch_swissprot/png/swissprot_overcommit_performance_memory.png)
 
 **Caption.** Observed throughput–memory paths for zsasa f32 and zsasa bitmask f32 over 10, 20, and 40 threads on 500,000 SwissProt AFDB structures. The Lahuta bitmask marker shows its 10-thread result. All calculations used 128 sphere points on a system with 10 logical CPUs. Each configuration was measured once, so the figure is a descriptive large-scale observation without uncertainty estimates.
+
+## Single-file benchmark
+
+### [PDB runtime across structure sizes](single_file/png/single_pdb_runtime_vs_atoms_story.png)
+
+**Caption.** Full-process runtime for eight protein-only PDB inputs selected to span medium and large single chains, two-chain complexes, large assemblies, and known parser or runtime stress cases. Points show the median of three Hyperfine runs at 10 threads and 100 sphere points; error bars span the minimum and maximum. PDBTools.jl values include the full Julia wrapper invocation. zsasa f64 and PDBTools.jl were measured in the zsasa 0.9.0 rerun, whereas the unchanged FreeSASA and RustSASA PDB values are retained from the historical 0.6.0 benchmark suite.
+
+### [Selected PDB component-timing cases](single_file/png/single_pdb_case_studies_story.png)
+
+**Caption.** Parse and SASA component timing for four selected PDB inputs at 10 threads and 100 sphere points: (a) a large single-chain AlphaFold model, (b) the largest assembly in the subset, (c) the 8rbs FreeSASA coordinate-overflow case, and (d) the 5vyc RustSASA parser outlier. The 8rbs PDB coordinates exceed the fixed-width 8.3 field range and are misread by the pinned FreeSASA parser, producing pathological SASA setup time. Component timings are reported separately from full-process wall time; the PDBTools.jl timing phase represents warmed in-process execution and excludes Julia startup. FreeSASA and RustSASA PDB component values are retained from the historical 0.6.0 benchmark suite.
+
+### [mmCIF runtime across structure sizes](single_file/png/single_mmcif_runtime_vs_atoms_si.png)
+
+**Caption.** Supplementary single-file runtime comparison using mmCIF representations of the same eight-structure subset. Points show the median of three Hyperfine runs at 10 threads and 100 sphere points; error bars span the minimum and maximum. The mmCIF representation avoids PDB fixed-width coordinate overflow, and FreeSASA no longer shows the pathological 8rbs behavior. The 5vyc and 9fqr inputs were filtered to protein-only atom sets to match the PDB workloads, and stale assembly-generation metadata unsupported by the pinned FreeSASA parser was removed. FreeSASA was excluded for the two NVDA structures because it aborted without assigning atomic radii. PDBTools.jl values include the full Julia wrapper invocation.
+
+### [Selected mmCIF component-timing cases](single_file/png/single_mmcif_case_studies_si.png)
+
+**Caption.** Supplementary parse and SASA component timing for mmCIF representations of the four PDB case-study structures at 10 threads and 100 sphere points. The PDB-specific FreeSASA coordinate-overflow behavior for 8rbs and RustSASA parser outlier for 5vyc are absent, although mmCIF parsing contributes appreciably to runtime, particularly for the largest assembly. Titles report chain instances from the cleaned source structure. The corresponding PDB writer reuses its finite set of one-character chain identifiers across TER-delimited chain instances, so unique PDB chain-ID counts are smaller even though the atom and chain-instance workloads are aligned. The 5vyc and 9fqr mmCIF inputs were filtered to the same protein-only atom sets as their PDB counterparts. PDBTools.jl component timing represents warmed in-process execution and excludes Julia startup.
