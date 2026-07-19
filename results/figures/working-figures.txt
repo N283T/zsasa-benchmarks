@@ -1,2 +1,11 @@
 # One PNG path per figure currently being edited, relative to results/figures/.
 # Keep this list small and clear it when the figure group is complete.
+batch_ecoli/png/ecoli_t10_runtime_speedup_vs_comparators.png
+batch_ecoli/png/ecoli_t10_rss_reduction_vs_comparators.png
+batch_human/png/human_t10_runtime_speedup_vs_comparators.png
+batch_human/png/human_t10_rss_reduction_vs_comparators.png
+md/png/md_performance_memory_story.png
+md/png/md_zsasa_performance_memory_detail.png
+md/png/md_correction_accuracy_throughput_story.png
+md/png/md_6sup_comparator_ratios_story.png
+md/png/md_5vz0_comparator_ratios_story.png

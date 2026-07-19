@@ -13,3 +13,4 @@ batch_human_cif/png/human_cif_af_fast_overcommit_tradeoff.png
 batch_human/png/human_t10_throughput_vs_peak_rss.png
 batch_human/png/human_t10_runtime_speedup_vs_comparators.png
 batch_human/png/human_t10_rss_reduction_vs_comparators.png
+batch_swissprot/png/swissprot_overcommit_performance_memory.png

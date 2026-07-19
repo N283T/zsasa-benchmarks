@@ -148,6 +148,28 @@ def test_human_cif_t20_rows_selects_complete_parser_io_matrix() -> None:
     assert {row["threads"] for row in human_cif_t20_rows(rows)} == {20}
 
 
+def test_swissprot_story_rows_selects_current_zsasa_and_lahuta_t10() -> None:
+    from scripts.plot_batch_figures import swissprot_story_rows
+
+    rows = [
+        {"variant": variant, "threads": threads}
+        for variant in (
+            "zsasa_0_6_0_f32",
+            "zsasa_0_9_0_f32",
+            "zsasa_0_9_0_bitmask_f32",
+            "zsasa_generic_read",
+            "lahuta_bitmask",
+        )
+        for threads in (10, 20, 40)
+    ]
+
+    assert {(row["variant"], row["threads"]) for row in swissprot_story_rows(rows)} == {
+        (variant, threads)
+        for variant in ("zsasa_0_9_0_f32", "zsasa_0_9_0_bitmask_f32")
+        for threads in (10, 20, 40)
+    } | {("lahuta_bitmask", 10)}
+
+
 def test_row_for_selects_variant_and_worker_count() -> None:
     from scripts.plot_batch_figures import row_for
 

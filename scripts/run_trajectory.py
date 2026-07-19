@@ -35,7 +35,7 @@ from scripts.benchlib.runner import (  # noqa: E402
 )
 from scripts.benchlib.tools import load_tool_specs, resolve_tool_binary  # noqa: E402
 
-DEFAULT_RUN_ID = "v0_9_0_md_zsasa"
+DEFAULT_RUN_ID = "v0_9_0_md_128"
 
 
 def parse_args() -> argparse.Namespace:
@@ -92,6 +92,7 @@ def full_rerun_settings(manifest: dict[str, Any]) -> dict[str, Any]:
             "prepare",
             "cli_precisions",
             "cli_bitmask_variants",
+            "wrapper_threads",
         ]
         for key in inherited_keys:
             if key in refresh:
@@ -153,10 +154,24 @@ def threads_for_dataset(dataset: dict[str, Any], settings: dict[str, Any]) -> li
     return [int(value) for value in raw_threads]
 
 
+def threads_for_tool(
+    tool: str, dataset: dict[str, Any], settings: dict[str, Any]
+) -> list[int]:
+    """Return the configured thread matrix, with an optional wrapper subset."""
+    threads = threads_for_dataset(dataset, settings)
+    if tool.startswith("zsasa_") and "wrapper_threads" in settings:
+        wrapper_threads = settings["wrapper_threads"]
+        if isinstance(wrapper_threads, int):
+            return [wrapper_threads]
+        return [int(value) for value in wrapper_threads]
+    return threads
+
+
 def command_variants(
     *, tool: str, dataset: dict[str, Any], n_points: int, settings: dict[str, Any]
 ) -> list[dict[str, Any]]:
-    threads = threads_for_dataset(dataset, settings)
+    threads = threads_for_tool(tool, dataset, settings)
+    separate_thread_outputs = len(threads) > 1
     if tool == "zig":
         return [
             {
@@ -164,7 +179,12 @@ def command_variants(
                 "tool": tool,
                 "precision": str(precision),
                 "threads": thread,
-                "raw_parts": [str(dataset["id"]), tool, str(precision)],
+                "raw_parts": [
+                    str(dataset["id"]),
+                    tool,
+                    str(precision),
+                    *([f"{thread}t"] if separate_thread_outputs else []),
+                ],
             }
             for thread in threads
             for precision in settings["cli_precisions"]
@@ -197,6 +217,7 @@ def command_variants(
                                 tool,
                                 str(precision),
                                 str(bitmask_variant),
+                                *([f"{thread}t"] if separate_thread_outputs else []),
                             ],
                         }
                     )
@@ -208,7 +229,11 @@ def command_variants(
                 "tool": tool,
                 "precision": None,
                 "threads": thread,
-                "raw_parts": [str(dataset["id"]), tool],
+                "raw_parts": [
+                    str(dataset["id"]),
+                    tool,
+                    *([f"{thread}t"] if separate_thread_outputs else []),
+                ],
             }
             for thread in threads
         ]
@@ -325,6 +350,9 @@ def main() -> None:
             "n_points": int(settings["n_points"]),
             "stride": int(settings["stride"]),
             "threads": [int(value) for value in settings["threads"]],
+            "wrapper_threads": [
+                int(value) for value in settings.get("wrapper_threads", [])
+            ],
             "cli_precisions": [str(value) for value in settings["cli_precisions"]],
             "cli_bitmask_variants": [
                 str(value) for value in settings["cli_bitmask_variants"]

@@ -38,11 +38,11 @@ These captions are manuscript-oriented drafts. They define the comparison, fixed
 
 ### [Throughput ratios against comparators](batch_ecoli/png/ecoli_t10_runtime_speedup_vs_comparators.png)
 
-**Caption.** Throughput ratios of zsasa f64 and zsasa bitmask f32 to three external comparators for 4,370 E. coli AFDB structures at 10 threads and 128 sphere points. Ratios were calculated from three-run mean runtimes; values above 1 indicate higher throughput for zsasa. The horizontal reference line denotes equal throughput.
+**Caption.** Throughput ratios of zsasa f64 and zsasa bitmask f32 to three external comparators for 4,370 E. coli AFDB structures at 10 threads and 128 sphere points. Ratios were calculated from three-run mean runtimes, and error bars show uncertainty propagated from the runtime standard deviations. Values above 1 indicate higher throughput for zsasa. The vertical reference line denotes equal throughput.
 
 ### [Peak RSS ratios against comparators](batch_ecoli/png/ecoli_t10_rss_reduction_vs_comparators.png)
 
-**Caption.** Peak RSS ratios of the external comparators to zsasa f64 and zsasa bitmask f32 for the E. coli AFDB batch benchmark. Ratios were calculated from three-run mean peak RSS values at 10 threads and 128 sphere points; values above 1 indicate lower peak memory for zsasa. The horizontal reference line denotes equal peak RSS.
+**Caption.** Peak RSS ratios of the external comparators to zsasa f64 and zsasa bitmask f32 for the E. coli AFDB batch benchmark. Ratios were calculated from three-run mean peak RSS values at 10 threads and 128 sphere points, and error bars show uncertainty propagated from the peak RSS standard deviations. Values above 1 indicate lower peak memory for zsasa. The vertical reference line denotes equal peak RSS.
 
 ## Human AFDB mmCIF batch benchmark
 
@@ -62,8 +62,14 @@ These captions are manuscript-oriented drafts. They define the comparison, fixed
 
 ### [Throughput ratios against comparators](batch_human/png/human_t10_runtime_speedup_vs_comparators.png)
 
-**Caption.** Throughput ratios of zsasa f64 and zsasa bitmask f32 to FreeSASA batch, RustSASA, and Lahuta bitmask for 23,586 Human AFDB PDB structures at 10 threads and 128 sphere points. Ratios were calculated from three-run mean runtimes; values above 1 indicate higher throughput for zsasa. The horizontal reference line denotes equal throughput.
+**Caption.** Throughput ratios of zsasa f64 and zsasa bitmask f32 to FreeSASA batch, RustSASA, and Lahuta bitmask for 23,586 Human AFDB PDB structures at 10 threads and 128 sphere points. Ratios were calculated from three-run mean runtimes, and error bars show uncertainty propagated from the runtime standard deviations. Values above 1 indicate higher throughput for zsasa. The vertical reference line denotes equal throughput.
 
 ### [Peak RSS ratios against comparators](batch_human/png/human_t10_rss_reduction_vs_comparators.png)
 
-**Caption.** Peak RSS ratios of FreeSASA batch, RustSASA, and Lahuta bitmask to zsasa f64 and zsasa bitmask f32 for the Human AFDB PDB batch benchmark. Ratios were calculated from three-run mean peak RSS values at 10 threads and 128 sphere points; values above 1 indicate lower peak memory for zsasa. The horizontal reference line denotes equal peak RSS.
+**Caption.** Peak RSS ratios of FreeSASA batch, RustSASA, and Lahuta bitmask to zsasa f64 and zsasa bitmask f32 for the Human AFDB PDB batch benchmark. Ratios were calculated from three-run mean peak RSS values at 10 threads and 128 sphere points, and error bars show uncertainty propagated from the peak RSS standard deviations. Values above 1 indicate lower peak memory for zsasa. The vertical reference line denotes equal peak RSS.
+
+## SwissProt AFDB batch benchmark
+
+### [Thread overcommit performance and memory](batch_swissprot/png/swissprot_overcommit_performance_memory.png)
+
+**Caption.** Observed throughput–memory paths for zsasa f32 and zsasa bitmask f32 over 10, 20, and 40 threads on 500,000 SwissProt AFDB structures. The Lahuta bitmask marker shows its 10-thread result. All calculations used 128 sphere points on a system with 10 logical CPUs. Each configuration was measured once, so the figure is a descriptive large-scale observation without uncertainty estimates.

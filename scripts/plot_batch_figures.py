@@ -676,6 +676,124 @@ def plot_human_performance_memory_map(
     )
 
 
+def swissprot_story_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Select current zsasa thread series and the 10-thread Lahuta comparator."""
+    variants = {
+        "zsasa_0_9_0_f32",
+        "zsasa_0_9_0_bitmask_f32",
+        "lahuta_bitmask",
+    }
+    return [
+        row
+        for row in rows
+        if row["variant"] in variants
+        and (row["variant"] != "lahuta_bitmask" or row["threads"] == 10)
+    ]
+
+
+def plot_swissprot_overcommit_performance_memory(
+    rows: list[dict[str, Any]], out_dir: Path
+) -> list[Path]:
+    """Show the observed SwissProt throughput-memory path under overcommit."""
+    selected = swissprot_story_rows(rows)
+    grouped = group_by_variant(selected)
+    styles = {
+        "zsasa_0_9_0_f32": {"color": "#d99b2b", "marker": "o"},
+        "zsasa_0_9_0_bitmask_f32": {"color": "#e67e22", "marker": "s"},
+    }
+    labels = {
+        "zsasa_0_9_0_f32": "zsasa f32",
+        "zsasa_0_9_0_bitmask_f32": "zsasa bitmask f32",
+    }
+    thread_offsets = {
+        "zsasa_0_9_0_f32": {10: (-7, -12), 20: (-8, 8), 40: (7, -2)},
+        "zsasa_0_9_0_bitmask_f32": {10: (-7, 8), 20: (-7, 8), 40: (7, 1)},
+    }
+
+    fig, ax = plt.subplots(figsize=(7.4, 5.2), layout="constrained")
+    for variant, style in styles.items():
+        variant_rows = grouped.get(variant, [])
+        if not variant_rows:
+            continue
+        ax.plot(
+            [row["memory_mean_mb"] for row in variant_rows],
+            [row["throughput"] for row in variant_rows],
+            linewidth=2.2,
+            markersize=7,
+            label=labels[variant],
+            **style,
+        )
+        for row in variant_rows:
+            offset = thread_offsets[variant][row["threads"]]
+            ax.annotate(
+                str(row["threads"]),
+                (row["memory_mean_mb"], row["throughput"]),
+                xytext=offset,
+                textcoords="offset points",
+                ha="right" if offset[0] < 0 else "left",
+                va="bottom" if offset[1] > 0 else "top",
+                color=style["color"],
+                fontsize=8,
+                fontweight="bold",
+            )
+        label_row = (
+            variant_rows[1]
+            if variant == "zsasa_0_9_0_bitmask_f32"
+            else variant_rows[-1]
+        )
+        ax.annotate(
+            labels[variant],
+            (label_row["memory_mean_mb"], label_row["throughput"]),
+            xytext=(14, -5) if variant == "zsasa_0_9_0_bitmask_f32" else (-10, -15),
+            textcoords="offset points",
+            ha="left" if variant == "zsasa_0_9_0_bitmask_f32" else "right",
+            va="center" if variant == "zsasa_0_9_0_bitmask_f32" else "top",
+            color=style["color"],
+            fontsize=9,
+            fontweight="bold",
+        )
+
+    lahuta_rows = grouped.get("lahuta_bitmask", [])
+    if lahuta_rows:
+        lahuta = lahuta_rows[0]
+        ax.scatter(
+            lahuta["memory_mean_mb"],
+            lahuta["throughput"],
+            color=color_for("lahuta_bitmask"),
+            marker="P",
+            s=90,
+            zorder=3,
+        )
+        ax.annotate(
+            "Lahuta bitmask\n10 threads",
+            (lahuta["memory_mean_mb"], lahuta["throughput"]),
+            xytext=(-8, 0),
+            textcoords="offset points",
+            ha="right",
+            va="center",
+            color="#75408a",
+            fontsize=8,
+            fontweight="bold",
+        )
+
+    ax.text(
+        0.02,
+        0.97,
+        "Numbers show zsasa threads",
+        transform=ax.transAxes,
+        ha="left",
+        va="top",
+        color="0.35",
+        fontsize=8,
+    )
+    ax.set_title("SwissProt AFDB throughput and memory under thread overcommit")
+    ax.set_xlabel("Peak RSS (MiB)")
+    ax.set_ylabel(r"Throughput (structures s$^{-1}$)")
+    ax.set_xlim(left=200)
+    ax.set_ylim(bottom=400)
+    return save_figure(fig, out_dir, "swissprot_overcommit_performance_memory")
+
+
 def plot_throughput_per_mib(rows: list[dict[str, Any]], out_dir: Path) -> list[Path]:
     memory_rows = [row for row in rows if row.get("memory_mean_mb", 0.0) > 0]
     if not memory_rows:
@@ -1819,101 +1937,136 @@ def plot_t10_comparator_ratio_for_dataset(
     name_metric: str,
     candidate_variants: list[str] | None = None,
 ) -> list[Path]:
+    """Plot comparator ratios as horizontal bars extending from parity."""
     selected = {row["variant"]: row for row in t10_rows(rows)}
     requested_candidates = candidate_variants or ZSASA_BATCH_VARIANTS
     candidates = [variant for variant in requested_candidates if variant in selected]
     if not candidates:
         return []
-    x = np.arange(len(candidates))
-    width = 0.25
-    width_inches = 7.8 if len(candidates) <= 2 else 10.5
-    fig, ax = plt.subplots(figsize=(width_inches, 5.5), layout="constrained")
+    y_centers = np.arange(len(candidates))[::-1]
+    fig, ax = plt.subplots(figsize=(8.2, 4.8), layout="constrained")
     comparator_styles = {
         "freesasa_batch": {
             "color": color_for("freesasa_batch"),
             "edgecolor": "#1f5f8f",
             "hatch": "",
+            "label": "vs FreeSASA batch",
         },
         "rustsasa": {
             "color": color_for("rustsasa"),
             "edgecolor": "#992d22",
             "hatch": "///",
+            "label": "vs RustSASA",
         },
         "lahuta_bitmask": {
             "color": color_for("lahuta_bitmask"),
             "edgecolor": "#7d3c98",
             "hatch": "\\\\\\",
+            "label": "vs Lahuta bitmask",
         },
     }
+    comparators = [
+        comparator
+        for comparator in BATCH_COMPARATOR_VARIANTS
+        if comparator in selected
+    ]
+    height = 0.22 if len(comparators) > 2 else 0.28
+    offsets = np.linspace(0.25, -0.25, len(comparators))
+    sd_key = "stddev_s" if metric == "mean_s" else "memory_stddev_mb"
     all_values: list[float] = []
-    for index, comparator in enumerate(BATCH_COMPARATOR_VARIANTS):
-        baseline = selected.get(comparator)
-        if baseline is None:
-            continue
-        values = []
+    all_uncertainties: list[float] = []
+    for comparator, offset in zip(comparators, offsets, strict=True):
+        baseline = selected[comparator]
+        values: list[float] = []
+        uncertainties: list[float] = []
         for variant in candidates:
             if variant == comparator or selected[variant][metric] <= 0:
                 values.append(np.nan)
+                uncertainties.append(0.0)
             else:
-                values.append(baseline[metric] / selected[variant][metric])
+                ratio = baseline[metric] / selected[variant][metric]
+                uncertainty = ratio * np.hypot(
+                    baseline[sd_key] / baseline[metric],
+                    selected[variant][sd_key] / selected[variant][metric],
+                )
+                values.append(ratio)
+                uncertainties.append(float(uncertainty))
         all_values.extend(value for value in values if value > 0)
-        positions = x + (index - 1) * width
-        bars = ax.bar(
+        all_uncertainties.extend(
+            uncertainty
+            for value, uncertainty in zip(values, uncertainties, strict=True)
+            if value > 0
+        )
+        positions = y_centers + offset
+        bars = ax.barh(
             positions,
-            values,
-            width=width,
+            [value - 1.0 for value in values],
+            left=1.0,
+            height=height,
+            xerr=uncertainties,
             linewidth=1.2,
-            label=f"vs {display_name(comparator)}",
+            capsize=2.5,
             alpha=0.75,
-            **comparator_styles[comparator],
+            zorder=3,
+            color=comparator_styles[comparator]["color"],
+            edgecolor=comparator_styles[comparator]["edgecolor"],
+            hatch=comparator_styles[comparator]["hatch"],
         )
-        ax.bar_label(
-            bars,
-            labels=[
-                (f"{value:.2f}×" if value < 1 else f"{value:.1f}×")
-                if np.isfinite(value)
-                else ""
-                for value in values
-            ],
-            padding=3,
-            fontsize=8,
-        )
-    ax.axhline(1.0, color="0.35", linestyle="--", linewidth=0.8, alpha=0.45)
-    ymax = max(all_values) * 1.22
-    ax.set_ylim(0, ymax)
+        for bar, value, uncertainty in zip(
+            bars, values, uncertainties, strict=True
+        ):
+            if not np.isfinite(value):
+                continue
+            below_parity = value < 1.0
+            label_x = (value + 1.0) / 2 if below_parity else value + uncertainty
+            ax.annotate(
+                f"{value:.2f}×" if value < 1 else f"{value:.1f}×",
+                (label_x, bar.get_y() + bar.get_height() / 2),
+                xytext=(0, -18) if below_parity else (5, 0),
+                textcoords="offset points",
+                ha="center" if below_parity else "left",
+                va="top" if below_parity else "center",
+                color=comparator_styles[comparator]["edgecolor"],
+                fontsize=8,
+                fontweight="bold",
+            )
+    ax.axvline(1.0, color="0.35", linestyle=":", linewidth=1.0, zorder=0)
+    endpoints = [
+        value + direction * uncertainty
+        for value, uncertainty in zip(all_values, all_uncertainties, strict=True)
+        for direction in (-1, 1)
+    ]
     if name_metric == "runtime_speedup":
-        ratio_ticks = [tick for tick in ax.get_yticks() if 0 <= tick <= ymax]
-        ax.set_yticks(sorted({*ratio_ticks, 1.0}))
-    ax.set_title(f"{label} batch {title_metric}")
-    ax.set_ylabel(ylabel)
-    ax.set_xticks(x, [display_name(variant) for variant in candidates])
-    plt.setp(ax.get_xticklabels(), rotation=35, ha="right", rotation_mode="anchor")
+        ax.set_xlim(0.0, max(endpoints) * 1.14)
+        ratio_ticks = [
+            tick for tick in ax.get_xticks() if 0 <= tick <= ax.get_xlim()[1]
+        ]
+        ax.set_xticks(sorted({*ratio_ticks, 1.0}))
+    else:
+        ax.set_xlim(0.8, max(endpoints) * 1.16)
+        ratio_ticks = [tick for tick in ax.get_xticks() if 1 <= tick <= ax.get_xlim()[1]]
+        ax.set_xticks(sorted({*ratio_ticks, 1.0}))
+    ax.set_title(f"{label} batch {title_metric} relative to external tools")
+    ax.set_xlabel(ylabel)
+    ax.set_yticks(y_centers, [display_name(variant) for variant in candidates])
+    ax.grid(axis="y", visible=False)
     handles = [
         Patch(
-            facecolor=color_for("freesasa_batch"),
-            edgecolor="#1f5f8f",
+            facecolor=comparator_styles[comparator]["color"],
+            edgecolor=comparator_styles[comparator]["edgecolor"],
             linewidth=1.2,
-            label="vs FreeSASA batch",
+            hatch=comparator_styles[comparator]["hatch"],
+            label=comparator_styles[comparator]["label"],
             alpha=0.75,
-        ),
-        Patch(
-            facecolor=color_for("rustsasa"),
-            edgecolor="#992d22",
-            linewidth=1.2,
-            hatch="///",
-            label="vs RustSASA",
-            alpha=0.75,
-        ),
-        Patch(
-            facecolor=color_for("lahuta_bitmask"),
-            edgecolor="#7d3c98",
-            linewidth=1.2,
-            hatch="\\\\\\",
-            label="vs Lahuta bitmask",
-            alpha=0.75,
-        ),
+        )
+        for comparator in comparators
     ]
-    ax.legend(handles=handles, loc="upper right", ncol=3, frameon=False)
+    fig.legend(
+        handles=handles,
+        loc="outside lower center",
+        ncol=len(handles),
+        frameon=False,
+    )
     return save_figure(fig, out_dir, f"{slug}_t10_{name_metric}_vs_comparators")
 
 
@@ -2045,7 +2198,7 @@ def generate_ecoli(rows: list[dict[str, Any]], out_dir: Path) -> tuple[list[Path
             "E. coli",
             metric="mean_s",
             ylabel="Throughput ratio (zsasa / comparator)",
-            title_metric="throughput ratio",
+            title_metric="throughput",
             name_metric="runtime_speedup",
             candidate_variants=["zsasa_f64", "zsasa_bitmask_f32"],
         )
@@ -2058,7 +2211,7 @@ def generate_ecoli(rows: list[dict[str, Any]], out_dir: Path) -> tuple[list[Path
             "E. coli",
             metric="memory_mean_mb",
             ylabel="Peak RSS ratio (comparator / zsasa)",
-            title_metric="peak RSS reduction",
+            title_metric="peak memory",
             name_metric="rss_reduction",
             candidate_variants=["zsasa_f64", "zsasa_bitmask_f32"],
         )
@@ -2083,7 +2236,7 @@ def generate_human(rows: list[dict[str, Any]], out_dir: Path) -> tuple[list[Path
             "Human",
             metric="mean_s",
             ylabel="Throughput ratio (zsasa / comparator)",
-            title_metric="throughput ratio",
+            title_metric="throughput",
             name_metric="runtime_speedup",
             candidate_variants=["zsasa_f64", "zsasa_bitmask_f32"],
         )
@@ -2096,7 +2249,7 @@ def generate_human(rows: list[dict[str, Any]], out_dir: Path) -> tuple[list[Path
             "Human",
             metric="memory_mean_mb",
             ylabel="Peak RSS ratio (comparator / zsasa)",
-            title_metric="peak RSS reduction",
+            title_metric="peak memory",
             name_metric="rss_reduction",
             candidate_variants=["zsasa_f64", "zsasa_bitmask_f32"],
         )
@@ -2123,6 +2276,11 @@ def generate_human_cif(
     return outputs, write_index(out_dir, outputs, "Human mmCIF batch figures")
 
 
+def generate_swissprot(rows: list[dict[str, Any]], out_dir: Path) -> tuple[list[Path], Path]:
+    outputs = plot_swissprot_overcommit_performance_memory(rows, out_dir)
+    return outputs, write_index(out_dir, outputs, "SwissProt batch figures")
+
+
 def generate_t10_comparison(
     ecoli_rows: list[dict[str, Any]], human_rows: list[dict[str, Any]], out_dir: Path
 ) -> tuple[list[Path], Path]:
@@ -2142,11 +2300,15 @@ def main() -> None:
         ecoli_rows = load_batch_rows(args.db, ECOLI_DATASET)
         human_rows = load_batch_rows(args.db, HUMAN_DATASET)
         human_cif_rows = load_batch_rows(args.db, HUMAN_CIF_DATASET)
+        swissprot_rows = load_batch_rows(args.db, SWISSPROT_DATASET)
         for outputs, index in [
             generate_ecoli(ecoli_rows, args.out_dir.joinpath("batch_ecoli")),
             generate_human(human_rows, args.out_dir.joinpath("batch_human")),
             generate_human_cif(
                 human_cif_rows, human_rows, args.out_dir.joinpath("batch_human_cif")
+            ),
+            generate_swissprot(
+                swissprot_rows, args.out_dir.joinpath("batch_swissprot")
             ),
             generate_t10_comparison(
                 ecoli_rows, human_rows, args.out_dir.joinpath("batch_t10_comparison")
@@ -2163,6 +2325,11 @@ def main() -> None:
         rows = load_batch_rows(args.db, HUMAN_CIF_DATASET)
         pdb_rows = load_batch_rows(args.db, HUMAN_DATASET)
         outputs, index = generate_human_cif(rows, pdb_rows, args.out_dir)
+        total_outputs = sum(1 for path in outputs if path.suffix == ".png")
+        written_indexes.append(index)
+    elif args.dataset_id == SWISSPROT_DATASET or args.dataset_id == "swissprot":
+        rows = load_batch_rows(args.db, SWISSPROT_DATASET)
+        outputs, index = generate_swissprot(rows, args.out_dir)
         total_outputs = sum(1 for path in outputs if path.suffix == ".png")
         written_indexes.append(index)
     else:
