@@ -19,12 +19,7 @@ def adopted_for_reporting(benchmark_kind: str, source_path: str | None, status: 
     adopted = {
         "validation": {"v0_9_0_validation"},
         "trajectory_validation": {"v0_9_0_validation"},
-        "trajectory": {
-            "v0_6_0_full",
-            "v0_9_0_md_zsasa",
-            "v0_9_0_md_zsasa_t20",
-            "v0_9_0_md_zsasa_t40",
-        },
+        "trajectory": {"v0_9_0_md_128"},
         "single_file": {
             "v0_6_0_full",
             "v0_9_0_single_pdb",

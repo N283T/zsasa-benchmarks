@@ -1,0 +1,4 @@
+interface:
+  display_name: "Publication Figures"
+  short_description: "Create clear, publication-ready scientific figures"
+  default_prompt: "Use $publication-figures to design or refine a manuscript-ready scientific figure."

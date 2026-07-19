@@ -695,8 +695,8 @@ def export_md_summary(rows: list[dict[str, Any]], out_dir: Path) -> list[Path]:
     md_rows = [
         row
         for row in all_md_rows
-        if row["run_set"] == "v0_6_0_full" and row["variant"] in {"mdtraj", "mdsasa_bolt"}
-        or row["run_set"] == "v0_9_0_md_zsasa"
+        if row["run_set"] == "v0_9_0_md_128"
+        and row["threads"] in {None, 10}
         and (row["tool_id"] != "zig_bitmask" or row["run_variant"] == "single_corrected")
     ]
     output: list[dict[str, Any]] = []
@@ -733,7 +733,7 @@ def export_md_summary(rows: list[dict[str, Any]], out_dir: Path) -> list[Path]:
     native = [
         row
         for row in all_md_rows
-        if row["run_set"].startswith("v0_9_0_md_zsasa")
+        if row["run_set"] == "v0_9_0_md_128"
         and row["tool_id"] in {"zig", "zig_bitmask"}
     ]
     baselines = {

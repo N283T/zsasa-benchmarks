@@ -1,0 +1,25 @@
+# One PNG path per figure, relative to results/figures/.
+validation/png/static_sr_standard_and_bitmask_vs_freesasa_1024p.png
+validation/png/static_sr_bitmask_f32_error_vs_points.png
+validation/png/static_sr_bitmask_correction_vs_points.png
+validation/png/md_standard_f64_convergence_vs_mdtraj.png
+validation/png/md_bitmask_correction_vs_standard.png
+md/png/md_performance_memory_story.png
+md/png/md_zsasa_performance_memory_detail.png
+md/png/md_correction_accuracy_throughput_story.png
+md/png/md_6sup_comparator_ratios_story.png
+md/png/md_5vz0_comparator_ratios_story.png
+batch_ecoli/png/ecoli_throughput_scaling_story.png
+batch_ecoli/png/ecoli_performance_memory_story.png
+batch_ecoli/png/ecoli_t10_runtime_speedup_vs_comparators.png
+batch_ecoli/png/ecoli_t10_rss_reduction_vs_comparators.png
+batch_human_cif/png/human_cif_ranking_recovery_story.png
+batch_human_cif/png/human_cif_af_fast_overcommit_tradeoff.png
+batch_human/png/human_t10_throughput_vs_peak_rss.png
+batch_human/png/human_t10_runtime_speedup_vs_comparators.png
+batch_human/png/human_t10_rss_reduction_vs_comparators.png
+batch_swissprot/png/swissprot_overcommit_performance_memory.png
+single_file/png/single_pdb_runtime_vs_atoms_story.png
+single_file/png/single_pdb_case_studies_story.png
+single_file/png/single_mmcif_runtime_vs_atoms_si.png
+single_file/png/single_mmcif_case_studies_si.png

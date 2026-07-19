@@ -2,11 +2,16 @@ from __future__ import annotations
 
 from scripts.plot_md_figures import (
     atom_frames_per_second,
+    correction_runtime_rows,
     display_name,
     marker_for,
+    md_performance_story_rows,
     md_rss_label_style,
     md_variant_name,
     milliseconds_per_frame,
+    native_overcommit_rows,
+    ratio_with_propagated_sd,
+    zsasa_detail_rows,
 )
 
 
@@ -35,6 +40,129 @@ def test_milliseconds_per_frame() -> None:
 
 def test_atom_frames_per_second() -> None:
     assert atom_frames_per_second(1000, 10, 2.0) == 5000.0
+
+
+def test_md_performance_story_rows_keeps_wrappers_and_precision_extremes() -> None:
+    rows = [
+        {"variant": variant}
+        for variant in (
+            "zsasa_cli_f64",
+            "zsasa_cli_f32",
+            "zsasa_cli_bitmask_f64",
+            "zsasa_cli_bitmask_f32",
+            "zsasa_mdtraj",
+            "zsasa_mdtraj_bitmask",
+            "zsasa_mdanalysis",
+            "zsasa_mdanalysis_bitmask",
+            "mdtraj",
+            "mdsasa_bolt",
+        )
+    ]
+
+    assert {row["variant"] for row in md_performance_story_rows(rows)} == {
+        "zsasa_cli_f64",
+        "zsasa_cli_bitmask_f32",
+        "zsasa_mdtraj",
+        "zsasa_mdtraj_bitmask",
+        "zsasa_mdanalysis",
+        "zsasa_mdanalysis_bitmask",
+        "mdtraj",
+        "mdsasa_bolt",
+    }
+
+
+def test_native_overcommit_rows_keeps_endpoints_and_corrected_bitmask() -> None:
+    rows = [
+        {"variant": variant, "threads": threads, "bitmask_variant": option}
+        for variant, option in (
+            ("zsasa_cli_f64", None),
+            ("zsasa_cli_bitmask_f32", "single"),
+            ("zsasa_cli_bitmask_f32", "single_corrected"),
+        )
+        for threads in (10, 20, 40)
+    ]
+
+    assert native_overcommit_rows(rows) == [
+        {"variant": "zsasa_cli_f64", "threads": 10, "bitmask_variant": None},
+        {"variant": "zsasa_cli_f64", "threads": 40, "bitmask_variant": None},
+        {
+            "variant": "zsasa_cli_bitmask_f32",
+            "threads": 10,
+            "bitmask_variant": "single_corrected",
+        },
+        {
+            "variant": "zsasa_cli_bitmask_f32",
+            "threads": 40,
+            "bitmask_variant": "single_corrected",
+        },
+    ]
+
+
+def test_correction_runtime_rows_keeps_raw_and_corrected_single_f32() -> None:
+    rows = [
+        {
+            "run_set": "v0_9_0_md_128",
+            "variant": "zsasa_cli_bitmask_f32",
+            "threads": 10,
+            "bitmask_variant": option,
+        }
+        for option in ("single", "single_corrected", "cycle")
+    ]
+
+    assert {row["bitmask_variant"] for row in correction_runtime_rows(rows)} == {
+        "single",
+        "single_corrected",
+    }
+
+
+def test_ratio_with_propagated_sd() -> None:
+    ratio, uncertainty = ratio_with_propagated_sd(
+        {"value": 2.0, "sd": 0.2},
+        {"value": 4.0, "sd": 0.4},
+        value_key="value",
+        sd_key="sd",
+    )
+
+    assert ratio == 0.5
+    assert uncertainty == 0.07071067811865477
+
+
+def test_zsasa_detail_rows_keeps_only_5vz0_native_overcommit_paths() -> None:
+    rows = [
+        {
+            "dataset_id": dataset_id,
+            "variant": variant,
+            "threads": threads,
+            "bitmask_variant": option,
+        }
+        for dataset_id in ("5wvo_C_analysis", "5vz0_A_protein")
+        for variant, option in (
+            ("zsasa_cli_f64", None),
+            ("zsasa_cli_bitmask_f32", "single"),
+            ("zsasa_cli_bitmask_f32", "single_corrected"),
+            ("zsasa_mdtraj", None),
+            ("mdtraj", None),
+        )
+        for threads in (10, 20, 40)
+    ]
+
+    selected = zsasa_detail_rows(rows)
+
+    assert {
+        (
+            row["dataset_id"],
+            row["variant"],
+            row["threads"],
+            row["bitmask_variant"],
+        )
+        for row in selected
+    } == {
+        ("5vz0_A_protein", "zsasa_cli_f64", threads, None)
+        for threads in (10, 20, 40)
+    } | {
+        ("5vz0_A_protein", "zsasa_cli_bitmask_f32", threads, "single_corrected")
+        for threads in (10, 20, 40)
+    }
 
 
 
@@ -185,8 +313,25 @@ def test_main_generates_only_log_rss_tradeoff(monkeypatch, tmp_path) -> None:
     )
     monkeypatch.setattr(module, "setup_style", lambda: None)
     monkeypatch.setattr(module, "load_md_rows", lambda _db: rows)
+    monkeypatch.setattr(module, "load_md_correction_accuracy", lambda _db: [])
     monkeypatch.setattr(module, "plot_bar_grid", lambda *args, **kwargs: [])
     monkeypatch.setattr(module, "plot_cpu_utilization_grid", lambda *_args, **_kwargs: [])
+    monkeypatch.setattr(
+        module, "plot_md_performance_memory_story", lambda *_args, **_kwargs: []
+    )
+    monkeypatch.setattr(
+        module, "plot_md_zsasa_performance_memory_detail", lambda *_args, **_kwargs: []
+    )
+    monkeypatch.setattr(
+        module, "plot_md_correction_accuracy_throughput", lambda *_args, **_kwargs: []
+    )
+    monkeypatch.setattr(
+        module, "plot_md_comparator_ratios_by_trajectory", lambda *_args, **_kwargs: []
+    )
+    monkeypatch.setattr(module, "plot_md_overcommit_tradeoff", lambda *_args, **_kwargs: [])
+    monkeypatch.setattr(
+        module, "plot_md_correction_runtime_effect", lambda *_args, **_kwargs: []
+    )
     monkeypatch.setattr(module, "write_index", lambda out_dir, outputs: out_dir / "index.md")
 
     def recording_rss_grid(_rows, _out_dir, *, log_x=False):  # type: ignore[no-untyped-def]

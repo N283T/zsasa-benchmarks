@@ -40,6 +40,24 @@ ZSASA_VARIANTS = [
     "zsasa_bitmask_f32",
 ]
 COMPARATOR_VARIANTS = ["freesasa", "rustsasa", "pdbtools_jl"]
+SINGLE_STORY_VARIANTS = [
+    "zsasa_f64",
+    "freesasa",
+    "rustsasa",
+    "pdbtools_jl",
+]
+PDB_CASE_STUDIES = [
+    ("AF-Q6ZS30-F1-model_v6", "Large single chain"),
+    ("9fqr", "Largest assembly"),
+    ("8rbs", "FreeSASA coordinate-overflow case"),
+    ("5vyc", "RustSASA parser outlier"),
+]
+MMCIF_CASE_STUDIES = [
+    ("AF-Q6ZS30-F1-model_v6", "Large single chain"),
+    ("9fqr", "Largest assembly"),
+    ("8rbs", "PDB coordinate-overflow case in mmCIF"),
+    ("5vyc", "PDB parser-outlier case in mmCIF"),
+]
 COLORS = {
     "zsasa_f64": "#f39c12",
     "zsasa_f32": "#f6c85f",
@@ -208,6 +226,9 @@ def load_single_rows(db_path: Path) -> list[dict[str, Any]]:
                 ).fetchall()
             }
             mean_s = float(stats[("runtime", "mean")])
+            median_s = float(stats.get(("runtime", "median")) or mean_s)
+            min_s = float(stats.get(("runtime", "min")) or mean_s)
+            max_s = float(stats.get(("runtime", "max")) or mean_s)
             stddev_s = float(stats.get(("runtime", "stddev")) or 0.0)
             rss_bytes = float(stats.get(("peak_rss", "mean")) or 0.0)
             rss_stddev_bytes = float(stats.get(("peak_rss", "stddev")) or 0.0)
@@ -229,6 +250,9 @@ def load_single_rows(db_path: Path) -> list[dict[str, Any]]:
                     "n_atoms": n_atoms,
                     "expected_chains": int(parse_note(notes, "expected_chains") or 0),
                     "mean_s": mean_s,
+                    "median_s": median_s,
+                    "min_s": min_s,
+                    "max_s": max_s,
                     "stddev_s": stddev_s,
                     "throughput": 1.0 / mean_s if mean_s > 0 else 0.0,
                     "atoms_per_sec": n_atoms / mean_s if mean_s > 0 else 0.0,
@@ -257,6 +281,19 @@ def t10_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [row for row in rows if row["threads"] == 10]
 
 
+def single_story_rows(
+    rows: list[dict[str, Any]], format_label: str
+) -> list[dict[str, Any]]:
+    """Select zsasa f64 and external tools at 10 threads for one format."""
+    return [
+        row
+        for row in rows
+        if row["threads"] == 10
+        and row["format"] == format_label
+        and row["variant"] in SINGLE_STORY_VARIANTS
+    ]
+
+
 def group_by_structure(rows: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
     grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for row in rows:
@@ -282,6 +319,200 @@ def legend_handles(variants: list[str]) -> list[plt.Line2D]:
         )
         for variant in variants
     ]
+
+
+def plot_single_runtime_vs_atoms_story(
+    rows: list[dict[str, Any]], out_dir: Path
+) -> list[Path]:
+    """Plot PDB and mmCIF runtime scaling as separate figures."""
+    styles = {
+        "zsasa_f64": {"marker": "o"},
+        "freesasa": {"marker": "^"},
+        "rustsasa": {"marker": "D"},
+        "pdbtools_jl": {"marker": "P"},
+    }
+    outputs: list[Path] = []
+    for format_label, slug in (("PDB", "pdb"), ("mmCIF", "mmcif")):
+        selected = single_story_rows(rows, format_label)
+        if not selected:
+            continue
+        fig, ax = plt.subplots(figsize=(7.6, 5.2), layout="constrained")
+        for variant in SINGLE_STORY_VARIANTS:
+            items = sorted(
+                [row for row in selected if row["variant"] == variant],
+                key=structure_sort_key,
+            )
+            if not items:
+                continue
+            ax.errorbar(
+                [row["n_atoms"] for row in items],
+                [row["median_s"] for row in items],
+                yerr=np.asarray(
+                    [
+                        [row["median_s"] - row["min_s"] for row in items],
+                        [row["max_s"] - row["median_s"] for row in items],
+                    ]
+                ),
+                color=color_for(variant),
+                marker=styles[variant]["marker"],
+                markersize=6.5,
+                markeredgecolor="#333333",
+                markeredgewidth=0.4,
+                capsize=2.5,
+                linestyle="none",
+                label=display_name(variant),
+                zorder=3,
+            )
+        xmin = min(row["n_atoms"] for row in selected)
+        xmax = max(row["n_atoms"] for row in selected)
+        ymin = min(row["min_s"] for row in selected)
+        ymax = max(row["max_s"] for row in selected)
+        ax.set_xscale("log")
+        ax.set_yscale("log")
+        ax.set_xlim(xmin / 1.35, xmax * 1.35)
+        ax.set_ylim(max(ymin / 1.8, 1e-4), ymax * 1.6)
+        ax.set_title(f"{format_label} single-file runtime")
+        ax.set_xlabel("Atom count")
+        ax.set_ylabel("Runtime (s)")
+        handles, labels = ax.get_legend_handles_labels()
+        fig.legend(
+            handles=handles,
+            labels=labels,
+            loc="outside lower center",
+            ncol=3,
+            frameon=False,
+        )
+        ax.grid(linewidth=0.7, alpha=0.3)
+        suffix = "story" if format_label == "PDB" else "si"
+        outputs.extend(
+            save_figure(fig, out_dir, f"single_{slug}_runtime_vs_atoms_{suffix}")
+        )
+    return outputs
+
+
+def plot_case_studies(
+    rows: list[dict[str, Any]],
+    out_dir: Path,
+    *,
+    format_label: str,
+    cases: list[tuple[str, str]],
+    output_name: str,
+) -> list[Path]:
+    """Show parse and SASA component timing for four selected structures."""
+    selected = single_story_rows(rows, format_label)
+    fig, axes = plt.subplots(2, 2, figsize=(10.2, 7.6), layout="constrained")
+    flat_axes = list(np.ravel(axes))
+    width = 0.36
+
+    for panel_index, (ax, (structure_name, case_title)) in enumerate(
+        zip(flat_axes, cases, strict=True)
+    ):
+        items = sorted(
+            [row for row in selected if row["structure_name"] == structure_name],
+            key=lambda row: variant_sort_key(row["variant"]),
+        )
+        if not items:
+            ax.set_visible(False)
+            continue
+        positions = np.arange(len(items), dtype=float)
+        parse_values = [row["parse_ms"] for row in items]
+        sasa_values = [row["sasa_ms"] for row in items]
+        ax.bar(
+            positions - width / 2,
+            parse_values,
+            width=width,
+            color="#d7d7d7",
+            edgecolor="#555555",
+            linewidth=0.8,
+            hatch="////",
+            label="Parse",
+            zorder=3,
+        )
+        ax.bar(
+            positions + width / 2,
+            sasa_values,
+            width=width,
+            color=[color_for(row["variant"]) for row in items],
+            edgecolor="#555555",
+            linewidth=0.8,
+            label="SASA",
+            zorder=3,
+        )
+        chain_instances = max(
+            int(row["expected_chains"])
+            for row in rows
+            if row["structure_name"] == structure_name
+        )
+        chain_label = "chain" if chain_instances == 1 else "chain instances"
+        ax.set_title(
+            f"{case_title}\n"
+            f"{structure_name} ({items[0]['n_atoms']:,} atoms, "
+            f"{chain_instances:,} {chain_label})"
+        )
+        ax.text(
+            -0.12,
+            1.11,
+            f"({chr(ord('a') + panel_index)})",
+            transform=ax.transAxes,
+            fontsize=10,
+            fontweight="bold",
+            ha="left",
+            va="top",
+        )
+        ax.set_xticks(positions)
+        ax.set_xticklabels([display_name(row["variant"]) for row in items])
+        plt.setp(
+            ax.get_xticklabels(),
+            rotation=25,
+            ha="right",
+            rotation_mode="anchor",
+        )
+        ax.set_ylabel("Component time (ms)")
+        positive_values = [value for value in [*parse_values, *sasa_values] if value > 0]
+        if positive_values and max(positive_values) / min(positive_values) > 20:
+            ax.set_yscale("log")
+            ax.set_ylim(min(positive_values) / 1.8, max(positive_values) * 2.0)
+        elif positive_values:
+            ax.set_ylim(0, max(positive_values) * 1.22)
+        ax.grid(axis="x", visible=False)
+
+    handles = [
+        Patch(
+            facecolor="#d7d7d7",
+            edgecolor="#555555",
+            hatch="////",
+            label="Parse",
+        ),
+        Patch(facecolor="#8a8a8a", edgecolor="#555555", label="SASA"),
+    ]
+    fig.legend(handles=handles, loc="outside lower center", ncol=2, frameon=False)
+    return save_figure(fig, out_dir, output_name)
+
+
+def plot_pdb_case_studies_story(
+    rows: list[dict[str, Any]], out_dir: Path
+) -> list[Path]:
+    """Show component timing for the selected PDB cases."""
+    return plot_case_studies(
+        rows,
+        out_dir,
+        format_label="PDB",
+        cases=PDB_CASE_STUDIES,
+        output_name="single_pdb_case_studies_story",
+    )
+
+
+def plot_mmcif_case_studies_si(
+    rows: list[dict[str, Any]], out_dir: Path
+) -> list[Path]:
+    """Show an mmCIF counterpart to the selected PDB cases for SI."""
+    return plot_case_studies(
+        rows,
+        out_dir,
+        format_label="mmCIF",
+        cases=MMCIF_CASE_STUDIES,
+        output_name="single_mmcif_case_studies_si",
+    )
 
 
 def plot_metric_vs_atoms(
@@ -605,6 +836,11 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--db", type=Path, default=DEFAULT_DB)
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
+    parser.add_argument(
+        "--story-only",
+        action="store_true",
+        help="generate only the curated single-file figures",
+    )
     return parser.parse_args()
 
 
@@ -613,6 +849,15 @@ def main() -> None:
     setup_style()
     rows = load_single_rows(args.db)
     outputs: list[Path] = []
+    outputs.extend(plot_single_runtime_vs_atoms_story(rows, args.out_dir))
+    outputs.extend(plot_pdb_case_studies_story(rows, args.out_dir))
+    outputs.extend(plot_mmcif_case_studies_si(rows, args.out_dir))
+    if args.story_only:
+        index = write_index(args.out_dir, outputs)
+        png_count = sum(1 for path in outputs if path.suffix == ".png")
+        print(f"wrote {png_count} figure sets in PNG/SVG/PDF under {args.out_dir}")
+        print(f"wrote {index}")
+        return
     outputs.extend(
         plot_metric_vs_atoms(
             rows,

@@ -366,7 +366,7 @@ def main() -> None:
         {
             "tool": "zsasa_0_9_0",
             "variant": "generic_mmap",
-            "threads": [20],
+            "threads": [10, 20, 40],
             "precisions": ["f32"],
             "modes": ["bitmask"],
             "af_model_fast": False,
@@ -375,7 +375,7 @@ def main() -> None:
         {
             "tool": "zsasa_0_9_0",
             "variant": "af_fast_mmap",
-            "threads": [20],
+            "threads": [10, 20, 40],
             "precisions": ["f32"],
             "modes": ["bitmask"],
             "af_model_fast": True,

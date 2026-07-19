@@ -50,8 +50,7 @@ Current full-rerun manifests use these timing settings:
 | E. coli batch throughput | `manifests/batch-ecoli.toml` | 3 warmups, 3 measured runs, `--prepare sync` | 128 points; threads 1, 4, 8, and 10; `f64` and `f32` `zsasa` variants |
 | Human batch throughput | `manifests/batch-human.toml` | 3 warmups, 3 measured runs, `--prepare sync` | 128 points; 10 threads; `f64` and `f32` `zsasa` variants |
 | Single-file wall-clock throughput | `manifests/single-file-sample.toml` | 1 warmup, 3 measured runs, `--prepare sync` | 100 points; threads 1, 4, 8, and 10; Lahuta excluded |
-| Trajectory throughput | `manifests/trajectory.toml` | 1 warmup, 3 measured runs, `--prepare sync` | 100 points; stride 1; 10 threads; `naccess` classifier; explicit hydrogens included |
-| Native trajectory worker scaling | `manifests/trajectory-zsasa-t20.toml`, `manifests/trajectory-zsasa-t40.toml` | 1 warmup, 3 measured runs, `--prepare sync` | 100 points; stride 1; 20 and 40 workers; native standard and bitmask variants only |
+| Trajectory throughput and worker scaling | `manifests/trajectory-128.toml` | 1 warmup, 3 measured runs, `--prepare sync` | 128 points; stride 1; native zsasa at 10, 20, and 40 threads; wrappers and comparators at 10 threads; `naccess` classifier; explicit hydrogens included |
 
 Validation runs are not Hyperfine timing runs; they record output agreement for the
 configured validation datasets. The single-file `timing` phase records tool component
@@ -72,7 +71,7 @@ python scripts/run_batch.py --manifest manifests/batch-ecoli.toml --datasets con
 python scripts/prepare_single_file_structures.py --manifest manifests/single-file-sample.toml --datasets config/datasets.toml.example --dry-run
 python scripts/run_single_file.py --manifest manifests/single-file-sample.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run
 uv run python scripts/run_trajectory_validation.py --manifest manifests/validation-md-5wvo.toml --datasets config/datasets.toml.example --run-id v0_9_0_validation --dry-run
-uv run python scripts/run_trajectory.py --manifest manifests/trajectory.toml --datasets config/datasets.toml.example --run-id v0_9_0_md_zsasa --dry-run
+uv run python scripts/run_trajectory.py --manifest manifests/trajectory-128.toml --datasets config/datasets.toml.example --run-id v0_9_0_md_128 --dry-run
 ```
 
 Version-refresh preparation dry-runs:

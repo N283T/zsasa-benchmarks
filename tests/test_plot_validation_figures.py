@@ -7,7 +7,10 @@ from pathlib import Path
 from scripts.plot_validation_figures import (
     candidate_columns,
     discover_result_csvs,
+    format_percentage,
+    format_r2,
     parse_result_points,
+    signed_relative_errors,
     summarize_pair,
 )
 
@@ -75,6 +78,31 @@ def test_summarize_pair_handles_zero_reference_errors() -> None:
     assert summary.r2 == 1.0
     assert math.isinf(summary.mean_error_percent)
     assert math.isinf(summary.max_error_percent)
+
+
+def test_signed_relative_errors_preserve_bias_direction_and_skip_zero_reference() -> None:
+    errors = signed_relative_errors(
+        [
+            {"freesasa": "100", "zsasa_bitmask_f32": "99"},
+            {"freesasa": "200", "zsasa_bitmask_f32": "202"},
+            {"freesasa": "0", "zsasa_bitmask_f32": "1"},
+        ],
+        reference="freesasa",
+        candidate="zsasa_bitmask_f32",
+    )
+
+    assert errors == [-1.0, 1.0]
+
+
+def test_format_percentage_uses_readable_fixed_and_scientific_notation() -> None:
+    assert format_percentage(0.731926) == "0.732%"
+    assert format_percentage(0.0000207) == "2.07 × 10⁻⁵%"
+
+
+def test_format_r2_does_not_round_near_perfect_fit_to_exact_agreement() -> None:
+    assert format_r2(1.0) == "= 1.000000"
+    assert format_r2(0.9999999999999) == "> 0.999999"
+    assert format_r2(0.999788) == "= 0.999788"
 
 
 def test_run_column_name_maps_database_runs() -> None:

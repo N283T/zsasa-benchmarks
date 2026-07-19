@@ -13,8 +13,15 @@ Run these from the repository root after importing benchmark results into the Du
 uv run python scripts/plot_validation_figures.py --db results/benchmark.duckdb --out-dir results/figures/validation
 uv run python scripts/plot_batch_figures.py --db results/benchmark.duckdb --out-dir results/figures --dataset-id all
 uv run python scripts/plot_md_figures.py --db results/benchmark.duckdb --out-dir results/figures/md
+uv run python scripts/plot_single_file_figures.py --db results/benchmark.duckdb --out-dir results/figures/single_file
 uv run python scripts/plot_overview_figures.py --db results/benchmark.duckdb --figures-dir results/figures
+uv run python scripts/build_figure_gallery.py
 ```
+
+Open `results/figures/gallery.html` in a browser to review all PNG figures in a
+filterable gallery. The gallery links to the corresponding SVG and PDF files.
+Figures listed in `results/figures/story-figures.txt` are highlighted and shown
+first so the curated story figures remain distinguishable from exploratory output.
 
 ## Current sections
 
@@ -24,6 +31,7 @@ uv run python scripts/plot_overview_figures.py --db results/benchmark.duckdb --f
 - `results/figures/batch_human/` — Human batch 10-thread throughput, runtime, memory, and CPU figures.
 - `results/figures/batch_t10_comparison/` — E. coli vs Human 10-thread comparison figures.
 - `results/figures/md/` — trajectory throughput, runtime, memory, throughput/RSS, and CPU figures.
+- `results/figures/single_file/` — single-structure runtime, memory, scaling, and breakdown figures.
 
 Each section includes PNG, SVG, and PDF outputs plus a section-level `index.md`.
 Use the PDF files for TeX manuscripts and other vector-first publication workflows.

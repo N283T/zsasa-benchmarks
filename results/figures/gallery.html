@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Benchmark figure gallery</title>
+  <style>
+    :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+    body { margin: 0; background: Canvas; color: CanvasText; }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      padding: 1rem;
+      background: color-mix(in srgb, Canvas 92%, transparent);
+      border-bottom: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+      backdrop-filter: blur(10px);
+    }
+    h1 { margin: 0 0 .75rem; font-size: 1.25rem; }
+    .caption-link { display: inline-block; margin: 0 0 .75rem; }
+    .controls { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+    input { min-width: min(22rem, 80vw); padding: .55rem .7rem; font: inherit; }
+    button { padding: .45rem .7rem; font: inherit; cursor: pointer; }
+    .filters { display: flex; flex-wrap: wrap; gap: .35rem; }
+    .filters button[aria-pressed="true"] {
+      color: HighlightText;
+      background: Highlight;
+      border-color: Highlight;
+    }
+    #status { margin: .65rem 0 0; color: GrayText; font-size: .9rem; }
+    main {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+    }
+    .figure-card {
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+      border-radius: .6rem;
+      background: color-mix(in srgb, CanvasText 3%, Canvas);
+    }
+    .figure-card[hidden] { display: none; }
+    .figure-card[data-story="true"] { border-color: Highlight; }
+    .figure-card[data-working="true"] {
+      border: 3px solid #e66a21;
+      box-shadow: 0 0 0 3px color-mix(in srgb, #e66a21 22%, transparent);
+    }
+    .preview {
+      display: block;
+      width: 100%;
+      height: 260px;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: white;
+    }
+    .preview img { display: block; width: 100%; height: 100%; object-fit: contain; }
+    .metadata { display: grid; gap: .25rem; padding: .7rem .8rem .8rem; }
+    .metadata strong { overflow-wrap: anywhere; font-size: .95rem; font-weight: 600; }
+    .badges { display: flex; flex-wrap: wrap; gap: .35rem; }
+    .story-badge {
+      width: fit-content;
+      padding: .15rem .4rem;
+      border-radius: .3rem;
+      color: HighlightText;
+      background: Highlight;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+    }
+    .working-badge {
+      width: fit-content;
+      padding: .15rem .4rem;
+      border-radius: .3rem;
+      color: white;
+      background: #c64f0b;
+      font-size: .72rem;
+      font-weight: 750;
+      letter-spacing: .04em;
+    }
+    .context { color: GrayText; font-size: .8rem; }
+    .formats { font-size: .85rem; }
+    .formats a { color: LinkText; }
+    dialog {
+      width: min(96vw, 1500px);
+      max-width: none;
+      padding: .75rem;
+      border: 1px solid color-mix(in srgb, CanvasText 25%, transparent);
+      border-radius: .7rem;
+      background: Canvas;
+      color: CanvasText;
+    }
+    dialog::backdrop { background: rgb(0 0 0 / 72%); }
+    .dialog-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: .6rem;
+    }
+    .dialog-head strong { overflow-wrap: anywhere; }
+    .viewer-body { position: relative; }
+    .viewer-nav {
+      position: absolute;
+      top: 50%;
+      z-index: 1;
+      width: 3rem;
+      height: 4.5rem;
+      padding: 0;
+      border: 0;
+      border-radius: .45rem;
+      color: white;
+      background: rgb(0 0 0 / 52%);
+      font-size: 2.2rem;
+      line-height: 1;
+      transform: translateY(-50%);
+    }
+    .viewer-nav:hover { background: rgb(0 0 0 / 72%); }
+    .viewer-nav.previous { left: .6rem; }
+    .viewer-nav.next { right: .6rem; }
+    #dialog-image {
+      display: block;
+      width: 100%;
+      max-height: 82vh;
+      object-fit: contain;
+      background: white;
+    }
+    @media (max-width: 520px) {
+      main { grid-template-columns: 1fr; padding: .65rem; }
+      header { padding: .75rem; }
+      .preview { height: 220px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Benchmark figure gallery</h1>
+    <a class="caption-link" href="story-captions.md" target="_blank">Draft STORY captions</a>
+    <div class="controls">
+      <input id="search" type="search" placeholder="Filter by figure name…"
+             aria-label="Filter figures">
+      <div class="filters" aria-label="Figure groups">
+        <button type="button" data-group="all" aria-pressed="true">all (24)</button>
+        <button type="button" data-group="working">working (0)</button>
+        <button type="button" data-group="story">story (24)</button>
+        <button type="button" data-group="batch_ecoli">batch ecoli (4)</button> <button type="button" data-group="batch_human">batch human (3)</button> <button type="button" data-group="batch_human_cif">batch human cif (2)</button> <button type="button" data-group="batch_swissprot">batch swissprot (1)</button> <button type="button" data-group="md">md (5)</button> <button type="button" data-group="single_file">single file (4)</button> <button type="button" data-group="validation">validation (5)</button>
+      </div>
+    </div>
+    <p id="status">Showing 24 figures</p>
+  </header>
+  <main id="gallery">
+    
+      <article class="figure-card"
+               data-group="batch_ecoli"
+               data-story="true"
+               data-working="false"
+               data-search="batch_ecoli  ecoli performance memory story story ">
+        <button class="preview" type="button"
+                data-image="batch_ecoli/png/ecoli_performance_memory_story.png"
+                data-label="ecoli performance memory story">
+          <img src="batch_ecoli/png/ecoli_performance_memory_story.png"
+               alt="ecoli performance memory story" loading="lazy">
+        </button>
+        <div class="metadata"><div class="badges"><span class="story-badge">STORY</span></div>
+          <strong>ecoli performance memory story</strong>
+          <span class="formats"><a href="batch_ecoli/png/ecoli_performance_memory_story.png" target="_blank">PNG</a> · <a href="batch_ecoli/svg/ecoli_performance_memory_story.svg" target="_blank">SVG</a> · <a href="batch_ecoli/pdf/ecoli_performance_memory_story.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="batch_ecoli"
+               data-story="true"
+               data-working="false"
+               data-search="batch_ecoli  ecoli t10 rss reduction vs comparators story ">
+        <button class="preview" type="button"
+                data-image="batch_ecoli/png/ecoli_t10_rss_reduction_vs_comparators.png"
+                data-label="ecoli t10 rss reduction vs comparators">
+          <img src="batch_ecoli/png/ecoli_t10_rss_reduction_vs_comparators.png"
+               alt="ecoli t10 rss reduction vs comparators" loading="lazy">
+        </button>
+        <div class="metadata"><div class="badges"><span class="story-badge">STORY</span></div>
+          <strong>ecoli t10 rss reduction vs comparators</strong>
+          <span class="formats"><a href="batch_ecoli/png/ecoli_t10_rss_reduction_vs_comparators.png" target="_blank">PNG</a> · <a href="batch_ecoli/svg/ecoli_t10_rss_reduction_vs_comparators.svg" target="_blank">SVG</a> · <a href="batch_ecoli/pdf/ecoli_t10_rss_reduction_vs_comparators.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="batch_ecoli"
+               data-story="true"
+               data-working="false"
+               data-search="batch_ecoli  ecoli t10 runtime speedup vs comparators story ">
+        <button class="preview" type="button"
+                data-image="batch_ecoli/png/ecoli_t10_runtime_speedup_vs_comparators.png"
+                data-label="ecoli t10 runtime speedup vs comparators">
+          <img src="batch_ecoli/png/ecoli_t10_runtime_speedup_vs_comparators.png"
+               alt="ecoli t10 runtime speedup vs comparators" loading="lazy">
+        </button>
+        <div class="metadata"><div class="badges"><span class="story-badge">STORY</span></div>
+          <strong>ecoli t10 runtime speedup vs comparators</strong>
+          <span class="formats"><a href="batch_ecoli/png/ecoli_t10_runtime_speedup_vs_comparators.png" target="_blank">PNG</a> · <a href="batch_ecoli/svg/ecoli_t10_runtime_speedup_vs_comparators.svg" target="_blank">SVG</a> · <a href="batch_ecoli/pdf/ecoli_t10_runtime_speedup_vs_comparators.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="batch_ecoli"
+               data-story="true"
+               data-working="false"
+               data-search="batch_ecoli  ecoli throughput scaling story story ">
+        <button class="preview" type="button"
+                data-image="batch_ecoli/png/ecoli_throughput_scaling_story.png"
+                data-label="ecoli throughput scaling story">
+          <img src="batch_ecoli/png/ecoli_throughput_scaling_story.png"
+               alt="ecoli throughput scaling story" loading="lazy">
+        </button>
+        <div class="metadata"><div class="badges"><span class="story-badge">STORY</span></div>
+          <strong>ecoli throughput scaling story</strong>
+          <span class="formats"><a href="batch_ecoli/png/ecoli_throughput_scaling_story.png" target="_blank">PNG</a> · <a href="batch_ecoli/svg/ecoli_throughput_scaling_story.svg" target="_blank">SVG</a> · <a href="batch_ecoli/pdf/ecoli_throughput_scaling_story.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="batch_human"
+               data-story="true"
+               data-working="false"
+               data-search="batch_human  human t10 rss reduction vs comparators story ">
+        <button class="preview" type="button"
+                data-image="batch_human/png/human_t10_rss_reduction_vs_comparators.png"
+                data-label="human t10 rss reduction vs comparators">
+          <img src="batch_human/png/human_t10_rss_reduction_vs_comparators.png"
+               alt="human t10 rss reduction vs comparators" loading="lazy">
+        </button>
+        <div class="metadata"><div class="badges"><span class="story-badge">STORY</span></div>
+          <strong>human t10 rss reduction vs comparators</strong>
+          <span class="formats"><a href="batch_human/png/human_t10_rss_reduction_vs_comparators.png" target="_blank">PNG</a> · <a href="batch_human/svg/human_t10_rss_reduction_vs_comparators.svg" target="_blank">SVG</a> · <a href="batch_human/pdf/human_t10_rss_reduction_vs_comparators.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="batch_human"
+               data-story="true"
+               data-working="false"
+               data-search="batch_human  human t10 runtime speedup vs comparators story ">
+        <button class="preview" type="button"
+                data-image="batch_human/png/human_t10_runtime_speedup_vs_comparators.png"
+                data-label="human t10 runtime speedup vs comparators">
+          <img src="batch_human/png/human_t10_runtime_speedup_vs_comparators.png"
+               alt="human t10 runtime speedup vs comparators" loading="lazy">
+        </button>
+        <div class="metadata"><div class="badges"><span class="story-badge">STORY</span></div>
+          <strong>human t10 runtime speedup vs comparators</strong>
+          <span class="formats"><a href="batch_human/png/human_t10_runtime_speedup_vs_comparators.png" target="_blank">PNG</a> · <a href="batch_human/svg/human_t10_runtime_speedup_vs_comparators.svg" target="_blank">SVG</a> · <a href="batch_human/pdf/human_t10_runtime_speedup_vs_comparators.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="batch_human"
+               data-story="true"
+               data-working="false"
+               data-search="batch_human  human t10 throughput vs peak rss story ">
+        <button class="preview" type="button"
+                data-image="batch_human/png/human_t10_throughput_vs_peak_rss.png"
+                data-label="human t10 throughput vs peak rss">
+          <img src="batch_human/png/human_t10_throughput_vs_peak_rss.png"
+               alt="human t10 throughput vs peak rss" loading="lazy">
+        </button>
+        <div class="metadata"><div class="badges"><span class="story-badge">STORY</span></div>
+          <strong>human t10 throughput vs peak rss</strong>
+          <span class="formats"><a href="batch_human/png/human_t10_throughput_vs_peak_rss.png" target="_blank">PNG</a> · <a href="batch_human/svg/human_t10_throughput_vs_peak_rss.svg" target="_blank">SVG</a> · <a href="batch_human/pdf/human_t10_throughput_vs_peak_rss.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="batch_human_cif"
+               data-story="true"
+               data-working="false"
+               data-search="batch_human_cif  human cif af fast overcommit tradeoff story ">
+        <button class="preview" type="button"
+                data-image="batch_human_cif/png/human_cif_af_fast_overcommit_tradeoff.png"
+                data-label="human cif af fast overcommit tradeoff">
+          <img src="batch_human_cif/png/human_cif_af_fast_overcommit_tradeoff.png"
+               alt="human cif af fast overcommit tradeoff" loading="lazy">
+        </button>
+        <div class="metadata"><div class="badges"><span class="story-badge">STORY</span></div>
+          <strong>human cif af fast overcommit tradeoff</strong>
+          <span class="formats"><a href="batch_human_cif/png/human_cif_af_fast_overcommit_tradeoff.png" target="_blank">PNG</a> · <a href="batch_human_cif/svg/human_cif_af_fast_overcommit_tradeoff.svg" target="_blank">SVG</a> · <a href="batch_human_cif/pdf/human_cif_af_fast_overcommit_tradeoff.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="batch_human_cif"
+               data-story="true"
+               data-working="false"
+               data-search="batch_human_cif  human cif ranking recovery story story ">
+        <button class="preview" type="button"
+                data-image="batch_human_cif/png/human_cif_ranking_recovery_story.png"
+                data-label="human cif ranking recovery story">
+          <img src="batch_human_cif/png/human_cif_ranking_recovery_story.png"
+               alt="human cif ranking recovery story" loading="lazy">
+        </button>
+        <div class="metadata"><div class="badges"><span class="story-badge">STORY</span></div>
+          <strong>human cif ranking recovery story</strong>
+          <span class="formats"><a href="batch_human_cif/png/human_cif_ranking_recovery_story.png" target="_blank">PNG</a> · <a href="batch_human_cif/svg/human_cif_ranking_recovery_story.svg" target="_blank">SVG</a> · <a href="batch_human_cif/pdf/human_cif_ranking_recovery_story.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="batch_swissprot"
+               data-story="true"
+               data-working="false"
+               data-search="batch_swissprot  swissprot overcommit performance memory story ">
+        <button class="preview" type="button"
+                data-image="batch_swissprot/png/swissprot_overcommit_performance_memory.png"
+                data-label="swissprot overcommit performance memory">
+          <img src="batch_swissprot/png/swissprot_overcommit_performance_memory.png"
+               alt="swissprot overcommit performance memory" loading="lazy">
+        </button>
+        <div class="metadata"><div class="badges"><span class="story-badge">STORY</span></div>
+          <strong>swissprot overcommit performance memory</strong>
+          <span class="formats"><a href="batch_swissprot/png/swissprot_overcommit_performance_memory.png" target="_blank">PNG</a> · <a href="batch_swissprot/svg/swissprot_overcommit_performance_memory.svg" target="_blank">SVG</a> · <a href="batch_swissprot/pdf/swissprot_overcommit_performance_memory.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="md"
+               data-story="true"
+               data-working="false"
+               data-search="md  md 5vz0 comparator ratios story story ">
+        <button class="preview" type="button"
+                data-image="md/png/md_5vz0_comparator_ratios_story.png"
+                data-label="md 5vz0 comparator ratios story">
+          <img src="md/png/md_5vz0_comparator_ratios_story.png"
+               alt="md 5vz0 comparator ratios story" loading="lazy">
+        </button>
+        <div class="metadata"><div class="badges"><span class="story-badge">STORY</span></div>
+          <strong>md 5vz0 comparator ratios story</strong>
+          <span class="formats"><a href="md/png/md_5vz0_comparator_ratios_story.png" target="_blank">PNG</a> · <a href="md/svg/md_5vz0_comparator_ratios_story.svg" target="_blank">SVG</a> · <a href="md/pdf/md_5vz0_comparator_ratios_story.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="md"
+               data-story="true"
+               data-working="false"
+               data-search="md  md 6sup comparator ratios story story ">
+        <button class="preview" type="button"
+                data-image="md/png/md_6sup_comparator_ratios_story.png"
+                data-label="md 6sup comparator ratios story">
+          <img src="md/png/md_6sup_comparator_ratios_story.png"
+               alt="md 6sup comparator ratios story" loading="lazy">
+        </button>
+        <div class="metadata"><div class="badges"><span class="story-badge">STORY</span></div>
+          <strong>md 6sup comparator ratios story</strong>
+          <span class="formats"><a href="md/png/md_6sup_comparator_ratios_story.png" target="_blank">PNG</a> · <a href="md/svg/md_6sup_comparator_ratios_story.svg" target="_blank">SVG</a> · <a href="md/pdf/md_6sup_comparator_ratios_story.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="md"
+               data-story="true"
+               data-working="false"
+               data-search="md  md correction accuracy throughput story story ">
+        <button class="preview" type="button"
+                data-image="md/png/md_correction_accuracy_throughput_story.png"
+                data-label="md correction accuracy throughput story">
+          <img src="md/png/md_correction_accuracy_throughput_story.png"
+               alt="md correction accuracy throughput story" loading="lazy">
+        </button>
+        <div class="metadata"><div class="badges"><span class="story-badge">STORY</span></div>
+          <strong>md correction accuracy throughput story</strong>
+          <span class="formats"><a href="md/png/md_correction_accuracy_throughput_story.png" target="_blank">PNG</a> · <a href="md/svg/md_correction_accuracy_throughput_story.svg" target="_blank">SVG</a> · <a href="md/pdf/md_correction_accuracy_throughput_story.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="md"
+               data-story="true"
+               data-working="false"
+               data-search="md  md performance memory story story ">
+        <button class="preview" type="button"
+                data-image="md/png/md_performance_memory_story.png"
+                data-label="md performance memory story">
+          <img src="md/png/md_performance_memory_story.png"
+               alt="md performance memory story" loading="lazy">
+        </button>
+        <div class="metadata"><div class="badges"><span class="story-badge">STORY</span></div>
+          <strong>md performance memory story</strong>
+          <span class="formats"><a href="md/png/md_performance_memory_story.png" target="_blank">PNG</a> · <a href="md/svg/md_performance_memory_story.svg" target="_blank">SVG</a> · <a href="md/pdf/md_performance_memory_story.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="md"
+               data-story="true"
+               data-working="false"
+               data-search="md  md zsasa performance memory detail story ">
+        <button class="preview" type="button"
+                data-image="md/png/md_zsasa_performance_memory_detail.png"
+                data-label="md zsasa performance memory detail">
+          <img src="md/png/md_zsasa_performance_memory_detail.png"
+               alt="md zsasa performance memory detail" loading="lazy">
+        </button>
+        <div class="metadata"><div class="badges"><span class="story-badge">STORY</span></div>
+          <strong>md zsasa performance memory detail</strong>
+          <span class="formats"><a href="md/png/md_zsasa_performance_memory_detail.png" target="_blank">PNG</a> · <a href="md/svg/md_zsasa_performance_memory_detail.svg" target="_blank">SVG</a> · <a href="md/pdf/md_zsasa_performance_memory_detail.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="single_file"
+               data-story="true"
+               data-working="false"
+               data-search="single_file  single mmcif case studies si story ">
+        <button class="preview" type="button"
+                data-image="single_file/png/single_mmcif_case_studies_si.png"
+                data-label="single mmcif case studies si">
+          <img src="single_file/png/single_mmcif_case_studies_si.png"
+               alt="single mmcif case studies si" loading="lazy">
+        </button>
+        <div class="metadata"><div class="badges"><span class="story-badge">STORY</span></div>
+          <strong>single mmcif case studies si</strong>
+          <span class="formats"><a href="single_file/png/single_mmcif_case_studies_si.png" target="_blank">PNG</a> · <a href="single_file/svg/single_mmcif_case_studies_si.svg" target="_blank">SVG</a> · <a href="single_file/pdf/single_mmcif_case_studies_si.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="single_file"
+               data-story="true"
+               data-working="false"
+               data-search="single_file  single mmcif runtime vs atoms si story ">
+        <button class="preview" type="button"
+                data-image="single_file/png/single_mmcif_runtime_vs_atoms_si.png"
+                data-label="single mmcif runtime vs atoms si">
+          <img src="single_file/png/single_mmcif_runtime_vs_atoms_si.png"
+               alt="single mmcif runtime vs atoms si" loading="lazy">
+        </button>
+        <div class="metadata"><div class="badges"><span class="story-badge">STORY</span></div>
+          <strong>single mmcif runtime vs atoms si</strong>
+          <span class="formats"><a href="single_file/png/single_mmcif_runtime_vs_atoms_si.png" target="_blank">PNG</a> · <a href="single_file/svg/single_mmcif_runtime_vs_atoms_si.svg" target="_blank">SVG</a> · <a href="single_file/pdf/single_mmcif_runtime_vs_atoms_si.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="single_file"
+               data-story="true"
+               data-working="false"
+               data-search="single_file  single pdb case studies story story ">
+        <button class="preview" type="button"
+                data-image="single_file/png/single_pdb_case_studies_story.png"
+                data-label="single pdb case studies story">
+          <img src="single_file/png/single_pdb_case_studies_story.png"
+               alt="single pdb case studies story" loading="lazy">
+        </button>
+        <div class="metadata"><div class="badges"><span class="story-badge">STORY</span></div>
+          <strong>single pdb case studies story</strong>
+          <span class="formats"><a href="single_file/png/single_pdb_case_studies_story.png" target="_blank">PNG</a> · <a href="single_file/svg/single_pdb_case_studies_story.svg" target="_blank">SVG</a> · <a href="single_file/pdf/single_pdb_case_studies_story.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="single_file"
+               data-story="true"
+               data-working="false"
+               data-search="single_file  single pdb runtime vs atoms story story ">
+        <button class="preview" type="button"
+                data-image="single_file/png/single_pdb_runtime_vs_atoms_story.png"
+                data-label="single pdb runtime vs atoms story">
+          <img src="single_file/png/single_pdb_runtime_vs_atoms_story.png"
+               alt="single pdb runtime vs atoms story" loading="lazy">
+        </button>
+        <div class="metadata"><div class="badges"><span class="story-badge">STORY</span></div>
+          <strong>single pdb runtime vs atoms story</strong>
+          <span class="formats"><a href="single_file/png/single_pdb_runtime_vs_atoms_story.png" target="_blank">PNG</a> · <a href="single_file/svg/single_pdb_runtime_vs_atoms_story.svg" target="_blank">SVG</a> · <a href="single_file/pdf/single_pdb_runtime_vs_atoms_story.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="validation"
+               data-story="true"
+               data-working="false"
+               data-search="validation  md bitmask correction vs standard story ">
+        <button class="preview" type="button"
+                data-image="validation/png/md_bitmask_correction_vs_standard.png"
+                data-label="md bitmask correction vs standard">
+          <img src="validation/png/md_bitmask_correction_vs_standard.png"
+               alt="md bitmask correction vs standard" loading="lazy">
+        </button>
+        <div class="metadata"><div class="badges"><span class="story-badge">STORY</span></div>
+          <strong>md bitmask correction vs standard</strong>
+          <span class="formats"><a href="validation/png/md_bitmask_correction_vs_standard.png" target="_blank">PNG</a> · <a href="validation/svg/md_bitmask_correction_vs_standard.svg" target="_blank">SVG</a> · <a href="validation/pdf/md_bitmask_correction_vs_standard.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="validation"
+               data-story="true"
+               data-working="false"
+               data-search="validation  md standard f64 convergence vs mdtraj story ">
+        <button class="preview" type="button"
+                data-image="validation/png/md_standard_f64_convergence_vs_mdtraj.png"
+                data-label="md standard f64 convergence vs mdtraj">
+          <img src="validation/png/md_standard_f64_convergence_vs_mdtraj.png"
+               alt="md standard f64 convergence vs mdtraj" loading="lazy">
+        </button>
+        <div class="metadata"><div class="badges"><span class="story-badge">STORY</span></div>
+          <strong>md standard f64 convergence vs mdtraj</strong>
+          <span class="formats"><a href="validation/png/md_standard_f64_convergence_vs_mdtraj.png" target="_blank">PNG</a> · <a href="validation/svg/md_standard_f64_convergence_vs_mdtraj.svg" target="_blank">SVG</a> · <a href="validation/pdf/md_standard_f64_convergence_vs_mdtraj.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="validation"
+               data-story="true"
+               data-working="false"
+               data-search="validation  static sr bitmask correction vs points story ">
+        <button class="preview" type="button"
+                data-image="validation/png/static_sr_bitmask_correction_vs_points.png"
+                data-label="static sr bitmask correction vs points">
+          <img src="validation/png/static_sr_bitmask_correction_vs_points.png"
+               alt="static sr bitmask correction vs points" loading="lazy">
+        </button>
+        <div class="metadata"><div class="badges"><span class="story-badge">STORY</span></div>
+          <strong>static sr bitmask correction vs points</strong>
+          <span class="formats"><a href="validation/png/static_sr_bitmask_correction_vs_points.png" target="_blank">PNG</a> · <a href="validation/svg/static_sr_bitmask_correction_vs_points.svg" target="_blank">SVG</a> · <a href="validation/pdf/static_sr_bitmask_correction_vs_points.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="validation"
+               data-story="true"
+               data-working="false"
+               data-search="validation  static sr bitmask f32 error vs points story ">
+        <button class="preview" type="button"
+                data-image="validation/png/static_sr_bitmask_f32_error_vs_points.png"
+                data-label="static sr bitmask f32 error vs points">
+          <img src="validation/png/static_sr_bitmask_f32_error_vs_points.png"
+               alt="static sr bitmask f32 error vs points" loading="lazy">
+        </button>
+        <div class="metadata"><div class="badges"><span class="story-badge">STORY</span></div>
+          <strong>static sr bitmask f32 error vs points</strong>
+          <span class="formats"><a href="validation/png/static_sr_bitmask_f32_error_vs_points.png" target="_blank">PNG</a> · <a href="validation/svg/static_sr_bitmask_f32_error_vs_points.svg" target="_blank">SVG</a> · <a href="validation/pdf/static_sr_bitmask_f32_error_vs_points.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+      <article class="figure-card"
+               data-group="validation"
+               data-story="true"
+               data-working="false"
+               data-search="validation  static sr standard and bitmask vs freesasa 1024p story ">
+        <button class="preview" type="button"
+                data-image="validation/png/static_sr_standard_and_bitmask_vs_freesasa_1024p.png"
+                data-label="static sr standard and bitmask vs freesasa 1024p">
+          <img src="validation/png/static_sr_standard_and_bitmask_vs_freesasa_1024p.png"
+               alt="static sr standard and bitmask vs freesasa 1024p" loading="lazy">
+        </button>
+        <div class="metadata"><div class="badges"><span class="story-badge">STORY</span></div>
+          <strong>static sr standard and bitmask vs freesasa 1024p</strong>
+          <span class="formats"><a href="validation/png/static_sr_standard_and_bitmask_vs_freesasa_1024p.png" target="_blank">PNG</a> · <a href="validation/svg/static_sr_standard_and_bitmask_vs_freesasa_1024p.svg" target="_blank">SVG</a> · <a href="validation/pdf/static_sr_standard_and_bitmask_vs_freesasa_1024p.pdf" target="_blank">PDF</a></span>
+        </div>
+      </article>
+  </main>
+  <dialog id="viewer">
+    <div class="dialog-head">
+      <strong id="dialog-label"></strong>
+      <button id="close-dialog" type="button">Close</button>
+    </div>
+    <div class="viewer-body">
+      <button class="viewer-nav previous" id="previous-image" type="button"
+              aria-label="Previous figure">‹</button>
+      <img id="dialog-image" alt="">
+      <button class="viewer-nav next" id="next-image" type="button"
+              aria-label="Next figure">›</button>
+    </div>
+  </dialog>
+  <script>
+    const cards = [...document.querySelectorAll('.figure-card')];
+    const search = document.getElementById('search');
+    const status = document.getElementById('status');
+    const groupButtons = [...document.querySelectorAll('[data-group]')]
+      .filter(button => button.closest('.filters'));
+    const viewer = document.getElementById('viewer');
+    const dialogImage = document.getElementById('dialog-image');
+    const dialogLabel = document.getElementById('dialog-label');
+    let activeGroup = 'all';
+    let activeCard = null;
+
+    function updateGallery() {
+      const query = search.value.trim().toLowerCase();
+      let visible = 0;
+      cards.forEach(card => {
+        const matchesGroup = activeGroup === 'all'
+          || (activeGroup === 'story' && card.dataset.story === 'true')
+          || (activeGroup === 'working' && card.dataset.working === 'true')
+          || card.dataset.group === activeGroup;
+        const matchesSearch = !query || card.dataset.search.includes(query);
+        card.hidden = !(matchesGroup && matchesSearch);
+        if (!card.hidden) visible += 1;
+      });
+      status.textContent = `Showing ${visible} of ${cards.length} figures`;
+    }
+
+    groupButtons.forEach(button => button.addEventListener('click', () => {
+      activeGroup = button.dataset.group;
+      groupButtons.forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+      updateGallery();
+    }));
+    search.addEventListener('input', updateGallery);
+
+    function visibleCards() {
+      return cards.filter(card => !card.hidden);
+    }
+
+    function showCard(card) {
+      if (!card) return;
+      const button = card.querySelector('.preview');
+      activeCard = card;
+      dialogImage.src = button.dataset.image;
+      dialogImage.alt = button.dataset.label;
+      dialogLabel.textContent = button.dataset.label;
+    }
+
+    function moveViewer(offset) {
+      const visible = visibleCards();
+      if (!visible.length) return;
+      const currentIndex = Math.max(0, visible.indexOf(activeCard));
+      showCard(visible[(currentIndex + offset + visible.length) % visible.length]);
+    }
+
+    document.querySelectorAll('.preview').forEach(button => {
+      button.addEventListener('click', () => {
+        showCard(button.closest('.figure-card'));
+        viewer.showModal();
+      });
+    });
+    document.getElementById('previous-image').addEventListener('click', () => moveViewer(-1));
+    document.getElementById('next-image').addEventListener('click', () => moveViewer(1));
+    document.getElementById('close-dialog').addEventListener('click', () => viewer.close());
+    viewer.addEventListener('click', event => { if (event.target === viewer) viewer.close(); });
+    viewer.addEventListener('keydown', event => {
+      if (event.key === 'ArrowLeft') { event.preventDefault(); moveViewer(-1); }
+      if (event.key === 'ArrowRight') { event.preventDefault(); moveViewer(1); }
+    });
+  </script>
+</body>
+</html>
