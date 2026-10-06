@@ -1,6 +1,6 @@
 # Zenodo benchmark archive guide
 
-This repository is prepared for the Zenodo DOI record [10.5281/zenodo.23181213](https://doi.org/10.5281/zenodo.23181213),
+This repository is prepared for the Zenodo DOI record [10.5281/zenodo.23184113](https://doi.org/10.5281/zenodo.23184113),
 covering benchmark evidence and analysis artifacts for `zsasa` v0.9.0. It is revision 1
 of the v0.9.0 archive and supersedes [10.5281/zenodo.23175149](https://doi.org/10.5281/zenodo.23175149);
 the `zsasa` v0.6.0 record is [10.5281/zenodo.20577561](https://doi.org/10.5281/zenodo.20577561).
@@ -23,7 +23,7 @@ Changes in revision 1:
 - **Title:** Benchmark dataset and analysis artifacts for zsasa v0.9.0
 - **Creators:** Tsubasa Nagae
 - **Version:** v0.9.0-benchmark-archive-r1
-- **DOI:** [10.5281/zenodo.23181213](https://doi.org/10.5281/zenodo.23181213)
+- **DOI:** [10.5281/zenodo.23184113](https://doi.org/10.5281/zenodo.23184113)
 - **Language:** English
 - **License:** Creative Commons Attribution 4.0 International (CC-BY-4.0)
 - **Keywords:** solvent accessible surface area; structural bioinformatics;
@@ -89,7 +89,7 @@ Upload the generated tarball and `SHA256SUMS` from `archives/zenodo/` to Zenodo.
 
 ## Published DOI
 
-The curated benchmark archive DOI for `zsasa` v0.9.0 is [10.5281/zenodo.23181213](https://doi.org/10.5281/zenodo.23181213) (revision 1).
+The curated benchmark archive DOI for `zsasa` v0.9.0 is [10.5281/zenodo.23184113](https://doi.org/10.5281/zenodo.23184113) (revision 1).
 The first v0.9.0 archive remains available as [10.5281/zenodo.23175149](https://doi.org/10.5281/zenodo.23175149), and the `zsasa` v0.6.0 archive as [10.5281/zenodo.20577561](https://doi.org/10.5281/zenodo.20577561).
 
 For future updates, create a new Zenodo version and rebuild the upload archive
