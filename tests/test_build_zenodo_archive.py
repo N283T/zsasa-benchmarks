@@ -24,6 +24,9 @@ def test_curated_profile_includes_publication_artifacts_and_excludes_raw_runs(
     touch(tmp_path.joinpath("results", "figures", "overview", "plot.png"))
     touch(tmp_path.joinpath("results", "full_rerun", "v0_6_0_full", "raw.json"))
     touch(tmp_path.joinpath("datasets", "single-file-large-structure", "pdb", "9fqr.pdb"))
+    touch(tmp_path.joinpath("datasets", "single-file-large-structure-mmcif", "9fqr.cif"))
+    touch(tmp_path.joinpath("datasets", "single-file-large-structure-sources", "MANIFEST.csv"))
+    touch(tmp_path.joinpath("results", "smoke-clean-cif", "9fqr.json"))
     touch(tmp_path.joinpath("logs", "single-file-v0_6_0_full.log"))
     touch(tmp_path.joinpath(".git", "HEAD"))
     touch(tmp_path.joinpath("scripts", "__pycache__", "ignored.pyc"))
@@ -40,6 +43,9 @@ def test_curated_profile_includes_publication_artifacts_and_excludes_raw_runs(
     assert "results/tables/summary.csv" in relpaths
     assert "results/figures/overview/plot.png" in relpaths
     assert "results/full_rerun/v0_6_0_full/raw.json" not in relpaths
+    assert "datasets/single-file-large-structure-mmcif/9fqr.cif" not in relpaths
+    assert "datasets/single-file-large-structure-sources/MANIFEST.csv" in relpaths
+    assert "results/smoke-clean-cif/9fqr.json" not in relpaths
     assert "config/datasets.local.toml" not in relpaths
     assert ".env" not in relpaths
     assert "datasets/single-file-large-structure/pdb/9fqr.pdb" not in relpaths

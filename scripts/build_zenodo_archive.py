@@ -49,7 +49,15 @@ FULL_PROFILE_RUN_IDS = {
     "nix_validation_20260524",
 }
 
+GENERATED_DIRECTORIES = {
+    ("datasets", "single-file-large-structure-mmcif"),
+    ("results", "smoke-clean-cif"),
+}
+
 PROFILE_CHOICES = ("curated", "full")
+
+# zsasa release covered by the archive; used in the default tarball name.
+ARCHIVE_VERSION = "v0.9.0"
 
 
 @dataclass(frozen=True)
@@ -87,6 +95,9 @@ def _should_include_file(relative_parts: tuple[str, ...], profile: str) -> bool:
     if relative_parts[-1].endswith(EXCLUDED_FILE_SUFFIXES):
         return False
     if relative_parts[:3] == ("datasets", "single-file-large-structure", "pdb"):
+        return False
+    # Derived structure files and smoke outputs are regenerated from the tracked sources.
+    if relative_parts[:2] in GENERATED_DIRECTORIES:
         return False
     if any(part in EXCLUDED_DIRECTORY_NAMES for part in relative_parts[:-1]):
         return False
@@ -223,7 +234,7 @@ def create_tarball(
 
 def default_archive_name(profile: str, compression: str) -> str:
     suffix = ".tar" if compression == "none" else ".tar.gz"
-    return f"zsasa-benchmarks-v0.6.0-{profile}-zenodo{suffix}"
+    return f"zsasa-benchmarks-{ARCHIVE_VERSION}-{profile}-zenodo{suffix}"
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
@@ -254,7 +265,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument(
         "--archive-name",
-        help="Archive filename. Defaults to a profile-specific v0.6.0 name.",
+        help=f"Archive filename. Defaults to a profile-specific {ARCHIVE_VERSION} name.",
     )
     parser.add_argument(
         "--make-archive",

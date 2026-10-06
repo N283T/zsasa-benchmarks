@@ -59,12 +59,12 @@ single_file:single_file_large_structure_subset:AF-P49792-F10-model_v6:t10,peak_r
 single_file:single_file_large_structure_subset:AF-Q6ZS30-F1-model_v6:t10,runtime_mean_s,min,zsasa_f64,zsasa f64,0.02740284702,single_file_large_structure_subset,single_file_large_structure_subset,AF-Q6ZS30-F1-model_v6,10
 single_file:single_file_large_structure_subset:AF-Q6ZS30-F1-model_v6:t10,atoms_per_sec,max,zsasa_f64,zsasa f64,788640.6833650236,single_file_large_structure_subset,single_file_large_structure_subset,AF-Q6ZS30-F1-model_v6,10
 single_file:single_file_large_structure_subset:AF-Q6ZS30-F1-model_v6:t10,peak_rss_mean_mib,min,zsasa_f64,zsasa f64,9.890625,single_file_large_structure_subset,single_file_large_structure_subset,AF-Q6ZS30-F1-model_v6,10
-trajectory:5vz0_A_protein,runtime_mean_s,min,zsasa_cli_bitmask_f32,zsasa CLI bitmask f32,35.28047388479334,5vz0_A_protein,5vz0_A,,40
-trajectory:5vz0_A_protein,items_per_sec,max,zsasa_cli_bitmask_f32,zsasa CLI bitmask f32,283.4712490727244,5vz0_A_protein,5vz0_A,,40
-trajectory:5vz0_A_protein,peak_rss_mean_mib,min,zsasa_cli_f64,zsasa CLI f64,85.671875,5vz0_A_protein,5vz0_A,,10
-trajectory:5wvo_C_analysis,runtime_mean_s,min,zsasa_cli_bitmask_f32,zsasa CLI bitmask f32,0.7346602130066667,5wvo_C_analysis,5wvo_C,,40
-trajectory:5wvo_C_analysis,items_per_sec,max,zsasa_cli_bitmask_f32,zsasa CLI bitmask f32,1362.5346551752305,5wvo_C_analysis,5wvo_C,,40
-trajectory:5wvo_C_analysis,peak_rss_mean_mib,min,zsasa_cli_bitmask_f32,zsasa CLI bitmask f32,24.1875,5wvo_C_analysis,5wvo_C,,10
-trajectory:6sup_A_analysis,runtime_mean_s,min,zsasa_cli_bitmask_f32,zsasa CLI bitmask f32,6.574400739800001,6sup_A_analysis,6sup_A,,40
-trajectory:6sup_A_analysis,items_per_sec,max,zsasa_cli_bitmask_f32,zsasa CLI bitmask f32,152.25722307132304,6sup_A_analysis,6sup_A,,40
-trajectory:6sup_A_analysis,peak_rss_mean_mib,min,zsasa_cli_bitmask_f32,zsasa CLI bitmask f32,142.03125,6sup_A_analysis,6sup_A,,10
+trajectory:5vz0_A_protein,runtime_mean_s,min,zsasa_cli_bitmask_f32,zsasa CLI bitmask f32,36.033422844246665,5vz0_A_protein,5vz0_A,,40
+trajectory:5vz0_A_protein,items_per_sec,max,zsasa_cli_bitmask_f32,zsasa CLI bitmask f32,277.54787668185196,5vz0_A_protein,5vz0_A,,40
+trajectory:5vz0_A_protein,peak_rss_mean_mib,min,zsasa_cli_f32,zsasa CLI f32,88.25520833333333,5vz0_A_protein,5vz0_A,,10
+trajectory:5wvo_C_analysis,runtime_mean_s,min,zsasa_cli_bitmask_f32,zsasa CLI bitmask f32,0.7321578300133335,5wvo_C_analysis,5wvo_C,,40
+trajectory:5wvo_C_analysis,items_per_sec,max,zsasa_cli_bitmask_f32,zsasa CLI bitmask f32,1367.1915521025987,5wvo_C_analysis,5wvo_C,,40
+trajectory:5wvo_C_analysis,peak_rss_mean_mib,min,zsasa_cli_bitmask_f32,zsasa CLI bitmask f32,24.265625,5wvo_C_analysis,5wvo_C,,10
+trajectory:6sup_A_analysis,runtime_mean_s,min,zsasa_cli_bitmask_f32,zsasa CLI bitmask f32,6.626423635360001,6sup_A_analysis,6sup_A,,40
+trajectory:6sup_A_analysis,items_per_sec,max,zsasa_cli_bitmask_f32,zsasa CLI bitmask f32,151.06187818395006,6sup_A_analysis,6sup_A,,40
+trajectory:6sup_A_analysis,peak_rss_mean_mib,min,zsasa_cli_f32,zsasa CLI f32,138.375,6sup_A_analysis,6sup_A,,10
