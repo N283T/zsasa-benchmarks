@@ -4,7 +4,7 @@
 
 The benchmark harness currently assumes one pinned `zsasa` release, mostly `v0.6.0`, across `flake.nix`, `config/tool-versions.toml`, runner defaults, scaffold checks, and documentation. For `zsasa` `v0.7.0`, the benchmark goal is not just to replace the pinned release. We need a repeatable workflow for testing any future `zsasa` release against previous releases under the same local harness.
 
-`v0.7.0` may improve large batch throughput by removing the CPU cap that caused I/O wait. The most important new workload is a SwissProt-scale directory benchmark of roughly 500k structures. This workload should compare only `zsasa 0.6.0`, `zsasa 0.7.0`, and Lahuta because FreeSASA and RustSASA are too slow for this scale. Runs should be limited to one measured run to keep the experiment practical.
+`v0.7.0` may improve large batch throughput by removing the CPU cap that caused I/O wait. The most important new workload is a SwissProt-scale directory benchmark of 550,122 structures. This workload should compare only `zsasa 0.6.0`, `zsasa 0.7.0`, and Lahuta because FreeSASA and RustSASA are too slow for this scale. Runs should be limited to one measured run to keep the experiment practical.
 
 The existing single-file benchmark uses cleaned PDB inputs. Prior investigation found that PDB-format limits can create parser and value problems for non-zsasa tools. A separate mmCIF single-file benchmark should be added so native mmCIF performance can be measured without mixing it with PDB conversion artifacts.
 
@@ -41,7 +41,7 @@ For versioned `zsasa`, record names and output paths include the full tool label
 
 ### SwissProt manifest
 
-Add `manifests/batch-swissprot-version-refresh.toml` with dataset ID `swissprot_500k_pdb`, expected count `500000`, and:
+Add `manifests/batch-swissprot-version-refresh.toml` with dataset ID `swissprot_500k_pdb`, expected count `550122` (the id is historical; the nominal 500k was corrected after the full-directory run showed 550,122 outputs), and:
 
 - `runs = 1`
 - `warmup = 0`

@@ -5,7 +5,8 @@ status = "planning"
 
 [dataset]
 id = "swissprot_500k_pdb"
-expected_count = 500000
+# The id is historical (nominal 500k); the collection holds 550,122 structures.
+expected_count = 550122
 role = ["batch-throughput", "version-refresh", "io-wait-stress"]
 notes = "Large SwissProt-scale PDB directory intended to stress zsasa batch I/O and CPU scheduling behavior."
 

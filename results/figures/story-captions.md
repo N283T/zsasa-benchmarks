@@ -94,7 +94,7 @@ These captions are manuscript-oriented drafts. They define the comparison, fixed
 
 ### [Thread overcommit performance and memory](batch_swissprot/png/swissprot_overcommit_performance_memory.png)
 
-**Caption.** Observed throughput–memory paths for zsasa f32 and zsasa bitmask f32 over 10, 20, and 40 threads on 500,000 SwissProt AFDB structures. The Lahuta bitmask marker shows its 10-thread result. All calculations used 128 sphere points on a system with 10 logical CPUs. Each configuration was measured once, so the figure is a descriptive large-scale observation without uncertainty estimates.
+**Caption.** Observed throughput–memory paths for zsasa f32 and zsasa bitmask f32 over 10, 20, and 40 threads on 550,122 SwissProt AFDB structures. The Lahuta bitmask marker shows its 10-thread result. All calculations used 128 sphere points on a system with 10 logical CPUs. Each configuration was measured once, so the figure is a descriptive large-scale observation without uncertainty estimates.
 
 ## Single-file benchmark
 

@@ -8,4 +8,4 @@ UP000005640_9606_HUMAN_v6_cif,UP000005640_9606_HUMAN_v6_cif,"batch-throughput,pa
 UP000005640_9606_HUMAN_v6_pdb,UP000005640_9606_HUMAN_v6_pdb,"batch-throughput,thread-overcommit",23586,/Users/nagaet/pdb/afdb/UP000005640_9606_HUMAN_v6/pdb,,ready
 single_file_large_structure_mmcif_subset,single_file_large_structure_mmcif_subset,"single-file-throughput,parser-stress,mmcif",8,/Users/nagaet/ghq/github.com/N283T/zsasa-benchmarks/datasets/single-file-large-structure-mmcif,,ready
 single_file_large_structure_subset,single_file_large_structure_subset,"single-file-throughput,parser-stress",8,/Users/nagaet/ghq/github.com/N283T/zsasa-benchmarks/datasets/single-file-large-structure/pdb,,ready
-swissprot_500k_pdb,swissprot_500k_pdb,"batch-throughput,version-refresh,io-wait-stress",500000,/Users/nagaet/pdb/afdb/swissprot_pdb_v6,,planning
+swissprot_500k_pdb,swissprot_500k_pdb,"batch-throughput,version-refresh,io-wait-stress",550122,/Users/nagaet/pdb/afdb/swissprot_pdb_v6,,planning
