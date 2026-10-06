@@ -44,7 +44,7 @@ Release-refresh manifests compare multiple `zsasa` versions without replacing th
 compatibility `zsasa` tool used by the manuscript rerun. Keep versioned tool IDs
 in command names and output directories so `0.6.0` and `0.9.0` results cannot be
 accidentally mixed. The SwissProt-scale manifest intentionally keeps the matrix
-small because the full 500k-structure workload is expensive: `zsasa_0_6_0` runs
+small because the full 550k-structure workload is expensive: `zsasa_0_6_0` runs
 f32 standard/bitmask at 10 threads, `zsasa_0_9_0` runs f32 standard/bitmask at
 10, 20, and 40 threads, and Lahuta runs only the 10-thread bitmask comparator.
 The earlier 0.7.0 attempt is excluded from active benchmark manifests.

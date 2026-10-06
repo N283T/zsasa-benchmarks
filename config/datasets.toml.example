@@ -13,6 +13,7 @@ path = "$HOME/pdb/afdb/UP000005640_9606_HUMAN_v6/pdb"
 [UP000005640_9606_HUMAN_v6_cif]
 path = "$HOME/pdb/afdb/UP000005640_9606_HUMAN_v6/cif"
 
+# Historical id: the SwissProt AFDB collection holds 550,122 structures.
 [swissprot_500k_pdb]
 path = "$HOME/pdb/afdb/swissprot_500k/pdb"
 

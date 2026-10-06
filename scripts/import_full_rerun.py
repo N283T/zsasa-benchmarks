@@ -479,6 +479,42 @@ def import_validation_static(conn, validation_dir: Path, run_label: str) -> None
         insert_validation_rows(conn, run_id, rows)
 
 
+def count_jsonl_lines(path: Path) -> int:
+    """Count lines (one per structure) without loading the file into memory."""
+    count = 0
+    last_byte = b"\n"
+    with path.open("rb") as handle:
+        while chunk := handle.read(1 << 24):
+            count += chunk.count(b"\n")
+            last_byte = chunk[-1:]
+    return count + (0 if last_byte == b"\n" else 1)
+
+
+def validate_batch_output_counts(base: Path, expected_count: int | None, dataset_id: str) -> None:
+    """Fail when per-structure batch output does not match the recorded structure count.
+
+    One JSONL output per tool directory is checked (all variants process the same
+    input directory), so a stale nominal ``expected_count`` cannot silently skew
+    throughput = expected_count / runtime.
+    """
+    if not expected_count or not base.is_dir():
+        return
+    checked: dict[str, Path] = {}
+    for path in sorted(base.rglob("*.jsonl")):
+        parts = path.relative_to(base).parts
+        if parts[0] == "hyperfine":
+            continue
+        checked.setdefault(parts[0], path)
+    for path in checked.values():
+        actual = count_jsonl_lines(path)
+        if actual != int(expected_count):
+            raise ValueError(
+                f"dataset {dataset_id!r} records expected_count={expected_count} but "
+                f"{path} has {actual} per-structure output lines; fix the manifest "
+                "expected_count (throughput is derived from it)"
+            )
+
+
 def import_hyperfine_directory(
     conn,
     *,
@@ -489,6 +525,11 @@ def import_hyperfine_directory(
     manifest_id: str,
     name_parser,
 ) -> None:
+    if benchmark_kind == "batch" and dataset_id:
+        row = conn.execute(
+            "SELECT expected_count FROM datasets WHERE dataset_id = ?", [dataset_id]
+        ).fetchone()
+        validate_batch_output_counts(base, row[0] if row else None, dataset_id)
     for path in sorted(base.joinpath("hyperfine").glob("*.json")):
         name = path.stem
         meta = name_parser(name)

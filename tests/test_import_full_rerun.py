@@ -537,3 +537,20 @@ def test_import_hyperfine_directory_imports_memory_and_cpu_metrics(tmp_path: Pat
     assert metrics[("peak_rss", "run_3")] == (300.0, "bytes", 3)
     assert metrics[("user_time", "mean")] == (20.0, "s", 3)
     assert metrics[("system_time", "mean")] == (3.0, "s", 3)
+
+
+def test_validate_batch_output_counts_rejects_stale_expected_count(tmp_path: Path) -> None:
+    from scripts.import_full_rerun import validate_batch_output_counts
+
+    base = tmp_path.joinpath("batch", "swissprot")
+    base.joinpath("hyperfine").mkdir(parents=True)
+    base.joinpath("hyperfine", "ignored.jsonl").write_text("{}\n", encoding="utf-8")
+    base.joinpath("zsasa_0_9_0").mkdir()
+    base.joinpath("zsasa_0_9_0", "f32_standard_10t_128p.jsonl").write_text(
+        '{"a":1}\n{"a":2}\n{"a":3}', encoding="utf-8"
+    )
+
+    validate_batch_output_counts(base, 3, "ds")
+    validate_batch_output_counts(base, None, "ds")
+    with pytest.raises(ValueError, match="expected_count=2 but .* has 3 per-structure"):
+        validate_batch_output_counts(base, 2, "ds")
