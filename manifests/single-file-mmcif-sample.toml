@@ -65,7 +65,7 @@ source_dataset = "single_file_large_structure_sources"
 source_file = "pdb_mmcif/3jc8.cif.gz"
 input_file = "3jc8.cif"
 expected_atoms = 107500
-expected_chains = 3
+expected_chains = 115
 notes = "100k-scale multi-chain PDB assembly represented as native mmCIF."
 
 [[structures]]
@@ -88,7 +88,7 @@ source_dataset = "single_file_large_structure_sources"
 source_file = "pdb_mmcif/8rbs.cif.gz"
 input_file = "8rbs.cif"
 expected_atoms = 164605
-expected_chains = 5
+expected_chains = 85
 notes = "Historical FreeSASA runtime outlier represented as native mmCIF."
 
 [[structures]]
