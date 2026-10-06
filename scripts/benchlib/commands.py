@@ -228,6 +228,7 @@ def mdtraj_runner_command(
     zsasa_binary: Path | None = None,
     bitmask_lut_mode: str | None = None,
     bitmask_correction: bool = False,
+    mdtraj_per_frame: bool = False,
 ) -> list[str]:
     cmd = [
         str(python or sys.executable),
@@ -258,6 +259,8 @@ def mdtraj_runner_command(
         cmd.extend(["--bitmask-lut-mode", bitmask_lut_mode])
     if bitmask_correction:
         cmd.append("--bitmask-correction")
+    if mdtraj_per_frame:
+        cmd.append("--mdtraj-per-frame")
     if output is not None:
         cmd.extend(["--output", str(output)])
     return cmd

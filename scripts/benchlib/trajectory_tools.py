@@ -50,6 +50,14 @@ def parse_args() -> argparse.Namespace:
         default=None,
     )
     parser.add_argument("--bitmask-correction", action="store_true")
+    parser.add_argument(
+        "--mdtraj-per-frame",
+        action="store_true",
+        help=(
+            "mdtraj tool only: call md.shrake_rupley once per frame instead of once on "
+            "the whole trajectory (use for validation references; timing keeps one call)"
+        ),
+    )
     parser.add_argument("--output", required=True, type=Path)
     hydrogen = parser.add_mutually_exclusive_group()
     hydrogen.add_argument(
@@ -132,6 +140,7 @@ def write_command_stub(args: argparse.Namespace) -> None:
             "zsasa_binary": str(args.zsasa_binary),
             "bitmask_lut_mode": args.bitmask_lut_mode,
             "bitmask_correction": args.bitmask_correction,
+            "mdtraj_per_frame": args.mdtraj_per_frame,
             "status": "command_stub_only",
         },
     )
@@ -201,8 +210,19 @@ def run_mdtraj(args: argparse.Namespace) -> None:
     import mdtraj as md
 
     traj = md.load(str(args.xtc), top=str(args.pdb), stride=args.stride)
-    sasa = md.shrake_rupley(traj, n_sphere_points=args.n_points, mode="atom")
-    totals = [float(value) * 100.0 for value in sasa.sum(axis=1)]
+    if args.mdtraj_per_frame:
+        # MDTraj (checked with 1.11.2) returns inflated per-atom areas for every frame
+        # after the first when shrake_rupley receives a multi-frame trajectory, so the
+        # result of a frame depends on the frames before it. One call per frame gives
+        # the correct values; validation references must use this path. Throughput
+        # timing keeps the single multi-frame call, which is how MDTraj is normally used.
+        totals = []
+        for index in range(traj.n_frames):
+            sasa = md.shrake_rupley(traj[index], n_sphere_points=args.n_points, mode="atom")
+            totals.append(float(sasa.sum()) * 100.0)
+    else:
+        sasa = md.shrake_rupley(traj, n_sphere_points=args.n_points, mode="atom")
+        totals = [float(value) * 100.0 for value in sasa.sum(axis=1)]
     write_json_output(args.output, _totals_payload(args=args, totals_a2=totals))
 
 
