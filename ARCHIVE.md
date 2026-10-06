@@ -1,15 +1,16 @@
 # Zenodo benchmark archive guide
 
-This repository is prepared for the Zenodo DOI record [10.5281/zenodo.20577561](https://doi.org/10.5281/zenodo.20577561),
-covering benchmark evidence and analysis artifacts for `zsasa` v0.6.0.
+This repository is prepared for the Zenodo DOI record [10.5281/zenodo.23175149](https://doi.org/10.5281/zenodo.23175149),
+covering benchmark evidence and analysis artifacts for `zsasa` v0.9.0. It is a new
+version of the `zsasa` v0.6.0 record [10.5281/zenodo.20577561](https://doi.org/10.5281/zenodo.20577561).
 
 ## Recommended Zenodo metadata
 
 - **Resource type:** Dataset
-- **Title:** Benchmark dataset and analysis artifacts for zsasa v0.6.0
+- **Title:** Benchmark dataset and analysis artifacts for zsasa v0.9.0
 - **Creators:** Tsubasa Nagae
-- **Version:** v0.6.0-benchmark-archive
-- **DOI:** [10.5281/zenodo.20577561](https://doi.org/10.5281/zenodo.20577561)
+- **Version:** v0.9.0-benchmark-archive
+- **DOI:** [10.5281/zenodo.23175149](https://doi.org/10.5281/zenodo.23175149)
 - **Language:** English
 - **License:** Creative Commons Attribution 4.0 International (CC-BY-4.0)
 - **Keywords:** solvent accessible surface area; structural bioinformatics;
@@ -22,7 +23,7 @@ covering benchmark evidence and analysis artifacts for `zsasa` v0.6.0.
 Suggested description:
 
 > Benchmark evidence, validation summaries, plotting outputs, and reproducibility
-> configuration for zsasa v0.6.0, a high-throughput solvent-accessible surface
+> configuration for zsasa v0.9.0, a high-throughput solvent-accessible surface
 > area analysis engine for structural bioinformatics workflows. The archive
 > includes the DuckDB benchmark evidence database, generated summary tables,
 > rendered manuscript figures, benchmark manifests, scripts, schemas, and pinned
@@ -34,7 +35,8 @@ Suggested description:
 
 - `curated` (recommended for first DOI upload): source code, manifests,
   reproducibility configuration, `results/benchmark.duckdb`, rendered figures,
-  exports, and summary tables. It excludes `results/full_rerun/` raw outputs.
+  exports, and summary tables. It excludes `results/full_rerun/` raw outputs, the
+  derived single-file structure files, and smoke-test outputs.
 - `full`: everything in `curated`, plus selected raw full-rerun output
   directories:
   - `results/full_rerun/v0_6_0_full/`
@@ -73,7 +75,8 @@ Upload the generated tarball and `SHA256SUMS` from `archives/zenodo/` to Zenodo.
 
 ## Published DOI
 
-The curated benchmark archive DOI is [10.5281/zenodo.20577561](https://doi.org/10.5281/zenodo.20577561).
+The curated benchmark archive DOI for `zsasa` v0.9.0 is [10.5281/zenodo.23175149](https://doi.org/10.5281/zenodo.23175149).
+The `zsasa` v0.6.0 archive remains available as [10.5281/zenodo.20577561](https://doi.org/10.5281/zenodo.20577561).
 
 For future updates, create a new Zenodo version and rebuild the upload archive
 after updating DOI/version metadata in this repository.

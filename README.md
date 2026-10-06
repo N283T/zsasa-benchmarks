@@ -2,7 +2,7 @@
 
 Release-fixed benchmark and validation harness for the `zsasa` manuscript.
 
-Archive DOI: [10.5281/zenodo.20577561](https://doi.org/10.5281/zenodo.20577561)
+Archive DOI: [10.5281/zenodo.23175149](https://doi.org/10.5281/zenodo.23175149) (`zsasa` v0.9.0; the `zsasa` v0.6.0 archive is [10.5281/zenodo.20577561](https://doi.org/10.5281/zenodo.20577561))
 
 This repository is a clean benchmark workspace for the `zsasa` manuscript. It intentionally keeps generated result files out of git and reruns benchmark evidence from pinned tool versions instead of mixing previous comparator outputs with refreshed `zsasa` runs.
 
