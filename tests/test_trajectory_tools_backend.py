@@ -5,6 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+from scripts.benchlib.commands import mdtraj_runner_command
 from scripts.benchlib.trajectory_tools import build_zsasa_traj_command, resolve_zsasa_binary
 
 
@@ -103,3 +104,34 @@ def test_resolve_zsasa_binary_prefers_zsasa_cli_env(tmp_path: Path, monkeypatch)
     monkeypatch.setenv("PATH", str(path_binary.parent))
     monkeypatch.setenv("ZSASA_CLI", str(env_binary))
     assert resolve_zsasa_binary(Path("zsasa")) == env_binary
+
+
+def _mdtraj_command(**kwargs) -> list[str]:
+    return mdtraj_runner_command(
+        tool="mdtraj",
+        xtc=Path("traj.xtc"),
+        pdb=Path("top.pdb"),
+        n_points=64,
+        stride=1,
+        python="python",
+        output=Path("out.json"),
+        **kwargs,
+    )
+
+
+def test_mdtraj_runner_command_per_frame_flag_is_opt_in() -> None:
+    default = _mdtraj_command()
+    assert "--mdtraj-per-frame" not in default
+    per_frame = _mdtraj_command(mdtraj_per_frame=True)
+    assert "--mdtraj-per-frame" in per_frame
+    # The flag is the only difference, so throughput command lines stay unchanged.
+    assert [arg for arg in per_frame if arg != "--mdtraj-per-frame"] == default
+
+
+def test_trajectory_tools_stub_records_mdtraj_per_frame(tmp_path: Path) -> None:
+    output = tmp_path / "stub.json"
+    cmd = _mdtraj_command(mdtraj_per_frame=True)
+    cmd[-1] = str(output)
+    subprocess.run([sys.executable, *cmd[1:], "--write-command-stub"], check=True)
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    assert payload["mdtraj_per_frame"] is True

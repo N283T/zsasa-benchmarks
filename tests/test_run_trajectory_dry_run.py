@@ -49,6 +49,11 @@ def test_run_trajectory_validation_dry_run_outputs_native_commands() -> None:
     assert "--bitmask-lut-mode cycle" in proc.stdout
     assert "--bitmask-correction" in proc.stdout
     assert "raw/mdtraj/64p/results.json" in proc.stdout
+    # Only the MDTraj reference uses per-frame calls (one flag per point count).
+    mdtraj_lines = [line for line in proc.stdout.splitlines() if "--tool mdtraj " in line]
+    assert mdtraj_lines
+    assert all("--mdtraj-per-frame" in line for line in mdtraj_lines)
+    assert proc.stdout.count("--mdtraj-per-frame") == len(mdtraj_lines)
 
     output_base = Path("results/full_rerun") / run_id / "validation_md" / "5wvo_C_analysis"
     assert output_base.joinpath("commands.log").is_file()
@@ -86,6 +91,7 @@ def test_run_trajectory_dry_run_outputs_native_hyperfine_commands() -> None:
     assert "hyperfine" in proc.stdout
     assert "mdsasa_bolt" not in proc.stdout
     assert "--tool mdtraj" not in proc.stdout
+    assert "--mdtraj-per-frame" not in proc.stdout
     assert "selected_commands=44/44" in proc.stdout
     assert f"results/full_rerun/{run_id}/md" in proc.stdout
     assert "5wvo_C_analysis" in proc.stdout

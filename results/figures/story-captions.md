@@ -20,7 +20,7 @@ These captions are manuscript-oriented drafts. They define the comparison, fixed
 
 ### [zsasa and MDTraj convergence](validation/png/md_standard_f64_convergence_vs_mdtraj.png)
 
-**Caption.** Signed relative difference between zsasa f64 and MDTraj across 1,001 trajectory frames as a function of sphere-point count. The line shows the median and the shaded band spans the 5th–95th percentiles. The distribution moves toward zero as the sphere-point count increases.
+**Caption.** Signed relative difference between zsasa f64 and MDTraj across 1,001 trajectory frames as a function of sphere-point count. The line shows the median and the shaded band spans the 5th–95th percentiles. The median stays near -0.3% at every point count, a small systematic offset, while the band narrows as the sphere-point count increases. The MDTraj reference is computed one frame at a time (see `docs/mdtraj-per-frame-reference.md`).
 
 ### [Bitmask correction across points and frames](validation/png/md_bitmask_correction_vs_standard.png)
 

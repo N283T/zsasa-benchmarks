@@ -193,6 +193,9 @@ def build_records(
                             zsasa_binary=zsasa_binary,
                             bitmask_lut_mode=variant.get("bitmask_lut_mode"),
                             bitmask_correction=bool(variant.get("bitmask_correction", False)),
+                            # Validation references need per-frame MDTraj calls; a
+                            # multi-frame call inflates areas after the first frame.
+                            mdtraj_per_frame=str(variant["tool"]) == "mdtraj",
                         ),
                     )
                 )
