@@ -170,6 +170,7 @@ manifests/   dataset and rerun manifests; no raw data
 schemas/     DuckDB schema for benchmark evidence
 scripts/     benchmark orchestration, DB import/export, and scaffold checks
 docs/        benchmark policy and rerun plans
+workflows/   workflow files and run records of the AFDB dimer delta-SASA runs (not benchmarks)
 results/     ignored generated benchmark outputs and local DuckDB files
 archives/    ignored final archive staging area
 ```

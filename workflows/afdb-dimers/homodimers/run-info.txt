@@ -1,0 +1,13 @@
+zsasa_binary=/Users/nagaet/ghq/github.com/N283T/zsasa/zig-out/bin/zsasa
+zsasa_version=zsasa 0.9.1
+zsasa_commit=d06392f747bf2aa6224c0752fbdebbe949ca3541
+zsasa_describe=v0.9.1-5-gd06392f
+zsasa_build=zig build -Doptimize=ReleaseFast (zig 0.16.0)
+algorithm=sr precision=f32 n_points=128 use_bitmask=true bitmask_correction=false
+probe_radius_angstrom=1.4 classifier=ccd workers=20
+input=dir = "/Users/nagaet/pdb/afdb/nvda/homodimers/9606_HUMAN/structure"
+input_count=91635
+hostname=TsubasanoMacBook-Pro.local
+cpu=Apple M4 logical_cpu=10 memory_bytes=34359738368
+os=macOS 26.6.2
+note=ordinary-use run, not a controlled benchmark; other jobs may have been running
