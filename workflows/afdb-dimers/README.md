@@ -20,6 +20,10 @@ in `results/benchmark.duckdb`.
 - `run-info.txt`: `zsasa` build, settings, input count, and machine.
 - `job-status.txt`: start and finish times.
 - `time-stderr.txt`: workflow summary and `/usr/bin/time -l` output.
+- `delta_sasa_ab.jsonl.zst`: the per-model results, one JSON object per line,
+  zstd-compressed (2.8 MB for the homo-dimers, 16 MB for the heterodimers).
+- `delta_sasa_ab.meta.json`: the output and calculation settings written by
+  `zsasa` next to the results.
 
 `zsasa` was built from the main branch at commit `d06392f` (five commits after
 v0.9.1), where the two-partner analysis is parallelized over structure files.
@@ -28,6 +32,26 @@ Each run was started as:
 ```bash
 /usr/bin/time -l zsasa batch --workflow workflow.toml --threads=20 --quiet
 ```
+
+## Results
+
+Each line of `delta_sasa_ab.jsonl.zst` describes one model:
+
+| Field | Meaning |
+| --- | --- |
+| `filename` | input file; the leading `AF-<number>` is the AFDB model identifier |
+| `sasa_partner_a`, `sasa_partner_b` | SASA of chain A and of chain B alone (Å²) |
+| `sasa_complex` | SASA of the two chains together (Å²) |
+| `delta_sasa_total` | `sasa_partner_a + sasa_partner_b - sasa_complex` (Å²) |
+| `bsa` | half of `delta_sasa_total` (Å²) |
+
+Values are from the bitmask f32 mode at 128 sphere points, which underestimates
+total SASA by about 0.7% relative to the exact mode on static structures. Read
+the files with, for example, `zstd -dc delta_sasa_ab.jsonl.zst | head` or
+DuckDB's `read_json_auto`.
+
+The values are derived from AlphaFold Database models, which are distributed
+under CC-BY 4.0; cite the AFDB/NVIDIA release when reusing them.
 
 ## Inputs
 
