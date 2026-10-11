@@ -1,0 +1,10 @@
+zsasa cold                       | {zsasa} batch {in} -o {out}.jsonl {zargs}
+zsasa @prestat @lead=0           | {zsasa} batch {in} -o {out}.jsonl {zargs}
+zsasa @prestat @lead=3           | {zsasa} batch {in} -o {out}.jsonl {zargs}
+zsasa @prestat @lead=10          | {zsasa} batch {in} -o {out}.jsonl {zargs}
+zsasa @prestat @lead=30          | {zsasa} batch {in} -o {out}.jsonl {zargs}
+zsasa @prestat @lead=90          | {zsasa} batch {in} -o {out}.jsonl {zargs}
+zsasa @prestat @lead=240         | {zsasa} batch {in} -o {out}.jsonl {zargs}
+zsasa cold (repeat)              | {zsasa} batch {in} -o {out}.jsonl {zargs}
+zsasa @prestat @lead=10 (repeat) | {zsasa} batch {in} -o {out}.jsonl {zargs}
+zsasa @prestat @lead=0 (repeat)  | {zsasa} batch {in} -o {out}.jsonl {zargs}

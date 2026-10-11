@@ -1,0 +1,11 @@
+mimic readbuf+2.7 (no VM activity)   | {mimic} {in} --mode=readbuf --spin-us=2700
+mimic read+2.7 (malloc per file)     | {mimic} {in} --mode=read --spin-us=2700
+mimic mmap+2.7                       | {mimic} {in} --mode=mmap --spin-us=2700
+mimic readbuf+2.7 + 1x 4MB anon map  | {mimic} {in} --mode=readbuf --spin-us=2700 --vm-churn=1
+mimic readbuf+2.7 + 4x 4MB anon map  | {mimic} {in} --mode=readbuf --spin-us=2700 --vm-churn=4
+mimic readbuf+2.7 + 1x 32MB anon map | {mimic} {in} --mode=readbuf --spin-us=2700 --vm-churn=1 --vm-churn-mb=32
+zsasa 0.10.1                         | {here}/zsasa-main batch {in} -o {out}.jsonl {zargs}
+mimic readbuf+2.7 (rep)              | {mimic} {in} --mode=readbuf --spin-us=2700
+mimic mmap+2.7 (rep)                 | {mimic} {in} --mode=mmap --spin-us=2700
+mimic readbuf+2.7 + 4x 4MB (rep)     | {mimic} {in} --mode=readbuf --spin-us=2700 --vm-churn=4
+zsasa 0.10.1 (rep)                   | {here}/zsasa-main batch {in} -o {out}.jsonl {zargs}

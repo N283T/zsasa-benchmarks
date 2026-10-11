@@ -17,6 +17,10 @@ path = "$HOME/pdb/afdb/UP000005640_9606_HUMAN_v6/cif"
 [swissprot_500k_pdb]
 path = "$HOME/pdb/afdb/swissprot_500k/pdb"
 
+# The same directory, for the runs under a passive disk I/O policy.
+[swissprot_500k_pdb_passive_io]
+path = "$HOME/pdb/afdb/swissprot_500k/pdb"
+
 [single_file_large_structure_sources]
 path = "datasets/single-file-large-structure-sources"
 

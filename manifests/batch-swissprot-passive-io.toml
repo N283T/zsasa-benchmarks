@@ -4,8 +4,9 @@ id = "batch-swissprot-passive-io"
 status = "planning"
 
 [dataset]
-id = "swissprot_500k_pdb"
-# The id is historical (nominal 500k); the collection holds 550,122 structures.
+id = "swissprot_500k_pdb_passive_io"
+# The same 550,122 files as swissprot_500k_pdb. A separate id keeps these runs apart from the
+# default-policy runs of the same commands in the database and the summary tables.
 expected_count = 550122
 role = ["batch-throughput", "io-wait-stress"]
 notes = "Same collection and settings as batch-swissprot-version-refresh; only the disk I/O policy differs."

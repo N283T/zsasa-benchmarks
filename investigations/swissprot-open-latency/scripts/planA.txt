@@ -1,0 +1,11 @@
+zsasa (reference)            | {zsasa} batch {in} -o {out}.jsonl {zargs}
+lahuta (reference)           | {lahuta} sasa-sr -d {in} --output {out} {largs}
+mimic zsasa-like             | {mimic} {in} --mode=mmap --spin-us=2700 --write-bytes=30000 --out={out}.jsonl
+mimic lahuta-like            | {mimic} {in} --mode=stdio --stat-first --spin-us=3900
+mimic read, no compute       | {mimic} {in} --mode=read
+mimic mmap, no compute       | {mimic} {in} --mode=mmap
+mimic stdio, no compute      | {mimic} {in} --mode=stdio
+mimic read + 2.7 ms compute  | {mimic} {in} --mode=read --spin-us=2700
+mimic stdio + 3.9 ms compute | {mimic} {in} --mode=stdio --spin-us=3900
+zsasa (reference, again)     | {zsasa} batch {in} -o {out}.jsonl {zargs}
+lahuta (reference, again)    | {lahuta} sasa-sr -d {in} --output {out} {largs}

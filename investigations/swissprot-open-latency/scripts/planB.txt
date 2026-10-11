@@ -1,0 +1,11 @@
+mimic read + 2.7 compute               | {mimic} {in} --mode=read --spin-us=2700
+mimic read + 2.7 compute + prestat     | {mimic} {in} --mode=read --spin-us=2700 --prestat
+mimic stdio + 3.9 compute + prestat    | {mimic} {in} --mode=stdio --spin-us=3900 --prestat
+mimic read + 2.7 compute, qos utility  | {mimic} {in} --mode=read --spin-us=2700 --qos=utility
+mimic read + 2.7 compute, qos backgrnd | {mimic} {in} --mode=read --spin-us=2700 --qos=background
+mimic read + 2.7 compute, qos initiated| {mimic} {in} --mode=read --spin-us=2700 --qos=initiated
+mimic read, no compute + prestat       | {mimic} {in} --mode=read --prestat
+stat-only pass                         | {mimic} {in} --stat-only
++ zsasa after stat-only pass           | {zsasa} batch {in} -o {out}.jsonl {zargs}
+lahuta (reference)                     | {lahuta} sasa-sr -d {in} --output {out} {largs}
+zsasa (reference)                      | {zsasa} batch {in} -o {out}.jsonl {zargs}

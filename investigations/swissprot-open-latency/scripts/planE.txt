@@ -1,0 +1,14 @@
+zsasa cold                          | {zsasa} batch {in} -o {out}.jsonl {zargs}
+zsasa cold, QoS clamp utility       | /usr/sbin/taskpolicy -c utility {zsasa} batch {in} -o {out}.jsonl {zargs}
+lahuta cold                         | {lahuta} sasa-sr -d {in} --output {out} {largs}
+lahuta cold, QoS clamp utility      | /usr/sbin/taskpolicy -c utility {lahuta} sasa-sr -d {in} --output {out} {largs}
+zsasa cold, QoS clamp background    | /usr/sbin/taskpolicy -c background {zsasa} batch {in} -o {out}.jsonl {zargs}
+zsasa @prestat, QoS clamp utility   | /usr/sbin/taskpolicy -c utility {zsasa} batch {in} -o {out}.jsonl {zargs}
+zsasa cold, QoS clamp utility (rep) | /usr/sbin/taskpolicy -c utility {zsasa} batch {in} -o {out}.jsonl {zargs}
+zsasa cold (rep)                    | {zsasa} batch {in} -o {out}.jsonl {zargs}
+lahuta cold, QoS clamp utility (rep)| /usr/sbin/taskpolicy -c utility {lahuta} sasa-sr -d {in} --output {out} {largs}
+lahuta cold (rep)                   | {lahuta} sasa-sr -d {in} --output {out} {largs}
++ lahuta warm                       | {lahuta} sasa-sr -d {in} --output {out} {largs}
++ lahuta warm, QoS clamp utility    | /usr/sbin/taskpolicy -c utility {lahuta} sasa-sr -d {in} --output {out} {largs}
++ zsasa warm                        | {zsasa} batch {in} -o {out}.jsonl {zargs}
++ zsasa warm, QoS clamp utility     | /usr/sbin/taskpolicy -c utility {zsasa} batch {in} -o {out}.jsonl {zargs}

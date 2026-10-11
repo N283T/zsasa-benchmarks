@@ -1,0 +1,9 @@
+zsasa bitmask (reference)            | {here}/zsasa-main batch {in} -o {out}.jsonl {zargs}
+zsasa standard, 4 points (tiny SASA) | {here}/zsasa-main batch {in} -o {out}.jsonl --format=jsonl --threads=10 --precision=f32 --n-points=4 --classifier=protor --timing --profile-stages
+mimic read+2.7 plain spin            | {mimic} {in} --mode=read --spin-us=2700
+mimic read+2.7 spin over 64 MB       | {mimic} {in} --mode=read --spin-us=2700 --spin-mem=64
+mimic read+2.7 spin over 4 MB        | {mimic} {in} --mode=read --spin-us=2700 --spin-mem=4
+zsasa standard, 4 points (rep)       | {here}/zsasa-main batch {in} -o {out}.jsonl --format=jsonl --threads=10 --precision=f32 --n-points=4 --classifier=protor --timing --profile-stages
+mimic read+2.7 spin over 64 MB (rep) | {mimic} {in} --mode=read --spin-us=2700 --spin-mem=64
+mimic read+2.7 plain spin (rep)      | {mimic} {in} --mode=read --spin-us=2700
+zsasa bitmask (rep)                  | {here}/zsasa-main batch {in} -o {out}.jsonl {zargs}

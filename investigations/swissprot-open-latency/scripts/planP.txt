@@ -1,0 +1,10 @@
+zsasa mmap, output file        | {here}/zsasa-readonce batch {in} -o {out}.jsonl {zargs}
+zsasa one read, output file    | {here}/zsasa-readonce batch {in} -o {out}.jsonl {zargs} --input-io=read
+lahuta                         | /usr/sbin/taskpolicy -d passive {lahuta} sasa-sr -d {in} --output {out} {largs}
+zsasa mmap, output discarded   | {here}/zsasa-readonce batch {in} -o /dev/null {zargs}
+zsasa one read, discarded      | {here}/zsasa-readonce batch {in} -o /dev/null {zargs} --input-io=read
+zsasa one read, discarded (2)  | {here}/zsasa-readonce batch {in} -o /dev/null {zargs} --input-io=read
+zsasa mmap, discarded (2)      | {here}/zsasa-readonce batch {in} -o /dev/null {zargs}
+lahuta (2)                     | /usr/sbin/taskpolicy -d passive {lahuta} sasa-sr -d {in} --output {out} {largs}
+zsasa one read, output file (2)| {here}/zsasa-readonce batch {in} -o {out}.jsonl {zargs} --input-io=read
+zsasa mmap, output file (2)    | {here}/zsasa-readonce batch {in} -o {out}.jsonl {zargs}

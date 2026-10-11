@@ -105,6 +105,7 @@ DATASET_LABELS = {
     ECOLI_DATASET: "E. coli AFDB",
     HUMAN_DATASET: "Human AFDB",
     SWISSPROT_DATASET: "SwissProt AFDB",
+    "swissprot_500k_pdb_passive_io": "SwissProt AFDB, passive disk I/O",
     "5wvo_C_analysis": "5wvo_C",
     "6sup_A_analysis": "6sup_A",
     "5vz0_A_protein": "5vz0_A",
