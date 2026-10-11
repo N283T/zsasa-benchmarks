@@ -168,6 +168,7 @@ def main() -> None:
     expected_zsasa_versions = {
         "zsasa_0_6_0": "v0.6.0",
         "zsasa_0_9_0": "v0.9.0",
+        "zsasa_0_11_0": "v0.11.0",
     }
     for tool, expected_tag in expected_zsasa_versions.items():
         spec = tools.get(tool, {})

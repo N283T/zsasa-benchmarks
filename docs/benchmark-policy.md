@@ -91,6 +91,12 @@ SwissProt rows. The 10-thread bitmask commands of `zsasa` and Lahuta were also
 run three times in alternating order (`..._r1` to `..._r3`, not imported):
 440.4, 431.3 and 451.1 s for `zsasa`, 484.0, 473.9 and 483.7 s for Lahuta.
 
+The same dataset holds one run of a later release, `zsasa` 0.11.0 (run set
+`v0_11_0_swissprot_passive_io`, 10 workers, bitmask f32, same command line):
+398.1 s. That release reads each batch input with one read instead of
+memory-mapping it. It is the only 0.11.0 measurement in the database; every
+other `zsasa` row of the 0.9.0 refresh stays on 0.9.0.
+
 The E. coli AFDB mmCIF plan is not adopted for the 0.9.0 refresh. Human mmCIF
 already answers the parser, input-I/O, and worker-overcommit questions, while
 E. coli PDB supplies the smaller batch-throughput workload. Keep the E. coli
