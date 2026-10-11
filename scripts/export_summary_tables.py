@@ -39,9 +39,10 @@ BATCH_VARIANT_ORDER = [
     "zsasa_0_9_0_bitmask_f32",
     "zsasa_0_11_0_bitmask_f32",
     "zsasa_generic_read",
-    "zsasa_generic_mmap",
-    "zsasa_af_fast_read",
-    "zsasa_af_fast_mmap",
+    "zsasa_0_11_0_generic_read",
+    "zsasa_0_11_0_generic_mmap",
+    "zsasa_0_11_0_af_fast_read",
+    "zsasa_0_11_0_af_fast_mmap",
     "freesasa_batch",
     "rustsasa",
     "lahuta",
@@ -82,9 +83,10 @@ DISPLAY_NAMES = {
     "zsasa_0_9_0_bitmask_f32": "zsasa 0.9.0 bitmask f32",
     "zsasa_0_11_0_bitmask_f32": "zsasa 0.11.0 bitmask f32",
     "zsasa_generic_read": "zsasa generic/read",
-    "zsasa_generic_mmap": "zsasa generic/mmap",
-    "zsasa_af_fast_read": "zsasa AF fast/read",
-    "zsasa_af_fast_mmap": "zsasa AF fast/mmap",
+    "zsasa_0_11_0_generic_read": "zsasa 0.11.0 generic/read",
+    "zsasa_0_11_0_generic_mmap": "zsasa 0.11.0 generic/mmap",
+    "zsasa_0_11_0_af_fast_read": "zsasa 0.11.0 AF fast/read",
+    "zsasa_0_11_0_af_fast_mmap": "zsasa 0.11.0 AF fast/mmap",
     "freesasa": "FreeSASA",
     "freesasa_batch": "FreeSASA batch",
     "rustsasa": "RustSASA",
@@ -178,7 +180,11 @@ def batch_variant_name(row: dict[str, Any]) -> str:
     tool_id = str(row.get("tool_id") or "")
     run_variant = str(row.get("run_variant") or "")
     if run_variant:
-        return f"zsasa_{run_variant}" if tool_id.startswith("zsasa") else run_variant
+        if not tool_id.startswith("zsasa"):
+            return run_variant
+        # 0.9.0 keeps the unversioned key; later releases carry their version.
+        prefix = "zsasa" if tool_id in {"zsasa", "zsasa_0_9_0"} else tool_id
+        return f"{prefix}_{run_variant}"
     precision = str(row.get("precision") or "")
     mode = str(row.get("mode") or "")
     if tool_id == "freesasa_batch":

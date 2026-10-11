@@ -55,9 +55,8 @@ comparator and lower-thread results as reference measurements rather than
 rerunning them in this matrix.
 
 The Human AFDB mmCIF benchmark keeps parser, input I/O, and thread scaling
-separable. At 20 threads it measures the full generic/AF-fast by read/mmap
-matrix. At 10 and 40 threads it measures the generic/read and AF-fast/read
-paths, and it includes Lahuta bitmask at 10 threads. Use one warmup, three
+separable. It measures the full generic/AF-fast by read/mmap matrix at 10, 20,
+and 40 threads, and it includes Lahuta bitmask at 10 threads. Use one warmup, three
 measured runs, f32 bitmask with 128 points, ProtOr classification, and
 three-decimal JSONL output. Interpret the result as a warm-cache end-to-end
 batch benchmark because `prepare = "sync"` does not drop the operating-system
@@ -70,9 +69,21 @@ used the parser's own default: memory mapping for the generic parser and
 whole-file reads for the AF-fast path. `generic_read` and `generic_mmap` are
 therefore repeats of generic parser + mmap, and `af_fast_read` and
 `af_fast_mmap` repeats of AF-fast + read; the same holds for the SwissProt
-`generic_read` run. The generic-against-AF-fast comparison stands. Do not read
-an input-I/O effect from these rows, and rerun the read/mmap control with a
-`zsasa` release that contains the fix.
+`generic_read` run. Do not read an input-I/O effect from those rows.
+
+The matrix was therefore measured again with `zsasa` 0.11.0, which applies the
+option (`manifests/batch-human-cif-zsasa-0.11.toml`, run set
+`v0_11_0_human_cif`, Lahuta 2.0.3 in the same session). The Human mmCIF tables
+and figures report this run set; its `zsasa` rows carry the version in their
+variant key (`zsasa_0_11_0_generic_read`, ...). The 0.9.0 run set
+`v0_9_0_human_cif` stays in the database and is no longer reported. With warm
+caches, read and mmap input take the same time within 2% for both parsers
+(10 threads: generic 17.21 s and 17.22 s, AF-fast 15.42 s and 15.41 s); mmap
+input has the lower peak RSS, and the difference grows with the worker count
+(AF-fast at 40 workers: 244 MiB against 323 MiB). The 0.11.0 times are 3-6%
+above the 0.9.0 times recorded in July. That is the session and not the
+release: `zsasa` 0.9.0 timed directly after the 0.11.0 run took 17.24 s
+(generic) and 15.73 s (AF-fast), while Lahuta took 16.19 s in both sessions.
 
 Batch manifests may set `[full_rerun] disk_io_policy` to run every command of
 the manifest under macOS `taskpolicy -d <policy>`. The SwissProt passive-I/O

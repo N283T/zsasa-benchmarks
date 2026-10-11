@@ -36,9 +36,10 @@ VARIANT_ORDER = [
     "zsasa_0_9_0_f32",
     "zsasa_0_9_0_bitmask_f32",
     "zsasa_generic_read",
-    "zsasa_generic_mmap",
-    "zsasa_af_fast_read",
-    "zsasa_af_fast_mmap",
+    "zsasa_0_11_0_generic_read",
+    "zsasa_0_11_0_generic_mmap",
+    "zsasa_0_11_0_af_fast_read",
+    "zsasa_0_11_0_af_fast_mmap",
     "freesasa_batch",
     "rustsasa",
     "lahuta",
@@ -75,9 +76,10 @@ COLORS = {
     "zsasa_0_9_0_f32": "#d99b2b",
     "zsasa_0_9_0_bitmask_f32": "#e67e22",
     "zsasa_generic_read": "#f6c85f",
-    "zsasa_generic_mmap": "#d99b2b",
-    "zsasa_af_fast_read": "#e67e22",
-    "zsasa_af_fast_mmap": "#b95f0b",
+    "zsasa_0_11_0_generic_read": "#f6c85f",
+    "zsasa_0_11_0_generic_mmap": "#d99b2b",
+    "zsasa_0_11_0_af_fast_read": "#e67e22",
+    "zsasa_0_11_0_af_fast_mmap": "#b95f0b",
     "freesasa_batch": "#3498db",
     "rustsasa": "#e74c3c",
     "lahuta": "#8e44ad",
@@ -93,9 +95,10 @@ DISPLAY_NAMES = {
     "zsasa_0_9_0_f32": "zsasa 0.9.0 f32",
     "zsasa_0_9_0_bitmask_f32": "zsasa 0.9.0 bitmask f32",
     "zsasa_generic_read": "zsasa generic/read",
-    "zsasa_generic_mmap": "zsasa generic/mmap",
-    "zsasa_af_fast_read": "zsasa AF fast/read",
-    "zsasa_af_fast_mmap": "zsasa AF fast/mmap",
+    "zsasa_0_11_0_generic_read": "zsasa 0.11.0 generic/read",
+    "zsasa_0_11_0_generic_mmap": "zsasa 0.11.0 generic/mmap",
+    "zsasa_0_11_0_af_fast_read": "zsasa 0.11.0 AF fast/read",
+    "zsasa_0_11_0_af_fast_mmap": "zsasa 0.11.0 AF fast/mmap",
     "freesasa_batch": "FreeSASA batch",
     "rustsasa": "RustSASA",
     "lahuta": "Lahuta",
@@ -125,7 +128,11 @@ def batch_column_name(run: dict[str, Any]) -> str:
     tool_id = str(run.get("tool_id") or "")
     run_variant = str(run.get("run_variant") or "")
     if run_variant:
-        return f"zsasa_{run_variant}" if tool_id.startswith("zsasa") else run_variant
+        if not tool_id.startswith("zsasa"):
+            return run_variant
+        # 0.9.0 keeps the unversioned key; later releases carry their version.
+        prefix = "zsasa" if tool_id in {"zsasa", "zsasa_0_9_0"} else tool_id
+        return f"{prefix}_{run_variant}"
     precision = str(run.get("precision") or "")
     mode = str(run.get("mode") or "")
     if tool_id == "freesasa_batch":
@@ -896,10 +903,10 @@ def t10_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 def human_cif_t20_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Select the complete parser-by-I/O matrix at 20 workers."""
     variants = {
-        "zsasa_generic_read",
-        "zsasa_generic_mmap",
-        "zsasa_af_fast_read",
-        "zsasa_af_fast_mmap",
+        "zsasa_0_11_0_generic_read",
+        "zsasa_0_11_0_generic_mmap",
+        "zsasa_0_11_0_af_fast_read",
+        "zsasa_0_11_0_af_fast_mmap",
     }
     return [row for row in rows if row["threads"] == 20 and row["variant"] in variants]
 
@@ -923,7 +930,7 @@ def plot_human_format_ranking(
         ),
         (
             "mmCIF",
-            row_for(cif_rows, "zsasa_generic_mmap", 10),
+            row_for(cif_rows, "zsasa_0_11_0_generic_mmap", 10),
             row_for(cif_rows, "lahuta_bitmask", 10),
         ),
     ]
@@ -985,10 +992,10 @@ def plot_human_format_ranking(
 def plot_human_cif_recovery(rows: list[dict[str, Any]], out_dir: Path) -> list[Path]:
     """Show categorical parser and I/O configurations without implying a trend."""
     configurations = [
-        ("Generic parser / mmap", "zsasa_generic_mmap", "#f6c85f", "s"),
-        ("Generic parser / read-all", "zsasa_generic_read", "#f6c85f", "o"),
-        ("AF fast path / mmap", "zsasa_af_fast_mmap", "#e67e22", "s"),
-        ("AF fast path / read-all", "zsasa_af_fast_read", "#e67e22", "o"),
+        ("Generic parser / mmap", "zsasa_0_11_0_generic_mmap", "#f6c85f", "s"),
+        ("Generic parser / read-all", "zsasa_0_11_0_generic_read", "#f6c85f", "o"),
+        ("AF fast path / mmap", "zsasa_0_11_0_af_fast_mmap", "#e67e22", "s"),
+        ("AF fast path / read-all", "zsasa_0_11_0_af_fast_read", "#e67e22", "o"),
     ]
     y_positions = np.arange(len(configurations))[::-1]
     fig, ax = plt.subplots(figsize=(7.6, 4.6), layout="constrained")
@@ -1065,13 +1072,13 @@ def plot_human_cif_ranking_recovery_story(
 
     comparisons = [
         (
-            "PDB",
+            "PDB\n(zsasa 0.9.0)",
             row_for(pdb_rows, "zsasa_bitmask_f32", 10),
             row_for(pdb_rows, "lahuta_bitmask", 10),
         ),
         (
-            "mmCIF",
-            row_for(cif_rows, "zsasa_generic_mmap", 10),
+            "mmCIF\n(zsasa 0.11.0)",
+            row_for(cif_rows, "zsasa_0_11_0_generic_mmap", 10),
             row_for(cif_rows, "lahuta_bitmask", 10),
         ),
     ]
@@ -1116,10 +1123,10 @@ def plot_human_cif_ranking_recovery_story(
     ratio_ax.grid(axis="y", visible=False)
 
     configurations = [
-        ("Generic, mmap", "zsasa_generic_mmap", "#f6c85f", "s", "white"),
-        ("Generic, read-all", "zsasa_generic_read", "#f6c85f", "o", "#f6c85f"),
-        ("AF-fast, mmap", "zsasa_af_fast_mmap", "#e67e22", "s", "white"),
-        ("AF-fast, read-all", "zsasa_af_fast_read", "#e67e22", "o", "#e67e22"),
+        ("Generic, mmap", "zsasa_0_11_0_generic_mmap", "#f6c85f", "s", "white"),
+        ("Generic, read-all", "zsasa_0_11_0_generic_read", "#f6c85f", "o", "#f6c85f"),
+        ("AF-fast, mmap", "zsasa_0_11_0_af_fast_mmap", "#e67e22", "s", "white"),
+        ("AF-fast, read-all", "zsasa_0_11_0_af_fast_read", "#e67e22", "o", "#e67e22"),
     ]
     recovery_ax = axes[1]
     recovery_y = np.arange(len(configurations))[::-1]
@@ -1145,10 +1152,10 @@ def plot_human_cif_ranking_recovery_story(
         recovery_ax.annotate(
             f"{row['throughput']:,.0f}",
             (row["throughput"], y),
-            xytext=(8, 0) if variant == "zsasa_generic_read" else (0, 9),
+            xytext=(0, 9),
             textcoords="offset points",
-            ha="left" if variant == "zsasa_generic_read" else "center",
-            va="center" if variant == "zsasa_generic_read" else "bottom",
+            ha="center",
+            va="bottom",
             fontsize=8,
         )
     lahuta = row_for(cif_rows, "lahuta_bitmask", 10)
@@ -1169,10 +1176,10 @@ def plot_human_cif_ranking_recovery_story(
         fontsize=8,
         fontweight="bold",
     )
-    recovery_ax.set_title("mmCIF recovery")
+    recovery_ax.set_title("mmCIF parser path and input I/O (zsasa 0.11.0)")
     recovery_ax.set_xlabel(r"Throughput (structures s$^{-1}$)")
     recovery_ax.set_yticks(recovery_y, [item[0] for item in configurations])
-    recovery_ax.set_xlim(1380, 1650)
+    recovery_ax.set_xlim(1330, 1570)
     recovery_ax.set_ylim(-0.5, 3.5)
     recovery_ax.grid(axis="y", visible=False)
 
@@ -1202,8 +1209,8 @@ def plot_human_cif_af_fast_overcommit(
         raise ValueError(f"unsupported AF-fast overcommit metric: {metric}")
 
     variants = {
-        "read-all": "zsasa_af_fast_read",
-        "mmap": "zsasa_af_fast_mmap",
+        "read-all": "zsasa_0_11_0_af_fast_read",
+        "mmap": "zsasa_0_11_0_af_fast_mmap",
     }
     styles = {
         "read-all": {"color": "#e67e22", "marker": "o", "linestyle": "-"},
@@ -1249,8 +1256,8 @@ def plot_human_cif_af_fast_overcommit_tradeoff(
 ) -> list[Path]:
     """Pair the AF-fast throughput response with its memory cost."""
     variants = {
-        "read-all": "zsasa_af_fast_read",
-        "mmap": "zsasa_af_fast_mmap",
+        "read-all": "zsasa_0_11_0_af_fast_read",
+        "mmap": "zsasa_0_11_0_af_fast_mmap",
     }
     styles = {
         "read-all": {"color": "#e67e22", "marker": "o", "linestyle": "-"},
@@ -1327,14 +1334,18 @@ def plot_human_cif_af_fast_overcommit_tradeoff(
         fontsize=8,
         fontweight="bold",
     )
-    axes[0].set_ylim(-2.0, 5.5)
+    axes[0].set_ylim(-4.0, 4.0)
 
-    rss_start = row_for(rows, variants["read-all"], 10)["memory_mean_mb"]
-    rss_end = row_for(rows, variants["read-all"], 40)["memory_mean_mb"]
+    rss_growth = {
+        io_mode: row_for(rows, variant, 40)["memory_mean_mb"]
+        / row_for(rows, variant, 10)["memory_mean_mb"]
+        for io_mode, variant in variants.items()
+    }
     axes[1].text(
         0.96,
         0.13,
-        f"read-all and mmap overlap\n{rss_end / rss_start:.1f}× peak RSS",
+        "peak RSS, 10 to 40 threads\n"
+        f"read-all {rss_growth['read-all']:.1f}×, mmap {rss_growth['mmap']:.1f}×",
         transform=axes[1].transAxes,
         ha="right",
         va="bottom",
@@ -1342,7 +1353,7 @@ def plot_human_cif_af_fast_overcommit_tradeoff(
         fontsize=8,
         fontweight="bold",
     )
-    axes[1].set_ylim(0, 335)
+    axes[1].set_ylim(0, 350)
     axes[1].legend(
         handles=[
             plt.Line2D(
@@ -1372,7 +1383,7 @@ def plot_human_cif_af_fast_overcommit_tradeoff(
     )
     add_panel_label(axes[0], "a")
     add_panel_label(axes[1], "b")
-    fig.suptitle("AF-fast I/O behavior under thread overcommit", fontsize=11)
+    fig.suptitle("AF-fast I/O behavior under thread overcommit (zsasa 0.11.0)", fontsize=11)
     return save_figure(fig, out_dir, "human_cif_af_fast_overcommit_tradeoff")
 
 
@@ -1382,8 +1393,8 @@ def plot_human_cif_parser_io_metric(
     """Compare Human mmCIF parser paths and input I/O at 20 workers."""
     selected = {row["variant"]: row for row in human_cif_t20_rows(rows)}
     parser_variants = {
-        "read": ["zsasa_generic_read", "zsasa_af_fast_read"],
-        "mmap": ["zsasa_generic_mmap", "zsasa_af_fast_mmap"],
+        "read": ["zsasa_0_11_0_generic_read", "zsasa_0_11_0_af_fast_read"],
+        "mmap": ["zsasa_0_11_0_generic_mmap", "zsasa_0_11_0_af_fast_mmap"],
     }
     expected_variants = {
         variant for variants in parser_variants.values() for variant in variants
@@ -1460,8 +1471,8 @@ def plot_human_cif_performance_memory_map(
     """Show parser and input-I/O effects in performance-memory space."""
     selected = human_cif_t20_matrix(rows)
     paths = {
-        "read": ("zsasa_generic_read", "zsasa_af_fast_read"),
-        "mmap": ("zsasa_generic_mmap", "zsasa_af_fast_mmap"),
+        "read": ("zsasa_0_11_0_generic_read", "zsasa_0_11_0_af_fast_read"),
+        "mmap": ("zsasa_0_11_0_generic_mmap", "zsasa_0_11_0_af_fast_mmap"),
     }
     if not {variant for path in paths.values() for variant in path}.issubset(selected):
         return []
@@ -1555,8 +1566,8 @@ def plot_human_cif_interaction(
     """Plot the parser-by-I/O interaction for one Human mmCIF metric."""
     selected = human_cif_t20_matrix(rows)
     variants = {
-        "read": ("zsasa_generic_read", "zsasa_af_fast_read"),
-        "mmap": ("zsasa_generic_mmap", "zsasa_af_fast_mmap"),
+        "read": ("zsasa_0_11_0_generic_read", "zsasa_0_11_0_af_fast_read"),
+        "mmap": ("zsasa_0_11_0_generic_mmap", "zsasa_0_11_0_af_fast_mmap"),
     }
     if not {variant for pair in variants.values() for variant in pair}.issubset(selected):
         return []
@@ -1626,8 +1637,8 @@ def plot_human_cif_parser_effect(rows: list[dict[str, Any]], out_dir: Path) -> l
     """Summarize the AF fast-path effect relative to the generic parser."""
     selected = human_cif_t20_matrix(rows)
     variants = {
-        "read": ("zsasa_generic_read", "zsasa_af_fast_read"),
-        "mmap": ("zsasa_generic_mmap", "zsasa_af_fast_mmap"),
+        "read": ("zsasa_0_11_0_generic_read", "zsasa_0_11_0_af_fast_read"),
+        "mmap": ("zsasa_0_11_0_generic_mmap", "zsasa_0_11_0_af_fast_mmap"),
     }
     if not {variant for pair in variants.values() for variant in pair}.issubset(selected):
         return []
@@ -1688,12 +1699,12 @@ def plot_human_cif_worker_scaling(
         variant_rows.sort(key=lambda row: row["threads"])
 
     read_variants = {
-        "zsasa_generic_read": "zsasa generic/read",
-        "zsasa_af_fast_read": "zsasa AF fast/read",
+        "zsasa_0_11_0_generic_read": "zsasa generic/read",
+        "zsasa_0_11_0_af_fast_read": "zsasa AF fast/read",
     }
     mmap_variants = {
-        "zsasa_generic_mmap": "zsasa generic/mmap (20 workers)",
-        "zsasa_af_fast_mmap": "zsasa AF fast/mmap (20 workers)",
+        "zsasa_0_11_0_generic_mmap": "zsasa generic/mmap (20 workers)",
+        "zsasa_0_11_0_af_fast_mmap": "zsasa AF fast/mmap (20 workers)",
     }
     required = {*read_variants, *mmap_variants, "lahuta_bitmask"}
     if not required.issubset(selected):
@@ -1715,10 +1726,10 @@ def plot_human_cif_worker_scaling(
         raise ValueError(f"unsupported Human CIF worker-scaling metric: {metric}")
 
     parser_colors = {
-        "zsasa_generic_read": "#f6c85f",
-        "zsasa_generic_mmap": "#f6c85f",
-        "zsasa_af_fast_read": "#e67e22",
-        "zsasa_af_fast_mmap": "#e67e22",
+        "zsasa_0_11_0_generic_read": "#f6c85f",
+        "zsasa_0_11_0_generic_mmap": "#f6c85f",
+        "zsasa_0_11_0_af_fast_read": "#e67e22",
+        "zsasa_0_11_0_af_fast_mmap": "#e67e22",
     }
     fig, ax = plt.subplots(figsize=(8.0, 5.3), layout="constrained")
     ax.axvspan(10, 40, color="0.5", alpha=0.06, zorder=0)

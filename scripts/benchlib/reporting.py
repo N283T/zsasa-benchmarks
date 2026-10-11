@@ -33,7 +33,7 @@ def adopted_for_reporting(benchmark_kind: str, source_path: str | None, status: 
             "v0_9_0_swissprot_read_t10",
             "v0_9_0_swissprot_passive_io",
             "v0_11_0_swissprot_passive_io",
-            "v0_9_0_human_cif",
+            "v0_11_0_human_cif",
         },
     }
     return source in adopted.get(benchmark_kind, set())
