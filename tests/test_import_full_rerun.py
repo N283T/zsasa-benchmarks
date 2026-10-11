@@ -16,6 +16,7 @@ from scripts.import_full_rerun import (
     parse_zsasa_jsonl_total,
     reset_database,
     single_structure_metadata,
+    swissprot_dataset_id,
 )
 
 
@@ -554,3 +555,13 @@ def test_validate_batch_output_counts_rejects_stale_expected_count(tmp_path: Pat
     validate_batch_output_counts(base, None, "ds")
     with pytest.raises(ValueError, match="expected_count=2 but .* has 3 per-structure"):
         validate_batch_output_counts(base, 2, "ds")
+
+
+def test_swissprot_dataset_id_follows_the_recorded_disk_io_policy(tmp_path: Path) -> None:
+    assert swissprot_dataset_id(tmp_path) == "swissprot_500k_pdb"
+
+    tmp_path.joinpath("config.json").write_text(json.dumps({"disk_io_policy": None}))
+    assert swissprot_dataset_id(tmp_path) == "swissprot_500k_pdb"
+
+    tmp_path.joinpath("config.json").write_text(json.dumps({"disk_io_policy": "passive"}))
+    assert swissprot_dataset_id(tmp_path) == "swissprot_500k_pdb_passive_io"

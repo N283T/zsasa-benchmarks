@@ -82,6 +82,15 @@ scanner's reads while a normal-priority tool reads from the same disk. The
 passive policy removes that throttling for `zsasa` and Lahuta alike. Keep it
 out of the warm-cache manifests, where it changes nothing.
 
+Runs under the passive policy are stored under their own dataset id,
+`swissprot_500k_pdb_passive_io` ("SwissProt AFDB, passive disk I/O" in the summary
+tables), so that the same commands under the default policy and under the
+passive policy stay separate rows. The adopted run set is
+`v0_9_0_swissprot_passive_io`: one run per command, as for the default-policy
+SwissProt rows. The 10-thread bitmask commands of `zsasa` and Lahuta were also
+run three times in alternating order (`..._r1` to `..._r3`, not imported):
+440.4, 431.3 and 451.1 s for `zsasa`, 484.0, 473.9 and 483.7 s for Lahuta.
+
 The E. coli AFDB mmCIF plan is not adopted for the 0.9.0 refresh. Human mmCIF
 already answers the parser, input-I/O, and worker-overcommit questions, while
 E. coli PDB supplies the smaller batch-throughput workload. Keep the E. coli

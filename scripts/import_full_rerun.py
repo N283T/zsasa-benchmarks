@@ -596,6 +596,14 @@ def import_hyperfine_directory(
         )
 
 
+def swissprot_dataset_id(base: Path) -> str:
+    """Dataset id of a SwissProt batch run: runs under a passive disk I/O policy have their own."""
+    config_path = base.joinpath("config.json")
+    if config_path.exists() and read_json(config_path).get("disk_io_policy") == "passive":
+        return "swissprot_500k_pdb_passive_io"
+    return "swissprot_500k_pdb"
+
+
 def manifest_id_from_config(base: Path, default: str) -> str:
     config_path = base.joinpath("config.json")
     if not config_path.exists():
@@ -807,6 +815,7 @@ def seed_all_datasets(conn, datasets_path: Path) -> None:
         ROOT.joinpath("manifests/batch-human-zsasa-0.9.toml"),
         ROOT.joinpath("manifests/batch-human-cif-zsasa-0.9.toml"),
         ROOT.joinpath("manifests/batch-swissprot-version-refresh.toml"),
+        ROOT.joinpath("manifests/batch-swissprot-passive-io.toml"),
         ROOT.joinpath("manifests/single-file-sample.toml"),
         ROOT.joinpath("manifests/single-file-mmcif-sample.toml"),
     ]:
@@ -928,7 +937,7 @@ def import_full_rerun(
             base=results_root.joinpath("batch", "swissprot"),
             run_label=run_label,
             benchmark_kind="batch",
-            dataset_id="swissprot_500k_pdb",
+            dataset_id=swissprot_dataset_id(results_root.joinpath("batch", "swissprot")),
             manifest_id=manifest_id_from_config(
                 results_root.joinpath("batch", "swissprot"), "batch-swissprot-version-refresh"
             ),
