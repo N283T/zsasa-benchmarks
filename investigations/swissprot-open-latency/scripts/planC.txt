@@ -1,0 +1,13 @@
+# does eviction by stat-ing 300k other files reset a warm block to cold?
+zsasa cold                         | {zsasa} batch {in} -o {out}.jsonl {zargs}
++ zsasa second pass (warm)         | {zsasa} batch {in} -o {out}.jsonl {zargs}
++ zsasa third pass @evict          | {zsasa} batch {in} -o {out}.jsonl {zargs}
++ zsasa fourth pass @evict @prestat| {zsasa} batch {in} -o {out}.jsonl {zargs}
+zsasa cold                         | {zsasa} batch {in} -o {out}.jsonl {zargs}
+zsasa @prestat                     | {zsasa} batch {in} -o {out}.jsonl {zargs}
+lahuta cold                        | {lahuta} sasa-sr -d {in} --output {out} {largs}
+lahuta @prestat                    | {lahuta} sasa-sr -d {in} --output {out} {largs}
+zsasa @prestat                     | {zsasa} batch {in} -o {out}.jsonl {zargs}
+zsasa cold                         | {zsasa} batch {in} -o {out}.jsonl {zargs}
+lahuta @prestat                    | {lahuta} sasa-sr -d {in} --output {out} {largs}
+lahuta cold                        | {lahuta} sasa-sr -d {in} --output {out} {largs}

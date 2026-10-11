@@ -1,0 +1,9 @@
+passive, mmap, cold            | {here}/zsasa-readonce batch {in} -o {out}.jsonl {zargs}
+passive, one read, cold        | {here}/zsasa-readonce batch {in} -o {out}.jsonl {zargs} --input-io=read
++ passive, one read, warm      | {here}/zsasa-readonce batch {in} -o {out}.jsonl {zargs} --input-io=read
++ passive, mmap, warm          | {here}/zsasa-readonce batch {in} -o {out}.jsonl {zargs}
++ passive, one read, warm      | {here}/zsasa-readonce batch {in} -o {out}.jsonl {zargs} --input-io=read
++ passive, mmap, warm          | {here}/zsasa-readonce batch {in} -o {out}.jsonl {zargs}
+passive, one read, cold (rep)  | {here}/zsasa-readonce batch {in} -o {out}.jsonl {zargs} --input-io=read
+passive, mmap, cold (rep)      | {here}/zsasa-readonce batch {in} -o {out}.jsonl {zargs}
+passive, old chunked read, cold| {here}/zsasa-passive batch {in} -o {out}.jsonl {zargs} --input-io=read

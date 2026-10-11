@@ -1,0 +1,9 @@
+zsasa full                           | {here}/zsasa-exp batch {in} -o {out}.jsonl {zargs}
+zsasa parse only @env:ZSASA_EXP=parse_only | {here}/zsasa-exp batch {in} -o {out}.jsonl {zargs}
+zsasa open only @env:ZSASA_EXP=open_only   | {here}/zsasa-exp batch {in} -o {out}.jsonl {zargs}
+mimic read, no compute               | {mimic} {in} --mode=read
+mimic open+close only                | {mimic} {in} --mode=none
+zsasa open only (rep) @env:ZSASA_EXP=open_only   | {here}/zsasa-exp batch {in} -o {out}.jsonl {zargs}
+zsasa parse only (rep) @env:ZSASA_EXP=parse_only | {here}/zsasa-exp batch {in} -o {out}.jsonl {zargs}
+zsasa full (rep)                     | {here}/zsasa-exp batch {in} -o {out}.jsonl {zargs}
+mimic open+close only (rep)          | {mimic} {in} --mode=none

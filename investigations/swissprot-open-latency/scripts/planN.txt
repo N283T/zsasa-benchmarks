@@ -1,0 +1,6 @@
+zsasa main cold                 | {here}/zsasa-main batch {in} -o {out}.jsonl {zargs}
+zsasa passive build cold        | {here}/zsasa-passive batch {in} -o {out}.jsonl {zargs}
++ zsasa passive build warm      | {here}/zsasa-passive batch {in} -o {out}.jsonl {zargs}
++ zsasa main warm               | {here}/zsasa-main batch {in} -o {out}.jsonl {zargs}
+zsasa passive build cold (rep)  | {here}/zsasa-passive batch {in} -o {out}.jsonl {zargs}
+zsasa main cold (rep)           | {here}/zsasa-main batch {in} -o {out}.jsonl {zargs}

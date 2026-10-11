@@ -1,0 +1,13 @@
+mimic read+2.7 cold                 | {mimic} {in} --mode=read --spin-us=2700
+mimic read+2.7 @prestat             | {mimic} {in} --mode=read --spin-us=2700
+mimic read+2.7 stat just before open| {mimic} {in} --mode=read --spin-us=2700 --stat-first
+mimic read+2.7 stat 100 ahead       | {mimic} {in} --mode=read --spin-us=2700 --stat-ahead=100
+mimic read+2.7 stat 2000 ahead      | {mimic} {in} --mode=read --spin-us=2700 --stat-ahead=2000
+mimic read no compute cold          | {mimic} {in} --mode=read
+mimic read no compute @prestat      | {mimic} {in} --mode=read
+mimic read+2.7 qos utility cold     | {mimic} {in} --mode=read --spin-us=2700 --qos=utility
+mimic read+2.7 qos utility @prestat | {mimic} {in} --mode=read --spin-us=2700 --qos=utility
+mimic read+2.7 cold (repeat)        | {mimic} {in} --mode=read --spin-us=2700
+mimic read+2.7 @prestat (repeat)    | {mimic} {in} --mode=read --spin-us=2700
+mimic read+2.7 stat 100 ahead (rep) | {mimic} {in} --mode=read --spin-us=2700 --stat-ahead=100
+mimic read+2.7 stat just before(rep)| {mimic} {in} --mode=read --spin-us=2700 --stat-first

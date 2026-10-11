@@ -1,0 +1,9 @@
+mimic read+2.7, no output            | {mimic} {in} --mode=read --spin-us=2700
+mimic read+2.7, 30 KB write per file | {mimic} {in} --mode=read --spin-us=2700 --write-bytes=30000 --out={out}.jsonl
+mimic read+2.7, write to /dev/null   | {mimic} {in} --mode=read --spin-us=2700 --write-bytes=30000 --out=/dev/null
+mimic read+2.7, 30 KB write (rep)    | {mimic} {in} --mode=read --spin-us=2700 --write-bytes=30000 --out={out}.jsonl
+mimic read+2.7, no output (rep)      | {mimic} {in} --mode=read --spin-us=2700
+zsasa bitmask, -o file               | {here}/zsasa-main batch {in} -o {out}.jsonl {zargs}
+zsasa bitmask, no output at all      | {here}/zsasa-main batch {in} --threads=10 --precision=f32 --n-points=128 --classifier=protor --use-bitmask --timing --profile-stages
+zsasa bitmask, no output, quiet      | {here}/zsasa-main batch {in} --threads=10 --precision=f32 --n-points=128 --classifier=protor --use-bitmask --timing --profile-stages -q
+zsasa bitmask, -o file, quiet        | {here}/zsasa-main batch {in} -o {out}.jsonl {zargs} -q

@@ -1,0 +1,12 @@
+zsasa 0.10.1 cold                    | {here}/zsasa-main batch {in} -o {out}.jsonl {zargs}
+zsasa 0.10.1 cold, disk passive      | /usr/sbin/taskpolicy -d passive {here}/zsasa-main batch {in} -o {out}.jsonl {zargs}
+lahuta cold                          | {lahuta} sasa-sr -d {in} --output {out} {largs}
+lahuta cold, disk passive            | /usr/sbin/taskpolicy -d passive {lahuta} sasa-sr -d {in} --output {out} {largs}
+zsasa cold, disk passive (rep)       | /usr/sbin/taskpolicy -d passive {here}/zsasa-main batch {in} -o {out}.jsonl {zargs}
++ zsasa warm, disk passive           | /usr/sbin/taskpolicy -d passive {here}/zsasa-main batch {in} -o {out}.jsonl {zargs}
++ zsasa warm                         | {here}/zsasa-main batch {in} -o {out}.jsonl {zargs}
+lahuta cold, disk passive (rep)      | /usr/sbin/taskpolicy -d passive {lahuta} sasa-sr -d {in} --output {out} {largs}
++ lahuta warm, disk passive          | /usr/sbin/taskpolicy -d passive {lahuta} sasa-sr -d {in} --output {out} {largs}
++ lahuta warm                        | {lahuta} sasa-sr -d {in} --output {out} {largs}
+zsasa stat-ahead cold, disk passive  | /usr/sbin/taskpolicy -d passive {here}/zsasa-statahead batch {in} -o {out}.jsonl {zargs}
+zsasa 0.10.1 cold (rep)              | {here}/zsasa-main batch {in} -o {out}.jsonl {zargs}

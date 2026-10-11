@@ -1,0 +1,9 @@
+main 0.10.1 cold            | {here}/zsasa-main batch {in} -o {out}.jsonl {zargs}
+stat-ahead build cold       | {here}/zsasa-statahead batch {in} -o {out}.jsonl {zargs}
++ stat-ahead build warm     | {here}/zsasa-statahead batch {in} -o {out}.jsonl {zargs}
++ main 0.10.1 warm          | {here}/zsasa-main batch {in} -o {out}.jsonl {zargs}
+stat-ahead build cold (rep) | {here}/zsasa-statahead batch {in} -o {out}.jsonl {zargs}
+main 0.10.1 cold (rep)      | {here}/zsasa-main batch {in} -o {out}.jsonl {zargs}
++ main 0.10.1 warm          | {here}/zsasa-main batch {in} -o {out}.jsonl {zargs}
++ stat-ahead build warm     | {here}/zsasa-statahead batch {in} -o {out}.jsonl {zargs}
+lahuta cold                 | {lahuta} sasa-sr -d {in} --output {out} {largs}

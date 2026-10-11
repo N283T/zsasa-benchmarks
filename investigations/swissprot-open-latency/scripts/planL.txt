@@ -1,0 +1,12 @@
+mimic mmap+2.7                        | {mimic} {in} --mode=mmap --spin-us=2700
+mimic mmap+2.7, iopol passive         | {mimic} {in} --mode=mmap --spin-us=2700 --iopol=passive
+mimic read (1 call)+2.7               | {mimic} {in} --mode=read --spin-us=2700
+mimic read (1 call)+2.7, iopol passive| {mimic} {in} --mode=read --spin-us=2700 --iopol=passive
+mimic read 64K chunks+2.7             | {mimic} {in} --mode=read64k --spin-us=2700
+mimic mmap+2.7, iopol utility         | {mimic} {in} --mode=mmap --spin-us=2700 --iopol=utility
+mimic mmap, no compute                | {mimic} {in} --mode=mmap
+mimic mmap, no compute, iopol passive | {mimic} {in} --mode=mmap --iopol=passive
+mimic open only                       | {mimic} {in} --mode=none
+mimic open only, iopol passive        | {mimic} {in} --mode=none --iopol=passive
+mimic mmap+2.7, iopol passive (rep)   | {mimic} {in} --mode=mmap --spin-us=2700 --iopol=passive
+mimic mmap+2.7 (rep)                  | {mimic} {in} --mode=mmap --spin-us=2700
