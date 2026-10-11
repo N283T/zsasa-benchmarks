@@ -30,6 +30,16 @@ zig = "0.16.0"
 binary = "zsasa-0.9.0"
 check_args = ["--version"]
 
+[zsasa_0_11_0]
+policy = "later zsasa release, measured only on the SwissProt passive-I/O run for comparison with 0.9.0"
+repository = "https://github.com/N283T/zsasa"
+version = "0.11.0"
+tag = "v0.11.0"
+commit = "0c572e587c5ce1b04947fbcd8066143f007221b6"
+zig = "0.16.0"
+binary = "zsasa-0.11.0"
+check_args = ["--version"]
+
 [freesasa]
 policy = "rerun from pinned Nix comparator build for manuscript benchmarks"
 repository = "https://github.com/N283T/freesasa"

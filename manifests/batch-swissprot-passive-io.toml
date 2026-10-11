@@ -36,3 +36,11 @@ modes = ["standard", "bitmask"]
 tool = "lahuta"
 threads = [10]
 modes = ["bitmask"]
+
+# A later release, for comparison with 0.9.0 under the same policy: 0.11.0 reads each input with
+# one read instead of memory-mapping it. Run it under its own run id (v0_11_0_swissprot_passive_io).
+[[full_rerun.jobs]]
+tool = "zsasa_0_11_0"
+threads = [10]
+precisions = ["f32"]
+modes = ["bitmask"]
