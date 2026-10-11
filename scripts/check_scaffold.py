@@ -338,59 +338,63 @@ def main() -> None:
         if pdb_full.get("threads") != expected_threads or pdb_full.get("jobs") != expected_pdb_jobs:
             fail(f"{manifest_name} must encode the expected zsasa 0.9.0 thread matrix")
 
-    human_cif = read_toml(ROOT.joinpath("manifests/batch-human-cif-zsasa-0.9.toml"))
-    human_cif_full = human_cif.get("full_rerun", {})
-    if human_cif_full.get("runs") != 3 or human_cif_full.get("warmup") != 1:
-        fail("Human CIF benchmark must use three measured runs and one warmup")
-    if human_cif_full.get("jsonl_decimals") != 3:
-        fail("Human CIF benchmark must use three-decimal JSONL output")
-    human_cif_jobs = human_cif_full.get("jobs", [])
-    expected_human_cif_jobs = [
-        {
-            "tool": "zsasa_0_9_0",
-            "variant": "generic_read",
-            "threads": [10, 20, 40],
-            "precisions": ["f32"],
-            "modes": ["bitmask"],
-            "af_model_fast": False,
-            "input_io": "read",
-        },
-        {
-            "tool": "zsasa_0_9_0",
-            "variant": "af_fast_read",
-            "threads": [10, 20, 40],
-            "precisions": ["f32"],
-            "modes": ["bitmask"],
-            "af_model_fast": True,
-            "input_io": "read",
-        },
-        {
-            "tool": "zsasa_0_9_0",
-            "variant": "generic_mmap",
-            "threads": [10, 20, 40],
-            "precisions": ["f32"],
-            "modes": ["bitmask"],
-            "af_model_fast": False,
-            "input_io": "mmap",
-        },
-        {
-            "tool": "zsasa_0_9_0",
-            "variant": "af_fast_mmap",
-            "threads": [10, 20, 40],
-            "precisions": ["f32"],
-            "modes": ["bitmask"],
-            "af_model_fast": True,
-            "input_io": "mmap",
-        },
-        {
-            "tool": "lahuta",
-            "threads": [10],
-            "precisions": ["f32"],
-            "modes": ["bitmask"],
-        },
-    ]
-    if human_cif_jobs != expected_human_cif_jobs:
-        fail("Human CIF jobs must encode the parser/I/O matrix plus Lahuta 10t")
+    for human_cif_name, human_cif_tool in (
+        ("batch-human-cif-zsasa-0.9.toml", "zsasa_0_9_0"),
+        ("batch-human-cif-zsasa-0.11.toml", "zsasa_0_11_0"),
+    ):
+        human_cif = read_toml(ROOT.joinpath("manifests", human_cif_name))
+        human_cif_full = human_cif.get("full_rerun", {})
+        if human_cif_full.get("runs") != 3 or human_cif_full.get("warmup") != 1:
+            fail(f"{human_cif_name} must use three measured runs and one warmup")
+        if human_cif_full.get("jsonl_decimals") != 3:
+            fail(f"{human_cif_name} must use three-decimal JSONL output")
+        human_cif_jobs = human_cif_full.get("jobs", [])
+        expected_human_cif_jobs = [
+            {
+                "tool": human_cif_tool,
+                "variant": "generic_read",
+                "threads": [10, 20, 40],
+                "precisions": ["f32"],
+                "modes": ["bitmask"],
+                "af_model_fast": False,
+                "input_io": "read",
+            },
+            {
+                "tool": human_cif_tool,
+                "variant": "af_fast_read",
+                "threads": [10, 20, 40],
+                "precisions": ["f32"],
+                "modes": ["bitmask"],
+                "af_model_fast": True,
+                "input_io": "read",
+            },
+            {
+                "tool": human_cif_tool,
+                "variant": "generic_mmap",
+                "threads": [10, 20, 40],
+                "precisions": ["f32"],
+                "modes": ["bitmask"],
+                "af_model_fast": False,
+                "input_io": "mmap",
+            },
+            {
+                "tool": human_cif_tool,
+                "variant": "af_fast_mmap",
+                "threads": [10, 20, 40],
+                "precisions": ["f32"],
+                "modes": ["bitmask"],
+                "af_model_fast": True,
+                "input_io": "mmap",
+            },
+            {
+                "tool": "lahuta",
+                "threads": [10],
+                "precisions": ["f32"],
+                "modes": ["bitmask"],
+            },
+        ]
+        if human_cif_jobs != expected_human_cif_jobs:
+            fail(f"{human_cif_name} must encode the parser/I/O matrix plus Lahuta 10t")
 
     single_pdb = read_toml(ROOT.joinpath("manifests/single-file-sample.toml"))
     expected_pdb_tools = {

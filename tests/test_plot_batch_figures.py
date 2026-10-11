@@ -130,22 +130,44 @@ def test_human_cif_t20_rows_selects_complete_parser_io_matrix() -> None:
     rows = [
         {"variant": variant, "threads": threads}
         for variant in (
-            "zsasa_generic_read",
-            "zsasa_generic_mmap",
-            "zsasa_af_fast_read",
-            "zsasa_af_fast_mmap",
+            "zsasa_0_11_0_generic_read",
+            "zsasa_0_11_0_generic_mmap",
+            "zsasa_0_11_0_af_fast_read",
+            "zsasa_0_11_0_af_fast_mmap",
             "lahuta_bitmask",
         )
         for threads in (10, 20, 40)
     ]
 
     assert {row["variant"] for row in human_cif_t20_rows(rows)} == {
-        "zsasa_generic_read",
-        "zsasa_generic_mmap",
-        "zsasa_af_fast_read",
-        "zsasa_af_fast_mmap",
+        "zsasa_0_11_0_generic_read",
+        "zsasa_0_11_0_generic_mmap",
+        "zsasa_0_11_0_af_fast_read",
+        "zsasa_0_11_0_af_fast_mmap",
     }
     assert {row["threads"] for row in human_cif_t20_rows(rows)} == {20}
+
+
+def test_batch_column_name_versions_variants_after_0_9_0() -> None:
+    from scripts.plot_batch_figures import batch_column_name
+
+    assert (
+        batch_column_name({"tool_id": "zsasa_0_9_0", "run_variant": "generic_read"})
+        == "zsasa_generic_read"
+    )
+    assert (
+        batch_column_name({"tool_id": "zsasa_0_11_0", "run_variant": "generic_read"})
+        == "zsasa_0_11_0_generic_read"
+    )
+    assert batch_column_name({"tool_id": "lahuta", "run_variant": "custom"}) == "custom"
+    assert (
+        batch_variant_name({"tool_id": "zsasa_0_9_0", "run_variant": "generic_read"})
+        == "zsasa_generic_read"
+    )
+    assert (
+        batch_variant_name({"tool_id": "zsasa_0_11_0", "run_variant": "af_fast_mmap"})
+        == "zsasa_0_11_0_af_fast_mmap"
+    )
 
 
 def test_swissprot_story_rows_selects_current_zsasa_and_lahuta_t10() -> None:
