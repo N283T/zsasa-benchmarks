@@ -14,9 +14,11 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.benchlib.commands import (  # noqa: E402
+    DISK_IO_POLICIES,
     batch_command,
     freesasa_batch_command,
     lahuta_batch_command,
+    with_disk_io_policy,
 )
 from scripts.benchlib.datasets import (  # noqa: E402
     DEFAULT_DATASETS_CONFIG,
@@ -120,6 +122,11 @@ def full_rerun_settings(manifest: dict[str, Any]) -> dict[str, Any]:
     input_io = full_rerun.get("input_io")
     if input_io is not None and input_io not in {"auto", "mmap", "read"}:
         raise ValueError("full_rerun.input_io must be one of: auto, mmap, read")
+    disk_io_policy = full_rerun.get("disk_io_policy")
+    if disk_io_policy is not None and disk_io_policy not in DISK_IO_POLICIES:
+        raise ValueError(
+            f"full_rerun.disk_io_policy must be one of: {', '.join(sorted(DISK_IO_POLICIES))}"
+        )
     return full_rerun
 
 
@@ -273,6 +280,7 @@ def build_native_records(
     runs = int(settings["runs"])
     warmup = int(settings["warmup"])
     prepare = str(settings["prepare"]) if settings.get("prepare") else None
+    disk_io_policy = str(settings["disk_io_policy"]) if settings.get("disk_io_policy") else None
     for job in batch_jobs(settings):
         tool_id = str(job["tool"])
         variant = validate_variant(job.get("variant"))
@@ -334,7 +342,7 @@ def build_native_records(
                                 ],
                                 argv=hyperfine_command(
                                     name=name,
-                                    command=shell_join(native),
+                                    command=shell_join(with_disk_io_policy(native, disk_io_policy)),
                                     output_json=output_base.joinpath("hyperfine", f"{name}.json"),
                                     warmup=warmup,
                                     runs=runs,
@@ -420,7 +428,7 @@ def build_native_records(
                         outputs=[*tool_outputs, output_base.joinpath("hyperfine", f"{name}.json")],
                         argv=hyperfine_command(
                             name=name,
-                            command=shell_join(native),
+                            command=shell_join(with_disk_io_policy(native, disk_io_policy)),
                             output_json=output_base.joinpath("hyperfine", f"{name}.json"),
                             warmup=warmup,
                             runs=runs,
@@ -502,6 +510,7 @@ def main() -> None:
             "jsonl_decimals": settings.get("jsonl_decimals"),
             "af_model_fast": settings.get("af_model_fast"),
             "input_io": settings.get("input_io"),
+            "disk_io_policy": settings.get("disk_io_policy"),
             "timing": settings.get("timing"),
             "profile_stages": settings.get("profile_stages"),
             "jobs": settings.get("jobs", []),

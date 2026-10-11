@@ -12,6 +12,7 @@ from scripts.benchlib.commands import (
     mdtraj_runner_command,
     pdbtools_single_command,
     rustsasa_single_command,
+    with_disk_io_policy,
     zsasa_calc_command,
 )
 
@@ -183,6 +184,15 @@ def test_lahuta_batch_command() -> None:
         "0",
         "--use-bitmask",
     ]
+
+
+def test_with_disk_io_policy_prefixes_taskpolicy() -> None:
+    cmd = ["/bin/zsasa", "batch", "in"]
+
+    assert with_disk_io_policy(cmd, None) == cmd
+    assert with_disk_io_policy(cmd, "passive") == ["taskpolicy", "-d", "passive", *cmd]
+    with pytest.raises(ValueError, match="unsupported disk I/O policy"):
+        with_disk_io_policy(cmd, "fast")
 
 
 def test_mdtraj_runner_command() -> None:

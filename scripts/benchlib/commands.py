@@ -38,6 +38,23 @@ def zsasa_calc_command(
     return cmd
 
 
+DISK_IO_POLICIES = frozenset({"default", "standard", "important", "passive", "utility", "throttle"})
+
+
+def with_disk_io_policy(cmd: list[str], policy: str | None) -> list[str]:
+    """Run a command under macOS `taskpolicy -d <policy>`; None leaves it unchanged.
+
+    `passive` keeps the tool's disk I/O priority but stops it from throttling
+    lower-priority I/O, which on this machine is the on-access file scanner
+    that every first `open()` of an input waits for.
+    """
+    if policy is None:
+        return cmd
+    if policy not in DISK_IO_POLICIES:
+        raise ValueError(f"unsupported disk I/O policy: {policy}")
+    return ["taskpolicy", "-d", policy, *cmd]
+
+
 def batch_command(
     *,
     binary: Path,

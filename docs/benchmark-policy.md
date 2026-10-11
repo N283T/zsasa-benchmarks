@@ -63,6 +63,25 @@ three-decimal JSONL output. Interpret the result as a warm-cache end-to-end
 batch benchmark because `prepare = "sync"` does not drop the operating-system
 page cache.
 
+The read/mmap half of that matrix did not measure what its labels say. `zsasa`
+0.9.0 to 0.10.1 ignore `--input-io` outside a workflow
+([N283T/zsasa#478](https://github.com/N283T/zsasa/issues/478)), so every run
+used the parser's own default: memory mapping for the generic parser and
+whole-file reads for the AF-fast path. `generic_read` and `generic_mmap` are
+therefore repeats of generic parser + mmap, and `af_fast_read` and
+`af_fast_mmap` repeats of AF-fast + read; the same holds for the SwissProt
+`generic_read` run. The generic-against-AF-fast comparison stands. Do not read
+an input-I/O effect from these rows, and rerun the read/mmap control with a
+`zsasa` release that contains the fix.
+
+Batch manifests may set `[full_rerun] disk_io_policy` to run every command of
+the manifest under macOS `taskpolicy -d <policy>`. The SwissProt passive-I/O
+manifest uses `passive`: the benchmark machine scans files on access, each
+first `open()` of an input waits for that scan, and macOS throttles the
+scanner's reads while a normal-priority tool reads from the same disk. The
+passive policy removes that throttling for `zsasa` and Lahuta alike. Keep it
+out of the warm-cache manifests, where it changes nothing.
+
 The E. coli AFDB mmCIF plan is not adopted for the 0.9.0 refresh. Human mmCIF
 already answers the parser, input-I/O, and worker-overcommit questions, while
 E. coli PDB supplies the smaller batch-throughput workload. Keep the E. coli
