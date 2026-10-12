@@ -1,0 +1,8 @@
+start 03:47:21
+0 main+passive           rc=0 start 03:47:24  wall  440.4 s   1249 files/s  CPU 2.81  wait  5.20 ms/file  busy 3.51  Defender 3.16 ms/file  lines 550122
+1 lahuta+passive         rc=0 start 03:55:03  wall  475.4 s   1157 files/s  CPU 4.33  wait  4.31 ms/file  busy 5.01  Defender 3.17 ms/file  lines 550122
+2 main                   rc=0 start 04:03:13  wall  623.6 s    882 files/s  CPU 2.81  wait  8.53 ms/file  busy 2.48  Defender 3.39 ms/file  lines 550122
+3 main+passive           rc=0 start 04:13:55  wall  446.7 s   1232 files/s  CPU 2.81  wait  5.31 ms/file  busy 3.46  Defender 3.04 ms/file  lines 550122
+4 lahuta                 rc=0 start 04:21:41  wall  661.6 s    831 files/s  CPU 3.99  wait  8.04 ms/file  busy 3.32  Defender 3.99 ms/file  lines 550122
+5 lahuta+passive         rc=0 start 04:32:57  wall  467.3 s   1177 files/s  CPU 4.35  wait  4.14 ms/file  busy 5.12  Defender 3.12 ms/file  lines 550122
+6 statahead+passive      rc=0 start 04:41:00  wall  443.5 s   1240 files/s  CPU 2.80  wait  5.26 ms/file  busy 3.48  Defender 3.16 ms/file  lines 550122

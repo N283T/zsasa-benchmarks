@@ -1,0 +1,8 @@
+start 14:12:01
+0 opt+pio+null           rc=0 start 14:12:01  wall  430.5 s   1278 files/s  CPU 2.85  wait  4.97 ms/file  busy 3.64  Defender 3.08 ms/file  lines 0  out  0.00 GB
+1 opt+pio                rc=0 start 14:19:22  wall  461.0 s   1193 files/s  CPU 2.92  wait  5.46 ms/file  busy 3.48  Defender 3.02 ms/file  lines 550122  out 16.62 GB
+2 opt+pio+dec3           rc=0 start 14:27:23  wall  450.3 s   1222 files/s  CPU 2.94  wait  5.24 ms/file  busy 3.60  Defender 3.03 ms/file  lines 550122  out  6.71 GB
+3 opt+pio                rc=0 start 14:35:07  wall  457.6 s   1202 files/s  CPU 2.89  wait  5.43 ms/file  busy 3.48  Defender 3.04 ms/file  lines 550122  out 16.62 GB
+4 opt+pio+null           rc=0 start 14:43:05  wall  450.5 s   1221 files/s  CPU 2.89  wait  5.30 ms/file  busy 3.53  Defender 3.17 ms/file  lines 0  out  0.00 GB
+5 opt+pio+dec3           rc=0 start 14:50:46  wall  451.5 s   1218 files/s  CPU 2.97  wait  5.24 ms/file  busy 3.62  Defender 3.04 ms/file  lines 550122  out  6.71 GB
+done 14:58:31

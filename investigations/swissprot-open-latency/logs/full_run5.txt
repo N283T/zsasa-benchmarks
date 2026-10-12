@@ -1,0 +1,10 @@
+start 20:42:13
+0 zsasa                  rc=0 start 20:42:14  wall  623.6 s    882 files/s  CPU 2.80  wait  8.53 ms/file  busy 2.47  Defender 3.41 ms/file  lines 550122
+1 zsasa+pacer            rc=0 start 20:52:56  wall  568.6 s    968 files/s  CPU 2.77  wait  7.57 ms/file  busy 2.68  Defender 3.20 ms/file  lines 550122  pacer stat calls 550122
+2 zsasa+upfront          rc=0 start 21:02:40  wall  669.7 s    821 files/s  CPU 2.81  wait  9.37 ms/file  busy 2.31  Defender 3.50 ms/file  lines 550122  upfront stat 34.3 s
+3 lahuta                 rc=0 start 21:14:09  wall  588.9 s    934 files/s  CPU 3.99  wait  6.71 ms/file  busy 3.73  Defender 3.17 ms/file  lines 550122
+4 zsasa+utility          rc=0 start 21:24:13  wall  667.8 s    824 files/s  CPU 5.40  wait  6.74 ms/file  busy 4.45  Defender 3.71 ms/file  lines 550122
+5 zsasa+pacer+utility    rc=0 start 21:35:39  wall  768.1 s    716 files/s  CPU 4.70  wait  9.26 ms/file  busy 3.36  Defender 3.46 ms/file  lines 550122  pacer stat calls 550122
+6 zsasa+pacer            rc=0 start 21:48:43  wall  567.7 s    969 files/s  CPU 2.77  wait  7.54 ms/file  busy 2.69  Defender 3.21 ms/file  lines 550122  pacer stat calls 550122
+7 zsasa                  rc=0 start 21:58:26  wall  654.0 s    841 files/s  CPU 2.80  wait  9.09 ms/file  busy 2.36  Defender 3.43 ms/file  lines 550122
+8 lahuta+utility         rc=0 start 22:09:39  wall  749.8 s    734 files/s  CPU 7.35  wait  6.28 ms/file  busy 5.39  Defender 3.77 ms/file  lines 550122

@@ -1,0 +1,5 @@
+start 12:54:58
+0 lahuta  rc=0 wall   659.0 s   834.8 files/s  user  2184.4 s  sys  138.7 s  busy 3.53  tool CPU  4.22 ms/file  wait  7.76 ms/file  Defender CPU  1953.1 s ( 3.55 ms/file, busy 2.96)  peak RSS  671.5 MiB  out  9.58 GB  lines 550122  finished 13:06:02
+1 zsasa   rc=0 wall   665.8 s   826.3 files/s  user  1529.4 s  sys  114.9 s  busy 2.47  tool CPU  2.99 ms/file  wait  9.11 ms/file  Defender CPU  1819.9 s ( 3.31 ms/file, busy 2.73)  peak RSS  273.5 MiB  out 16.62 GB  lines 550122  finished 13:17:26
+2 lahuta  rc=0 wall   637.0 s   863.7 files/s  user  2195.8 s  sys  140.4 s  busy 3.67  tool CPU  4.25 ms/file  wait  7.33 ms/file  Defender CPU  1758.0 s ( 3.20 ms/file, busy 2.76)  peak RSS  674.6 MiB  out  9.58 GB  lines 550122  finished 13:28:18
+3 zsasa   rc=0 wall   639.8 s   859.9 files/s  user  1515.6 s  sys  109.3 s  busy 2.54  tool CPU  2.95 ms/file  wait  8.68 ms/file  Defender CPU  1864.8 s ( 3.39 ms/file, busy 2.91)  peak RSS  274.8 MiB  out 16.62 GB  lines 550122  finished 13:39:17

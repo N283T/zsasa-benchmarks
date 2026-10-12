@@ -1,0 +1,7 @@
+start 02:03:21
+0 stdio:3900+unsorted+prestat        start 02:03:22  wall  627.7 s (workers  609.7 s, prestat 17.076 s)    902 files/s  CPU 4.10  wait  6.98 ms/file  open  6.41  data 0.69  Defender 3.17 ms/file
+1 stdio:3900                         start 02:14:00  wall  632.4 s (workers  630.5 s)    873 files/s  CPU 4.10  wait  7.36 ms/file  open  6.78  data 0.71  Defender 3.19 ms/file
+2 stdio:3900+prestat                 start 02:24:42  wall  694.9 s (workers  663.2 s, prestat 30.959 s)    829 files/s  CPU 4.12  wait  7.93 ms/file  open  7.33  data 0.74  Defender 3.49 ms/file
+3 stdio:3900+unsorted                start 02:36:27  wall  602.8 s (workers  602.2 s)    913 files/s  CPU 4.09  wait  6.85 ms/file  open  6.28  data 0.69  Defender 3.11 ms/file
+4 read:2700+unsorted+prestat         start 02:46:40  wall  511.4 s (workers  491.8 s, prestat 17.863 s)   1119 files/s  CPU 2.82  wait  6.12 ms/file  open  5.88  data 0.31  Defender 3.12 ms/file
+5 read:2700                          start 02:55:22  wall  502.7 s (workers  500.9 s)   1098 files/s  CPU 2.81  wait  6.30 ms/file  open  6.04  data 0.32  Defender 3.00 ms/file

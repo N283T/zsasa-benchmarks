@@ -1,0 +1,183 @@
+## 20:10:50 plan planA.txt (cursor 330000, N 8000)
+  zsasa (reference)                               827 files/s  CPU  2.92  wait  9.17  Defender 3.53 ms/file | read+parse  9.35
+  lahuta (reference)                              982 files/s  CPU  3.97  wait  6.21  Defender 3.11 ms/file
+  mimic zsasa-like                                847 files/s  CPU  2.88  wait  8.92  Defender 3.57 ms/file | open  7.43  data 1.01  close 0.00  write 0.03
+  mimic lahuta-like                               838 files/s  CPU  4.11  wait  7.82  Defender 3.48 ms/file | open  7.09  data 0.69  close 0.00  write 0.00
+  mimic read, no compute                         1689 files/s  CPU  0.19  wait  5.73  Defender 2.87 ms/file | open  5.54  data 0.35  close 0.01  write 0.00
+  mimic mmap, no compute                         1170 files/s  CPU  0.21  wait  8.34  Defender 3.79 ms/file | open  7.46  data 1.07  close 0.01  write 0.00
+  mimic stdio, no compute                        1262 files/s  CPU  0.35  wait  7.58  Defender 3.52 ms/file | open  6.96  data 0.94  close 0.01  write 0.00
+  mimic read + 2.7 ms compute                     933 files/s  CPU  2.83  wait  7.88  Defender 3.62 ms/file | open  7.52  data 0.38  close 0.00  write 0.00
+  mimic stdio + 3.9 ms compute                    798 files/s  CPU  4.12  wait  8.42  Defender 3.54 ms/file | open  7.75  data 0.74  close 0.01  write 0.00
+  zsasa (reference, again)                        821 files/s  CPU  3.14  wait  9.04  Defender 3.45 ms/file | read+parse  9.20
+  lahuta (reference, again)                       920 files/s  CPU  4.60  wait  6.27  Defender 3.14 ms/file
+## 20:14:36 plan planB.txt (cursor 418000, N 8000)
+  mimic read + 2.7 compute                        910 files/s  CPU  2.83  wait  8.15  Defender 3.58 ms/file | open  7.34  data 0.38  close 0.00  write 0.00
+  mimic read + 2.7 compute + prestat             1361 files/s  CPU  2.81  wait  4.53  Defender 2.62 ms/file | open  3.56  data 0.26  close 0.00  write 0.00
+  mimic stdio + 3.9 compute + prestat             946 files/s  CPU  4.12  wait  6.45  Defender 2.83 ms/file | open  5.13  data 0.72  close 0.00  write 0.00
+  mimic read + 2.7 compute, qos utility          1742 files/s  CPU  2.83  wait  2.92  Defender 2.24 ms/file | open  2.69  data 0.24  close 0.00  write 0.00
+  mimic read + 2.7 compute, qos backgrnd         1312 files/s  CPU  2.87  wait  4.75  Defender 1.91 ms/file | open  2.25  data 1.93  close 0.02  write 0.00
+  mimic read + 2.7 compute, qos initiated        1265 files/s  CPU  2.81  wait  5.10  Defender 2.86 ms/file | open  4.82  data 0.29  close 0.00  write 0.00
+  mimic read, no compute + prestat               1555 files/s  CPU  0.17  wait  6.26  Defender 2.94 ms/file | open  5.49  data 0.38  close 0.01  write 0.00
+  stat-only pass                               189463 files/s  CPU  0.01  wait  0.04  Defender 0.01 ms/file | open  0.00  data 0.00  close 0.00  write 0.00
++ zsasa after stat-only pass                     1113 files/s  CPU  3.12  wait  5.86  Defender 2.89 ms/file | read+parse  6.03
+  lahuta (reference)                              936 files/s  CPU  4.60  wait  6.09  Defender 3.12 ms/file
+  zsasa (reference)                              1152 files/s  CPU  2.97  wait  5.71  Defender 2.89 ms/file | read+parse  5.88
+## 20:17:37 plan planC.txt (cursor 498000, N 8000)
+  zsasa cold                                      859 files/s  CPU  3.18  wait  8.47  Defender 3.41 ms/file | read+parse  8.58
++ zsasa second pass (warm)                       2469 files/s  CPU  3.58  wait  0.47  Defender 0.20 ms/file | read+parse  0.68
++ zsasa third pass @evict                        1856 files/s  CPU  3.59  wait  1.80  Defender 0.27 ms/file | read+parse  1.82
++ zsasa fourth pass @evict @prestat              1877 files/s  CPU  3.57  wait  1.76  Defender 0.24 ms/file | read+parse  1.80
+  zsasa cold                                      866 files/s  CPU  3.06  wait  8.48  Defender 3.37 ms/file | read+parse  8.59
+  zsasa @prestat                                 1121 files/s  CPU  3.08  wait  5.84  Defender 2.90 ms/file | read+parse  5.96
+  lahuta cold                                     914 files/s  CPU  4.65  wait  6.28  Defender 3.14 ms/file
+  lahuta @prestat                                 954 files/s  CPU  4.84  wait  5.65  Defender 3.12 ms/file
+  zsasa @prestat                                 1023 files/s  CPU  3.51  wait  6.26  Defender 3.03 ms/file | read+parse  6.45
+  zsasa cold                                      829 files/s  CPU  3.34  wait  8.73  Defender 3.49 ms/file | read+parse  8.87
+  lahuta @prestat                                1038 files/s  CPU  4.17  wait  5.47  Defender 3.05 ms/file
+  lahuta cold                                     989 files/s  CPU  3.99  wait  6.12  Defender 3.08 ms/file
+## 20:24:22 plan planD.txt (cursor 19878, N 8000)
+  mimic read+2.7 cold                             947 files/s  CPU  2.83  wait  7.73  Defender 3.54 ms/file | open  6.95  data 0.34  close 0.00  write 0.00
+  mimic read+2.7 @prestat                        1484 files/s  CPU  2.79  wait  3.94  Defender 2.62 ms/file | open  3.69  data 0.25  close 0.00  write 0.00
+  mimic read+2.7 stat just before open            977 files/s  CPU  2.84  wait  7.40  Defender 3.56 ms/file | open  6.92  data 0.34  close 0.00  write 0.00
+  mimic read+2.7 stat 100 ahead                   986 files/s  CPU  2.84  wait  7.31  Defender 3.54 ms/file | open  6.86  data 0.31  close 0.00  write 0.00
+  mimic read+2.7 stat 2000 ahead                 1071 files/s  CPU  2.83  wait  6.50  Defender 3.32 ms/file | open  6.09  data 0.30  close 0.00  write 0.00
+  mimic read no compute cold                     1601 files/s  CPU  0.19  wait  6.06  Defender 3.24 ms/file | open  5.86  data 0.33  close 0.01  write 0.00
+  mimic read no compute @prestat                 1634 files/s  CPU  0.14  wait  5.98  Defender 3.29 ms/file | open  5.77  data 0.32  close 0.01  write 0.00
+  mimic read+2.7 qos utility cold                1655 files/s  CPU  2.84  wait  3.20  Defender 2.30 ms/file | open  2.91  data 0.27  close 0.00  write 0.00
+  mimic read+2.7 qos utility @prestat            1714 files/s  CPU  2.80  wait  3.03  Defender 2.26 ms/file | open  2.74  data 0.25  close 0.00  write 0.00
+  mimic read+2.7 cold (repeat)                    982 files/s  CPU  2.83  wait  7.35  Defender 3.48 ms/file | open  7.00  data 0.32  close 0.00  write 0.00
+  mimic read+2.7 @prestat (repeat)               1495 files/s  CPU  2.79  wait  3.90  Defender 2.60 ms/file | open  3.67  data 0.23  close 0.00  write 0.00
+  mimic read+2.7 stat 100 ahead (rep)             990 files/s  CPU  2.84  wait  7.26  Defender 3.49 ms/file | open  6.80  data 0.31  close 0.00  write 0.00
+  mimic read+2.7 stat just before(rep)           1005 files/s  CPU  2.83  wait  7.12  Defender 3.57 ms/file | open  6.67  data 0.33  close 0.00  write 0.00
+## 20:31:27 plan planE.txt (cursor 123878, N 8000)
+  zsasa cold                                      943 files/s  CPU  2.52  wait  8.08  Defender 3.42 ms/file | read+parse  8.21
+  zsasa cold, QoS clamp utility                  1177 files/s  CPU  4.00  wait  4.50  Defender 3.04 ms/file | read+parse  4.57
+  lahuta cold                                    1052 files/s  CPU  3.66  wait  5.85  Defender 3.07 ms/file
+  lahuta cold, QoS clamp utility                 1014 files/s  CPU  5.65  wait  4.22  Defender 3.11 ms/file
+  zsasa cold, QoS clamp background                507 files/s  CPU  8.81  wait 10.93  Defender 2.47 ms/file | read+parse  7.62
+  zsasa @prestat, QoS clamp utility              1240 files/s  CPU  3.90  wait  4.16  Defender 2.97 ms/file | read+parse  4.32
+  zsasa cold, QoS clamp utility (rep)            1117 files/s  CPU  4.45  wait  4.50  Defender 3.01 ms/file | read+parse  4.58
+  zsasa cold (rep)                                784 files/s  CPU  3.81  wait  8.95  Defender 3.59 ms/file | read+parse  9.16
+  lahuta cold, QoS clamp utility (rep)            935 files/s  CPU  6.35  wait  4.34  Defender 3.19 ms/file
+  lahuta cold (rep)                               928 files/s  CPU  4.64  wait  6.14  Defender 3.18 ms/file
++ lahuta warm                                    1723 files/s  CPU  5.22  wait  0.58  Defender 0.28 ms/file
++ lahuta warm, QoS clamp utility                 1334 files/s  CPU  6.82  wait  0.67  Defender 0.26 ms/file
++ zsasa warm                                     2435 files/s  CPU  3.65  wait  0.45  Defender 0.20 ms/file | read+parse  0.67
++ zsasa warm, QoS clamp utility                  1961 files/s  CPU  4.65  wait  0.45  Defender 0.23 ms/file | read+parse  0.60
+## 22:23:18 plan planF.txt (cursor 227878, N 8000)
+  zsasa cold                                      888 files/s  CPU  2.86  wait  8.39  Defender 3.29 ms/file | read+parse  8.49
+  zsasa @prestat @lead=0                         1123 files/s  CPU  2.96  wait  5.94  Defender 2.86 ms/file | read+parse  6.08
+  zsasa @prestat @lead=3                         1132 files/s  CPU  2.94  wait  5.89  Defender 2.85 ms/file | read+parse  6.01
+  zsasa @prestat @lead=10                        1139 files/s  CPU  2.91  wait  5.87  Defender 2.89 ms/file | read+parse  5.95
+  zsasa @prestat @lead=30                        1237 files/s  CPU  2.47  wait  5.61  Defender 2.89 ms/file | read+parse  5.77
+  zsasa @prestat @lead=90                        1303 files/s  CPU  2.13  wait  5.55  Defender 2.93 ms/file | read+parse  5.62
+  zsasa @prestat @lead=240                       1242 files/s  CPU  2.13  wait  5.92  Defender 2.91 ms/file | read+parse  6.00
+  zsasa cold (repeat)                             870 files/s  CPU  2.91  wait  8.58  Defender 3.45 ms/file | read+parse  8.68
+  zsasa @prestat @lead=10 (repeat)               1115 files/s  CPU  2.90  wait  6.07  Defender 2.94 ms/file | read+parse  6.22
+  zsasa @prestat @lead=0 (repeat)                1185 files/s  CPU  2.68  wait  5.76  Defender 2.88 ms/file | read+parse  5.89
+## 00:02:37 plan planG.txt (cursor 307878, N 24000)
+  main 0.10.1 cold                                951 files/s  CPU  2.85  wait  7.67  Defender 3.50 ms/file | read+parse  7.85
+  stat-ahead build cold                          1058 files/s  CPU  2.75  wait  6.70  Defender 3.45 ms/file | read+parse  6.87
++ stat-ahead build warm                          2709 files/s  CPU  3.23  wait  0.46  Defender 0.27 ms/file | read+parse  0.70
++ main 0.10.1 warm                               2710 files/s  CPU  3.27  wait  0.42  Defender 0.26 ms/file | read+parse  0.67
+  stat-ahead build cold (rep)                     959 files/s  CPU  2.77  wait  7.66  Defender 3.56 ms/file | read+parse  7.85
+  main 0.10.1 cold (rep)                          993 files/s  CPU  3.14  wait  6.93  Defender 2.79 ms/file | read+parse  7.10
++ main 0.10.1 warm                               1952 files/s  CPU  3.48  wait  1.65  Defender 1.16 ms/file | read+parse  1.85
++ stat-ahead build warm                          2390 files/s  CPU  3.70  wait  0.48  Defender 0.22 ms/file | read+parse  0.68
+  lahuta cold                                     910 files/s  CPU  4.63  wait  6.36  Defender 3.21 ms/file
+## 03:05:36 plan planH.txt (cursor 427878, N 8000)
+  mimic readbuf+2.7 (no VM activity)              979 files/s  CPU  2.82  wait  7.39  Defender 3.21 ms/file | open  6.59  data 0.34  close 0.00  write 0.00
+  mimic read+2.7 (malloc per file)               1033 files/s  CPU  2.82  wait  6.85  Defender 3.18 ms/file | open  6.54  data 0.35  close 0.00  write 0.00
+  mimic mmap+2.7                                  937 files/s  CPU  2.85  wait  7.82  Defender 3.11 ms/file | open  6.87  data 0.97  close 0.00  write 0.00
+  mimic readbuf+2.7 + 1x 4MB anon map            1075 files/s  CPU  3.05  wait  6.25  Defender 2.90 ms/file | open  5.94  data 0.32  close 0.24  write 0.00
+  mimic readbuf+2.7 + 4x 4MB anon map             923 files/s  CPU  4.00  wait  6.84  Defender 3.15 ms/file | open  6.48  data 0.32  close 1.27  write 0.00
+  mimic readbuf+2.7 + 1x 32MB anon map            844 files/s  CPU  5.15  wait  6.71  Defender 3.24 ms/file | open  6.30  data 0.33  close 2.44  write 0.00
+  zsasa 0.10.1                                    838 files/s  CPU  3.21  wait  8.72  Defender 3.41 ms/file | read+parse  8.87
+  mimic readbuf+2.7 (rep)                        1013 files/s  CPU  2.82  wait  7.05  Defender 3.23 ms/file | open  6.72  data 0.34  close 0.00  write 0.00
+  mimic mmap+2.7 (rep)                            900 files/s  CPU  2.86  wait  8.26  Defender 3.33 ms/file | open  7.29  data 1.01  close 0.00  write 0.00
+  mimic readbuf+2.7 + 4x 4MB (rep)                882 files/s  CPU  4.04  wait  7.30  Defender 3.26 ms/file | open  6.87  data 0.36  close 1.32  write 0.00
+  zsasa 0.10.1 (rep)                              870 files/s  CPU  2.91  wait  8.59  Defender 3.46 ms/file | read+parse  8.74
+## 03:15:27 plan planI.txt (cursor 5756, N 8000)
+  zsasa bitmask (reference)                       893 files/s  CPU  2.73  wait  8.47  Defender 3.52 ms/file | read+parse  8.54
+  zsasa standard, 4 points (tiny SASA)            943 files/s  CPU  2.33  wait  8.28  Defender 3.51 ms/file | read+parse  8.39
+  mimic read+2.7 plain spin                      1002 files/s  CPU  2.83  wait  7.16  Defender 3.25 ms/file | open  6.41  data 0.33  close 0.00  write 0.00
+  mimic read+2.7 spin over 64 MB                 1001 files/s  CPU  2.96  wait  7.03  Defender 3.85 ms/file | open  6.78  data 0.34  close 0.01  write 0.00
+  mimic read+2.7 spin over 4 MB                   970 files/s  CPU  2.90  wait  7.41  Defender 4.02 ms/file | open  7.12  data 0.34  close 0.01  write 0.00
+  zsasa standard, 4 points (rep)                  970 files/s  CPU  2.28  wait  8.04  Defender 3.45 ms/file | read+parse  8.21
+  mimic read+2.7 spin over 64 MB (rep)            965 files/s  CPU  2.97  wait  7.39  Defender 4.08 ms/file | open  7.06  data 0.37  close 0.01  write 0.00
+  mimic read+2.7 plain spin (rep)                1001 files/s  CPU  2.83  wait  7.16  Defender 3.63 ms/file | open  6.88  data 0.32  close 0.00  write 0.00
+  zsasa bitmask (rep)                             901 files/s  CPU  2.65  wait  8.45  Defender 3.54 ms/file | read+parse  8.60
+## 03:20:52 plan planJ.txt (cursor 77756, N 8000)
+  mimic read+2.7, no output                       967 files/s  CPU  2.83  wait  7.51  Defender 3.83 ms/file | open  7.21  data 0.32  close 0.00  write 0.00
+  mimic read+2.7, 30 KB write per file            961 files/s  CPU  2.84  wait  7.56  Defender 3.71 ms/file | open  7.23  data 0.33  close 0.00  write 0.02
+  mimic read+2.7, write to /dev/null             1001 files/s  CPU  2.83  wait  7.16  Defender 3.60 ms/file | open  6.86  data 0.32  close 0.00  write 0.00
+  mimic read+2.7, 30 KB write (rep)               957 files/s  CPU  2.85  wait  7.60  Defender 3.79 ms/file | open  7.28  data 0.32  close 0.00  write 0.03
+  mimic read+2.7, no output (rep)                 971 files/s  CPU  2.83  wait  7.46  Defender 3.77 ms/file | open  7.17  data 0.32  close 0.00  write 0.00
+  zsasa bitmask, -o file                          895 files/s  CPU  2.71  wait  8.46  Defender 3.59 ms/file | read+parse  8.59
+  zsasa bitmask, no output at all                 950 files/s  CPU  2.42  wait  8.11  Defender 3.55 ms/file | read+parse  8.23
+  zsasa bitmask, no output, quiet                 918 files/s  CPU  2.47  wait  8.43  Defender 3.60 ms/file | read+parse  8.58
+  zsasa bitmask, -o file, quiet                   916 files/s  CPU  2.56  wait  8.36  Defender 3.51 ms/file | read+parse  8.49
+## 03:30:49 plan planK.txt (cursor 197756, N 8000)
+  zsasa full                                      803 files/s  CPU  3.22  wait  9.23  Defender 3.55 ms/file | read+parse  8.92
+  zsasa parse only @env:ZSASA_EXP=parse_only     1214 files/s  CPU  0.47  wait  7.77  Defender 3.90 ms/file  rc=1 'odel_v6.pdb: MissingAtomAreas\nWarning: failed to serialize AF-P0A1J4-F1-model_v6.pdb: MissingAtomAreas\nWarning: failed to serialize AF-P0A1J5-F1-model_v6.pdb: MissingAtomAreas\nError: JsonlWriteFailed\n'
+  zsasa open only @env:ZSASA_EXP=open_only       1667 files/s  CPU  0.12  wait  5.87  Defender 3.43 ms/file  rc=1 'odel_v6.pdb: MissingAtomAreas\nWarning: failed to serialize AF-P0CM15-F1-model_v6.pdb: MissingAtomAreas\nWarning: failed to serialize AF-P0CM14-F1-model_v6.pdb: MissingAtomAreas\nError: JsonlWriteFailed\n'
+  mimic read, no compute                         1564 files/s  CPU  0.20  wait  6.20  Defender 3.53 ms/file | open  6.00  data 0.32  close 0.01  write 0.00
+  mimic open+close only                          1684 files/s  CPU  0.12  wait  5.82  Defender 3.41 ms/file | open  5.88  data 0.00  close 0.01  write 0.00
+  zsasa open only (rep) @env:ZSASA_EXP=open_only   1682 files/s  CPU  0.13  wait  5.82  Defender 3.35 ms/file  rc=1 'odel_v6.pdb: MissingAtomAreas\nWarning: failed to serialize AF-P37487-F1-model_v6.pdb: MissingAtomAreas\nWarning: failed to serialize AF-P37489-F1-model_v6.pdb: MissingAtomAreas\nError: JsonlWriteFailed\n'
+  zsasa parse only (rep) @env:ZSASA_EXP=parse_only   1220 files/s  CPU  0.43  wait  7.77  Defender 3.78 ms/file  rc=1 'odel_v6.pdb: MissingAtomAreas\nWarning: failed to serialize AF-P46971-F1-model_v6.pdb: MissingAtomAreas\nWarning: failed to serialize AF-P46970-F1-model_v6.pdb: MissingAtomAreas\nError: JsonlWriteFailed\n'
+  zsasa full (rep)                                863 files/s  CPU  2.99  wait  8.59  Defender 3.56 ms/file | read+parse  8.73
+  mimic open+close only (rep)                    1694 files/s  CPU  0.12  wait  5.79  Defender 3.33 ms/file | open  5.83  data 0.00  close 0.01  write 0.00
+## 03:36:24 plan planL.txt (cursor 269756, N 8000)
+  mimic mmap+2.7                                  863 files/s  CPU  2.86  wait  8.73  Defender 3.74 ms/file | open  7.51  data 0.82  close 0.00  write 0.00
+  mimic mmap+2.7, iopol passive                  1481 files/s  CPU  2.84  wait  3.92  Defender 2.79 ms/file | open  3.31  data 0.59  close 0.00  write 0.00
+  mimic read (1 call)+2.7                         970 files/s  CPU  2.84  wait  7.47  Defender 3.74 ms/file | open  7.11  data 0.36  close 0.00  write 0.00
+  mimic read (1 call)+2.7, iopol passive         1555 files/s  CPU  2.82  wait  3.61  Defender 2.85 ms/file | open  3.37  data 0.23  close 0.00  write 0.00
+  mimic read 64K chunks+2.7                       963 files/s  CPU  2.84  wait  7.55  Defender 3.72 ms/file | open  7.11  data 0.46  close 0.00  write 0.00
+  mimic mmap+2.7, iopol utility                  1316 files/s  CPU  2.86  wait  4.74  Defender 2.57 ms/file | open  3.22  data 1.53  close 0.00  write 0.00
+  mimic mmap, no compute                         1298 files/s  CPU  0.27  wait  7.43  Defender 3.77 ms/file | open  6.68  data 0.96  close 0.01  write 0.00
+  mimic mmap, no compute, iopol passive          2873 files/s  CPU  0.12  wait  3.36  Defender 2.03 ms/file | open  2.57  data 0.86  close 0.00  write 0.00
+  mimic open only                                1713 files/s  CPU  0.12  wait  5.72  Defender 3.30 ms/file | open  5.78  data 0.00  close 0.01  write 0.00
+  mimic open only, iopol passive                 3533 files/s  CPU  0.10  wait  2.73  Defender 2.32 ms/file | open  2.76  data 0.00  close 0.01  write 0.00
+  mimic mmap+2.7, iopol passive (rep)            1431 files/s  CPU  2.85  wait  4.14  Defender 2.79 ms/file | open  3.38  data 0.73  close 0.00  write 0.00
+  mimic mmap+2.7 (rep)                            888 files/s  CPU  2.86  wait  8.39  Defender 3.69 ms/file | open  7.45  data 0.98  close 0.00  write 0.00
+## 03:42:40 plan planM.txt (cursor 365756, N 8000)
+  zsasa 0.10.1 cold                               899 files/s  CPU  2.70  wait  8.43  Defender 3.54 ms/file | read+parse  8.56
+  zsasa 0.10.1 cold, disk passive                1314 files/s  CPU  3.09  wait  4.52  Defender 2.92 ms/file | read+parse  4.55
+  lahuta cold                                     921 files/s  CPU  4.58  wait  6.28  Defender 3.22 ms/file
+  lahuta cold, disk passive                      1107 files/s  CPU  4.60  wait  4.43  Defender 3.20 ms/file
+  zsasa cold, disk passive (rep)                 1348 files/s  CPU  2.95  wait  4.47  Defender 2.91 ms/file | read+parse  4.52
++ zsasa warm, disk passive                       2696 files/s  CPU  3.29  wait  0.41  Defender 0.20 ms/file | read+parse  0.62
++ zsasa warm                                     2676 files/s  CPU  3.29  wait  0.44  Defender 0.20 ms/file | read+parse  0.62
+  lahuta cold, disk passive (rep)                1089 files/s  CPU  4.81  wait  4.37  Defender 3.20 ms/file
++ lahuta warm, disk passive                      1751 files/s  CPU  5.23  wait  0.49  Defender 0.23 ms/file
++ lahuta warm                                    1727 files/s  CPU  5.24  wait  0.55  Defender 0.23 ms/file
+  zsasa stat-ahead cold, disk passive            1353 files/s  CPU  3.01  wait  4.38  Defender 2.90 ms/file | read+parse  4.43
+  zsasa 0.10.1 cold (rep)                         858 files/s  CPU  3.01  wait  8.64  Defender 3.56 ms/file | read+parse  8.78
+## 04:52:17 plan planN.txt (cursor 429756, N 8000)
+  zsasa main cold                                 881 files/s  CPU  3.05  wait  8.30  Defender 3.25 ms/file | read+parse  8.46
+  zsasa passive build cold                       1416 files/s  CPU  2.91  wait  4.15  Defender 2.69 ms/file | read+parse  4.24
++ zsasa passive build warm                       2696 files/s  CPU  3.25  wait  0.46  Defender 0.20 ms/file | read+parse  0.62
++ zsasa main warm                                2740 files/s  CPU  3.25  wait  0.40  Defender 0.20 ms/file | read+parse  0.61
+  zsasa passive build cold (rep)                 1408 files/s  CPU  2.95  wait  4.15  Defender 2.69 ms/file | read+parse  4.24
+  zsasa main cold (rep)                           878 files/s  CPU  2.92  wait  8.47  Defender 3.32 ms/file | read+parse  8.62
+## 11:43:22 plan planO.txt (cursor 461756, N 8000)
+  passive, mmap, cold                            1350 files/s  CPU  3.09  wait  4.32  Defender 2.76 ms/file | read+parse  4.40
+  passive, one read, cold                        1350 files/s  CPU  3.06  wait  4.35  Defender 2.80 ms/file | read+parse  4.44
++ passive, one read, warm                        2587 files/s  CPU  3.44  wait  0.42  Defender 0.22 ms/file | read+parse  0.66
++ passive, mmap, warm                            2584 files/s  CPU  3.44  wait  0.43  Defender 0.20 ms/file | read+parse  0.64
++ passive, one read, warm                        2599 files/s  CPU  3.45  wait  0.40  Defender 0.20 ms/file | read+parse  0.64
++ passive, mmap, warm                            2607 files/s  CPU  3.44  wait  0.39  Defender 0.20 ms/file | read+parse  0.64
+  passive, one read, cold (rep)                  1247 files/s  CPU  3.34  wait  4.68  Defender 2.80 ms/file | read+parse  4.77
+  passive, mmap, cold (rep)                      1338 files/s  CPU  3.09  wait  4.38  Defender 2.79 ms/file | read+parse  4.44
+  passive, old chunked read, cold                1352 files/s  CPU  3.08  wait  4.31  Defender 2.78 ms/file | read+parse  4.38
+## 14:01:02 plan planP.txt (cursor 501756, N 40000)
+  zsasa mmap, output file                        1269 files/s  CPU  3.20  wait  4.68  Defender 3.02 ms/file  free 19.1 GB | read+parse  4.72
+  zsasa one read, output file                    1280 files/s  CPU  2.94  wait  4.87  Defender 3.15 ms/file  free 19.2 GB | read+parse  4.92
+  lahuta                                         1234 files/s  CPU  3.89  wait  4.22  Defender 3.16 ms/file  free 19.0 GB
+  zsasa mmap, output discarded                   1424 files/s  CPU  2.51  wait  4.51  Defender 3.10 ms/file  free 18.8 GB | read+parse  4.65
+  zsasa one read, discarded                      1439 files/s  CPU  2.47  wait  4.47  Defender 3.10 ms/file  free 19.0 GB | read+parse  4.62
+  zsasa one read, discarded (2)                  1352 files/s  CPU  2.87  wait  4.52  Defender 3.18 ms/file  free 18.8 GB | read+parse  4.69
+  zsasa mmap, discarded (2)                      1395 files/s  CPU  2.64  wait  4.53  Defender 3.10 ms/file  free 18.9 GB | read+parse  4.69
+  lahuta (2)                                     1174 files/s  CPU  4.22  wait  4.30  Defender 3.17 ms/file  free 18.8 GB
+  zsasa one read, output file (2)                1274 files/s  CPU  2.64  wait  5.21  Defender 3.29 ms/file  free 18.3 GB | read+parse  5.27
+  zsasa mmap, output file (2)                    1243 files/s  CPU  2.74  wait  5.30  Defender 3.28 ms/file  free 18.5 GB | read+parse  5.37

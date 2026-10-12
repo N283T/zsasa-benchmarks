@@ -1,0 +1,6 @@
+start 01:11:48
+0 sa2k                   rc=0 start 01:11:49  wall  565.3 s    973 files/s  CPU 2.82  wait  7.46 ms/file  busy 2.75  Defender 3.15 ms/file  lines 550122
+1 sa32k                  rc=0 start 01:21:33  wall  565.4 s    973 files/s  CPU 2.82  wait  7.46 ms/file  busy 2.74  Defender 3.13 ms/file  lines 550122
+2 lahuta+sample          rc=0 start 01:31:17  wall  588.4 s    935 files/s  CPU 3.99  wait  6.71 ms/file  busy 3.73  Defender 3.16 ms/file  lines 550122
+3 statahead              rc=0 start 01:41:21  wall  554.9 s    991 files/s  CPU 2.80  wait  7.28 ms/file  busy 2.78  Defender 3.14 ms/file  lines 550122
+4 main                   rc=0 start 01:50:55  wall  658.8 s    835 files/s  CPU 2.82  wait  9.16 ms/file  busy 2.35  Defender 3.49 ms/file  lines 550122

@@ -25,6 +25,8 @@ ECOLI_DATASET = "UP000000625_83333_ECOLI_v6_pdb"
 HUMAN_DATASET = "UP000005640_9606_HUMAN_v6_pdb"
 HUMAN_CIF_DATASET = "UP000005640_9606_HUMAN_v6_cif"
 SWISSPROT_DATASET = "swissprot_500k_pdb"
+# The same collection run under the passive disk I/O policy; the story figure reports it.
+SWISSPROT_PASSIVE_DATASET = "swissprot_500k_pdb_passive_io"
 
 VARIANT_ORDER = [
     "zsasa_f64",
@@ -751,10 +753,10 @@ def plot_swissprot_overcommit_performance_memory(
         ax.annotate(
             labels[variant],
             (label_row["memory_mean_mb"], label_row["throughput"]),
-            xytext=(14, -5) if variant == "zsasa_0_9_0_bitmask_f32" else (-10, -15),
+            xytext=(12, -16) if variant == "zsasa_0_9_0_bitmask_f32" else (-10, -15),
             textcoords="offset points",
             ha="left" if variant == "zsasa_0_9_0_bitmask_f32" else "right",
-            va="center" if variant == "zsasa_0_9_0_bitmask_f32" else "top",
+            va="top",
             color=style["color"],
             fontsize=9,
             fontweight="bold",
@@ -785,19 +787,22 @@ def plot_swissprot_overcommit_performance_memory(
 
     ax.text(
         0.02,
-        0.97,
+        0.03,
         "Numbers show zsasa threads",
         transform=ax.transAxes,
         ha="left",
-        va="top",
+        va="bottom",
         color="0.35",
         fontsize=8,
     )
-    ax.set_title("SwissProt AFDB throughput and memory under thread overcommit")
+    ax.set_title(
+        "SwissProt AFDB throughput and memory under thread overcommit\n"
+        "(passive disk I/O policy)"
+    )
     ax.set_xlabel("Peak RSS (MiB)")
     ax.set_ylabel(r"Throughput (structures s$^{-1}$)")
     ax.set_xlim(left=200)
-    ax.set_ylim(bottom=400)
+    ax.set_ylim(400, 1400)
     return save_figure(fig, out_dir, "swissprot_overcommit_performance_memory")
 
 
@@ -2311,7 +2316,7 @@ def main() -> None:
         ecoli_rows = load_batch_rows(args.db, ECOLI_DATASET)
         human_rows = load_batch_rows(args.db, HUMAN_DATASET)
         human_cif_rows = load_batch_rows(args.db, HUMAN_CIF_DATASET)
-        swissprot_rows = load_batch_rows(args.db, SWISSPROT_DATASET)
+        swissprot_rows = load_batch_rows(args.db, SWISSPROT_PASSIVE_DATASET)
         for outputs, index in [
             generate_ecoli(ecoli_rows, args.out_dir.joinpath("batch_ecoli")),
             generate_human(human_rows, args.out_dir.joinpath("batch_human")),
@@ -2338,8 +2343,8 @@ def main() -> None:
         outputs, index = generate_human_cif(rows, pdb_rows, args.out_dir)
         total_outputs = sum(1 for path in outputs if path.suffix == ".png")
         written_indexes.append(index)
-    elif args.dataset_id == SWISSPROT_DATASET or args.dataset_id == "swissprot":
-        rows = load_batch_rows(args.db, SWISSPROT_DATASET)
+    elif args.dataset_id in {SWISSPROT_DATASET, SWISSPROT_PASSIVE_DATASET, "swissprot"}:
+        rows = load_batch_rows(args.db, SWISSPROT_PASSIVE_DATASET)
         outputs, index = generate_swissprot(rows, args.out_dir)
         total_outputs = sum(1 for path in outputs if path.suffix == ".png")
         written_indexes.append(index)

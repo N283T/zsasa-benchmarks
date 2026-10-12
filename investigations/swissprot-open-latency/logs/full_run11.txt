@@ -1,0 +1,7 @@
+start 04:54:43
+0 passive                rc=0 start 04:54:44  wall  439.0 s   1253 files/s  CPU 2.81  wait  5.17 ms/file  busy 3.53  Defender 3.07 ms/file  lines 550122
+1 passive+t20            rc=0 start 05:02:21  wall  417.7 s   1317 files/s  CPU 3.06  wait 12.12 ms/file  busy 4.04  Defender 3.01 ms/file  lines 550122
+2 main                   rc=0 start 05:09:38  wall  686.6 s    801 files/s  CPU 2.86  wait  9.62 ms/file  busy 2.29  Defender 3.33 ms/file  lines 550122
+3 passive+t40            rc=0 start 05:21:23  wall  432.0 s   1273 files/s  CPU 3.25  wait 28.16 ms/file  busy 4.14  Defender 2.95 ms/file  lines 550122
+4 passive                rc=0 start 05:28:54  wall  472.8 s   1164 files/s  CPU 2.82  wait  5.77 ms/file  busy 3.28  Defender 3.19 ms/file  lines 550122
+5 main+t20               rc=0 start 05:37:05  wall  521.1 s   1056 files/s  CPU 3.20  wait 15.75 ms/file  busy 3.38  Defender 3.11 ms/file  lines 550122
