@@ -1,0 +1,10 @@
+start 16:19:23
+0 zsasa            rc=0 start 16:19:23 load  2.3  wall   634.0 s   867.7 files/s  user  1450.8  sys  101.5  busy 2.45  CPU  2.82 ms/file  wait  8.70 ms/file  Defender  1881.4 s ( 3.42 ms/file)  RSS   275.4 MiB  out 16.62 GB  lines 550122
+1 lahuta-2.0.3     rc=0 start 16:30:16 load  5.8  wall   596.6 s   922.1 files/s  user  2102.9  sys  124.0  busy 3.73  CPU  4.05 ms/file  wait  6.80 ms/file  Defender  1769.7 s ( 3.22 ms/file)  RSS   686.4 MiB  out  9.58 GB  lines 550122
+2 lahuta-2.0.0-dev rc=0 start 16:40:28 load  7.9  wall   602.0 s   913.8 files/s  user  2069.2  sys  120.6  busy 3.64  CPU  3.98 ms/file  wait  6.96 ms/file  Defender  1743.2 s ( 3.17 ms/file)  RSS   695.0 MiB  out  9.58 GB  lines 550122
+3 lahuta-2.0.3     rc=0 start 16:50:45 load  7.6  wall   587.2 s   936.9 files/s  user  2075.5  sys  120.7  busy 3.74  CPU  3.99 ms/file  wait  6.68 ms/file  Defender  1734.7 s ( 3.15 ms/file)  RSS   686.2 MiB  out  9.58 GB  lines 550122
+4 lahuta-2.0.0-dev rc=0 start 17:00:47 load  8.3  wall   596.0 s   923.1 files/s  user  2071.5  sys  120.6  busy 3.68  CPU  3.98 ms/file  wait  6.85 ms/file  Defender  1814.5 s ( 3.30 ms/file)  RSS   678.3 MiB  out  9.58 GB  lines 550122
+5 zsasa            rc=0 start 17:10:58 load  7.6  wall   631.5 s   871.2 files/s  user  1432.8  sys  100.6  busy 2.43  CPU  2.79 ms/file  wait  8.69 ms/file  Defender  1833.5 s ( 3.33 ms/file)  RSS   273.9 MiB  out 16.62 GB  lines 550122
+6 lahuta-2.0.0-dev rc=0 start 17:21:48 load  6.1  wall   590.1 s   932.2 files/s  user  2075.6  sys  120.6  busy 3.72  CPU  3.99 ms/file  wait  6.73 ms/file  Defender  1767.2 s ( 3.21 ms/file)  RSS   684.9 MiB  out  9.58 GB  lines 550122
+7 zsasa            rc=0 start 17:31:53 load  7.3  wall   622.9 s   883.1 files/s  user  1434.6  sys  100.3  busy 2.46  CPU  2.79 ms/file  wait  8.53 ms/file  Defender  1866.3 s ( 3.39 ms/file)  RSS   273.1 MiB  out 16.62 GB  lines 550122
+8 lahuta-2.0.3     rc=0 start 17:42:35 load  5.2  wall   602.0 s   913.8 files/s  user  2084.4  sys  121.5  busy 3.66  CPU  4.01 ms/file  wait  6.93 ms/file  Defender  1744.3 s ( 3.17 ms/file)  RSS   686.0 MiB  out  9.58 GB  lines 550122

@@ -1,0 +1,7 @@
+start 00:08:11
+0 main                   rc=0 start 00:08:13  wall  645.3 s    853 files/s  CPU 2.85  wait  8.88 ms/file  busy 2.43  Defender -105.51 ms/file  lines 550122
+1 statahead              rc=0 start 00:19:17  wall  566.0 s    972 files/s  CPU 2.82  wait  7.47 ms/file  busy 2.74  Defender 3.23 ms/file  lines 550122
+2 lahuta                 rc=0 start 00:29:02  wall  594.2 s    926 files/s  CPU 3.98  wait  6.82 ms/file  busy 3.68  Defender 3.34 ms/file  lines 550122
+3 statahead              rc=0 start 00:39:11  wall  557.7 s    986 files/s  CPU 2.80  wait  7.34 ms/file  busy 2.76  Defender 3.14 ms/file  lines 550122
+4 main                   rc=0 start 00:48:47  wall  657.1 s    837 files/s  CPU 2.81  wait  9.13 ms/file  busy 2.36  Defender 3.45 ms/file  lines 550122
+5 main+pacer5000         rc=0 start 01:00:03  wall  575.8 s    955 files/s  CPU 2.79  wait  7.68 ms/file  busy 2.66  Defender 3.31 ms/file  lines 550122  initial stat 0.4 s  pacer stat calls 550122

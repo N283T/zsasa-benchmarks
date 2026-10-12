@@ -1,0 +1,9 @@
+start 18:02:30
+0 mmap      rc=0 start 18:02:30  wall  616.3 s    893 files/s  CPU 2.82  wait 8.38  cycle 11.20 ms/file | read+parse  8.57  classify 0.19  sasa 2.30  jsonl 0.10  other  0.03 | Defender 3.24 ms/file  RSS   274 MiB  lines 550122
+1 read      rc=0 start 18:13:05  wall  657.5 s    837 files/s  CPU 2.82  wait 9.13  cycle 11.95 ms/file | read+parse  9.32  classify 0.20  sasa 2.29  jsonl 0.12  other  0.02 | Defender 3.38 ms/file  RSS   273 MiB  lines 550122
+2 mmap-null rc=0 start 18:24:21  wall  638.5 s    862 files/s  CPU 2.79  wait 8.81  cycle 11.61 ms/file | read+parse  9.04  classify 0.19  sasa 2.28  jsonl 0.07  other  0.02 | Defender 3.44 ms/file  RSS   275 MiB  lines 0
+3 read-null rc=0 start 18:35:09  wall  653.5 s    842 files/s  CPU 2.81  wait 9.07  cycle 11.88 ms/file | read+parse  9.30  classify 0.20  sasa 2.29  jsonl 0.07  other  0.02 | Defender 3.48 ms/file  RSS   274 MiB  lines 0
+4 read-null rc=0 start 18:46:13  wall  641.7 s    857 files/s  CPU 2.81  wait 8.86  cycle 11.67 ms/file | read+parse  9.09  classify 0.20  sasa 2.29  jsonl 0.07  other  0.02 | Defender 3.50 ms/file  RSS   274 MiB  lines 0
+5 mmap-null rc=0 start 18:57:05  wall  639.4 s    860 files/s  CPU 2.80  wait 8.82  cycle 11.62 ms/file | read+parse  9.05  classify 0.19  sasa 2.28  jsonl 0.07  other  0.02 | Defender 3.39 ms/file  RSS   274 MiB  lines 0
+6 read      rc=0 start 19:07:55  wall  658.8 s    835 files/s  CPU 2.81  wait 9.17  cycle 11.98 ms/file | read+parse  9.37  classify 0.19  sasa 2.28  jsonl 0.11  other  0.02 | Defender 3.44 ms/file  RSS   275 MiB  lines 550122
+7 mmap      rc=0 start 19:19:12  wall  656.3 s    838 files/s  CPU 2.80  wait 9.13  cycle 11.93 ms/file | read+parse  9.32  classify 0.19  sasa 2.27  jsonl 0.12  other  0.02 | Defender 3.44 ms/file  RSS   274 MiB  lines 550122

@@ -1,0 +1,6 @@
+start 15:05:32
+0 readfix+pio+read       rc=0 start 15:05:34  wall  408.3 s   1347 files/s  CPU 2.82  wait  4.60 ms/file  busy 3.80  Defender 3.11 ms/file  lines 550122  out 16.62 GB
+1 readfix+pio            rc=0 start 15:12:42  wall  437.7 s   1257 files/s  CPU 2.80  wait  5.15 ms/file  busy 3.52  Defender 3.08 ms/file  lines 550122  out 16.62 GB
+2 readfix+pio            rc=0 start 15:20:20  wall  453.5 s   1213 files/s  CPU 2.81  wait  5.44 ms/file  busy 3.40  Defender 3.03 ms/file  lines 550122  out 16.62 GB
+3 readfix+pio+read       rc=0 start 15:28:13  wall  414.3 s   1328 files/s  CPU 2.79  wait  4.74 ms/file  busy 3.70  Defender 3.22 ms/file  lines 550122  out 16.62 GB
+done 15:35:27

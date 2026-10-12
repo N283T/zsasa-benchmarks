@@ -27,7 +27,7 @@ Sampling running processes on files not yet scanned (`scripts/sample_tool.py`, m
 
 ### Default disk I/O policy, repeated in October
 
-Runs on the idle machine, in rotating order (`logs/full_run3.log` to `logs/full_run11.log`):
+Runs on the idle machine, in rotating order (`logs/full_run3.txt` to `logs/full_run11.txt`):
 
 | Tool | Runtime (s) |
 | --- | --- |
@@ -36,7 +36,7 @@ Runs on the idle machine, in rotating order (`logs/full_run3.log` to `logs/full_
 | Lahuta 2.0.3 | 596.6, 587.2, 602.0, 588.9, 594.9, 594.2, 588.4, 661.6 |
 | Lahuta 2.0.0-dev (local build) | 602.0, 596.0, 590.1 |
 
-The July values in the database (`zsasa` 0.9.0 670.2 s, Lahuta 588.1 s) are reproduced. With other work on the machine Lahuta lost about 9% and the difference disappeared (`logs/full_run.log`), so these runs need an idle machine.
+The July values in the database (`zsasa` 0.9.0 670.2 s, Lahuta 588.1 s) are reproduced. With other work on the machine Lahuta lost about 9% and the difference disappeared (`logs/full_run.txt`), so these runs need an idle machine.
 
 ### Passive disk I/O policy
 
@@ -64,12 +64,12 @@ Per file and thread, waiting time is the thread count times the runtime minus th
 
 - A time series under the passive policy (`logs/full_run14_samples.csv`) shows `zsasa` at 4.8-5.1 ms until free memory runs out, after about 120,000 files, and at 5.5-5.8 ms from then on. Lahuta stays at 4.2 ms.
 - `zsasa` takes 14.3 minor page faults per file (one per 16 KiB page of the mapped input), Lahuta 2.1 (`scripts/pagefaults.py`).
-- With the input read by one `read` instead of mapped, the full run takes 408.3 and 414.3 s against 437.7 and 453.5 s (`logs/full_run16.log`). On collections that fit in memory the two are within 1% (`scripts/human_warm.py`, `scripts/read_default_check.py`).
-- Discarding the output, or rounding it to three decimals (6.7 GB), saves 2-4% (`logs/full_run15.log`).
+- With the input read by one `read` instead of mapped, the full run takes 408.3 and 414.3 s against 437.7 and 453.5 s (`logs/full_run16.txt`). On collections that fit in memory the two are within 1% (`scripts/human_warm.py`, `scripts/read_default_check.py`).
+- Discarding the output, or rounding it to three decimals (6.7 GB), saves 2-4% (`logs/full_run15.txt`).
 
 ### Ruled out
 
-Lahuta's version (2.0.0-dev and 2.0.3 take the same time), the number of threads, the JSONL mutex (0.1 ms per file with `--profile-stages`, `logs/full_run4.log`), the Nix wrapper script of `zsasa-0.9.0`, anonymous memory-map churn, the progress display, the kind of computation, and the share of CPU time on performance cores (`scripts/pcore.py`: 75% for `zsasa`, 72% for Lahuta). A lower QoS clamp (`taskpolicy -c utility`) helps on small blocks and loses on the full collection. Stat-ing files a few thousand ahead of the workers gains 11-14% under the default policy and nothing under the passive one (`logs/full_run5.log`, `logs/full_run6.log`); stat-ing every file first, as Lahuta's directory source does, gains nothing at this size.
+Lahuta's version (2.0.0-dev and 2.0.3 take the same time), the number of threads, the JSONL mutex (0.1 ms per file with `--profile-stages`, `logs/full_run4.txt`), the Nix wrapper script of `zsasa-0.9.0`, anonymous memory-map churn, the progress display, the kind of computation, and the share of CPU time on performance cores (`scripts/pcore.py`: 75% for `zsasa`, 72% for Lahuta). A lower QoS clamp (`taskpolicy -c utility`) helps on small blocks and loses on the full collection. Stat-ing files a few thousand ahead of the workers gains 11-14% under the default policy and nothing under the passive one (`logs/full_run5.txt`, `logs/full_run6.txt`); stat-ing every file first, as Lahuta's directory source does, gains nothing at this size.
 
 ### A defect found on the way
 
@@ -82,7 +82,7 @@ Lahuta's version (2.0.0-dev and 2.0.3 take the same time), the number of threads
 
 ## Files
 
-- `scripts/assay.py` with `scripts/plan*.txt`: short runs on blocks of 8,000 files that the scanner has not seen recently; `logs/assay.log` holds every result. A block is made "cold" by stat-ing 300,000 other files first.
+- `scripts/assay.py` with `scripts/plan*.txt`: short runs on blocks of 8,000 files that the scanner has not seen recently; `logs/assay.txt` holds every result. A block is made "cold" by stat-ing 300,000 other files first.
 - `scripts/mimic.c`: a small program that reproduces a tool's per-file system calls (open, stat, read or map, close, compute, write) with switches for each part and for the disk I/O policy.
-- `scripts/full_run*.py`, `scripts/run_b.py`: drivers of the full-collection runs; `logs/full_run*.log` are their outputs. The scripts hold the absolute paths of the benchmark machine and are kept as run.
+- `scripts/full_run*.py`, `scripts/run_b.py`: drivers of the full-collection runs; `logs/full_run*.txt` are their outputs, renamed from `.log` because this repository ignores `*.log` files. The scripts hold the absolute paths of the benchmark machine and are kept as run.
 - `scripts/io_probe*.py`, `scripts/open_flags.py`, `scripts/pagefaults*.py`, `scripts/pcore.py`, `scripts/sample_tool.py`, `scripts/whoworks.py`, `scripts/poststat.py`: the single measurements quoted above.
