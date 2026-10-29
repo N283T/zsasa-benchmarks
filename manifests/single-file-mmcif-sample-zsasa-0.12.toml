@@ -1,0 +1,129 @@
+# mmCIF replacement for the cleaned-PDB single-file benchmark subset.
+
+id = "single-file-mmcif-subset-zsasa-0-12"
+status = "ready"
+
+[dataset]
+id = "single_file_large_structure_mmcif_subset"
+expected_count = 8
+role = ["single-file-throughput", "parser-stress", "mmcif"]
+notes = "Uncompressed mmCIF inputs matching the eight-structure cleaned-PDB subset. 5vyc and 9fqr are protein-only cleaned because their native atom sets include additional non-protein atoms."
+
+[preprocess]
+output_dir_default = "datasets/single-file-large-structure-mmcif"
+policy = "decompress_native_mmcif_with_targeted_protein_cleanup"
+
+[[structures]]
+id = "AF-P49792-F10-model_v6"
+role = "single-medium"
+source_kind = "cif"
+source_dataset = "UP000005640_9606_HUMAN_v6_cif"
+source_file = "AF-P49792-F10-model_v6.cif"
+input_file = "AF-P49792-F10-model_v6.cif"
+expected_atoms = 10919
+expected_chains = 1
+notes = "Human AFDB single-chain structure near the upper tail of the proteome-size distribution."
+
+[[structures]]
+id = "AF-Q6ZS30-F1-model_v6"
+role = "single-large"
+source_kind = "cif"
+source_dataset = "UP000005640_9606_HUMAN_v6_cif"
+source_file = "AF-Q6ZS30-F1-model_v6.cif"
+input_file = "AF-Q6ZS30-F1-model_v6.cif"
+expected_atoms = 21611
+expected_chains = 1
+notes = "Human AFDB single-chain maximum-scale structure."
+
+[[structures]]
+id = "AF-0000000066638622"
+role = "multi-medium-nvda"
+source_kind = "cif_zst"
+source_dataset = "single_file_large_structure_sources"
+source_file = "nvda_cif_zst/AF-0000000066638622-model_v1.cif.zst"
+input_file = "AF-0000000066638622.cif"
+expected_atoms = 14618
+expected_chains = 2
+notes = "Two-chain NVDA human complex selected as a medium multi-chain case with low clash count."
+
+[[structures]]
+id = "AF-0000000065781219"
+role = "multi-large-nvda"
+source_kind = "cif_zst"
+source_dataset = "single_file_large_structure_sources"
+source_file = "nvda_cif_zst/AF-0000000065781219-model_v1.cif.zst"
+input_file = "AF-0000000065781219.cif"
+expected_atoms = 24140
+expected_chains = 2
+notes = "Two-chain NVDA human complex from the largest compressed CIF candidates."
+
+[[structures]]
+id = "3jc8"
+role = "multi-100k-pdb"
+source_kind = "cif_gz"
+source_dataset = "single_file_large_structure_sources"
+source_file = "pdb_mmcif/3jc8.cif.gz"
+input_file = "3jc8.cif"
+expected_atoms = 107500
+expected_chains = 115
+notes = "100k-scale multi-chain PDB assembly represented as native mmCIF."
+
+[[structures]]
+id = "5vyc"
+role = "rustsasa-parser-outlier"
+source_kind = "cif_gz"
+source_dataset = "single_file_large_structure_sources"
+source_file = "pdb_mmcif/5vyc.cif.gz"
+input_file = "5vyc.cif"
+preprocess = "protein_only_clean_cif"
+expected_atoms = 249168
+expected_chains = 216
+notes = "Historical RustSASA parser outlier written as protein-only mmCIF so its 249,168-atom workload matches the cleaned PDB input."
+
+[[structures]]
+id = "8rbs"
+role = "freesasa-runtime-outlier"
+source_kind = "cif_gz"
+source_dataset = "single_file_large_structure_sources"
+source_file = "pdb_mmcif/8rbs.cif.gz"
+input_file = "8rbs.cif"
+expected_atoms = 164605
+expected_chains = 85
+notes = "Historical FreeSASA runtime outlier represented as native mmCIF."
+
+[[structures]]
+id = "9fqr"
+role = "multi-max-pdb"
+source_kind = "cif_gz"
+source_dataset = "single_file_large_structure_sources"
+source_file = "pdb_mmcif/9fqr.cif.gz"
+input_file = "9fqr.cif"
+preprocess = "protein_only_clean_cif"
+expected_atoms = 4506416
+expected_chains = 1574
+notes = "Maximum PDB-derived structure written as protein-only mmCIF so its 4,506,416-atom workload matches the cleaned PDB input after alternative-conformation removal."
+
+[full_rerun]
+source_kind = "full_rerun"
+run_id_default = "v0_12_1_single_mmcif"
+n_points = 100
+threads = [1, 4, 8, 10]
+runs = 3
+warmup = 1
+prepare = "sync"
+tools = [
+  "zsasa_0_12_1_f64",
+  "zsasa_0_12_1_f32",
+  "zsasa_0_12_1_f64_bitmask",
+  "zsasa_0_12_1_f32_bitmask",
+]
+phases = ["wall", "timing"]
+timing_repeats = 3
+excluded_records = [
+  "single_*_freesasa_AF-0000000065781219_*",
+  "single_*_freesasa_AF-0000000066638622_*",
+]
+rerun_zsasa = true
+rerun_comparators = false
+excluded_tools = ["freesasa", "rustsasa", "pdbtools_jl", "lahuta"]
+excluded_tools_notes = "This refresh reruns zsasa 0.12.1 only. FreeSASA, RustSASA and PDBTools.jl keep their rows from run set v0_9_0_single_mmcif, taken with the same pinned builds. Lahuta file mode requires AlphaFold-style model metadata and skips general PDB-derived mmCIF assemblies such as 3jc8."
