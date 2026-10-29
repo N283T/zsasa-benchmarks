@@ -114,7 +114,7 @@
         zsasaCli0121 = mkZsasaCli {
           version = "0.12.1";
           src = zsasa_0_12_1;
-          zigDepsHash = "sha256-XgIsmn9/8bgfTkJP4+oosvl8nasl7MB4GcEtwYaP+eM=";
+          zigDepsHash = "sha256-CX8env5VcdTwQh8JbGrXU2Bvd9hwAfkoDjrmK2vS7/Q=";
         };
         zsasaVersioned06 = pkgs.writeShellScriptBin "zsasa-0.6.0" ''
           exec ${zsasaCli}/bin/zsasa "$@"
@@ -280,7 +280,7 @@
             export ZSASA_CLI="${zsasaCli}/bin/zsasa"
             echo "zsasa benchmark shell"
             echo "- zsasa CLI: $ZSASA_CLI"
-            echo "- versioned zsasa CLIs: zsasa-0.6.0, zsasa-0.9.0, zsasa-0.11.0"
+            echo "- versioned zsasa CLIs: zsasa-0.6.0, zsasa-0.9.0, zsasa-0.11.0, zsasa-0.12.1"
             echo "- PDBTools.jl wrapper: julia --project=scripts/julia/pdbtools_sasa scripts/benchlib/pdbtools_sasa.jl"
             echo "- Run: python scripts/check_scaffold.py"
             echo "- Dry run full validation: uv run python scripts/run_validation.py --manifest manifests/validation-ecoli.toml --datasets config/datasets.toml.example --run-id v0_6_0_full --dry-run"
