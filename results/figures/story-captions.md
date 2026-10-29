@@ -1,6 +1,6 @@
 # Draft captions for STORY figures
 
-These captions are manuscript-oriented drafts. They define the comparison, fixed conditions, reference direction, and uncertainty display so that the corresponding figures can remain visually concise.
+These captions are manuscript-oriented drafts. They define the comparison, fixed conditions, reference direction, and uncertainty display so that the corresponding figures can remain visually concise. Every zsasa result is from zsasa 0.12.1; which comparator rows were kept from earlier sessions is recorded in `docs/v0.12.1-rerun.md`.
 
 ## Static validation
 
@@ -70,11 +70,11 @@ These captions are manuscript-oriented drafts. They define the comparison, fixed
 
 ### [Ranking and performance recovery](batch_human_cif/png/human_cif_ranking_recovery_story.png)
 
-**Caption.** Effect of input format, parser path, and input I/O on the zsasa–Lahuta throughput comparison for 23,586 Human AFDB structures. (a) Ratio of zsasa bitmask f32 throughput to Lahuta bitmask throughput for PDB input (zsasa 0.9.0) and for mmCIF input with the generic parser and memory mapping (zsasa 0.11.0); values above 1 favor zsasa. Ratio error bars were propagated from the throughput standard deviations. (b) mmCIF throughput of the generic and AF-fast parser paths of zsasa 0.11.0 with memory-mapped and read-all input. The vertical purple line marks Lahuta bitmask throughput in the same session. Points show three-run means and error bars show standard deviations; zsasa calculations used 10 threads and 128 sphere points. The mmCIF rows use zsasa 0.11.0 because 0.9.0 ignores the input I/O option in batch runs.
+**Caption.** Effect of input format, parser path, and input I/O on the zsasa–Lahuta throughput comparison for 23,586 Human AFDB structures. (a) Ratio of zsasa bitmask f32 throughput to Lahuta bitmask throughput for PDB input and for mmCIF input with the generic parser and memory mapping; values above 1 favor zsasa. Ratio error bars were propagated from the throughput standard deviations. (b) mmCIF throughput of the generic and AF-fast parser paths with memory-mapped and read-all input. The vertical purple line marks Lahuta bitmask throughput in the same session. Points show three-run means and error bars show standard deviations; zsasa calculations used 10 threads and 128 sphere points.
 
 ### [AF-fast thread overcommit](batch_human_cif/png/human_cif_af_fast_overcommit_tradeoff.png)
 
-**Caption.** Throughput and memory behavior of the zsasa 0.11.0 AF-fast mmCIF path under thread overcommit on a system with 10 logical CPUs. (a) Throughput change relative to 10 threads for read-all and memory-mapped input. (b) Peak RSS over the same 10–40-thread range. Points show three-run means; error bars show propagated standard deviations in panel (a) and standard deviations in panel (b). All calculations used zsasa 0.11.0 bitmask f32 with 128 sphere points on 23,586 Human AFDB structures.
+**Caption.** Throughput and memory behavior of the zsasa AF-fast mmCIF path under thread overcommit on a system with 10 logical CPUs. (a) Throughput change relative to 10 threads for read-all and memory-mapped input. (b) Peak RSS over the same 10–40-thread range. Points show three-run means; error bars show propagated standard deviations in panel (a) and standard deviations in panel (b). All calculations used zsasa bitmask f32 with 128 sphere points on 23,586 Human AFDB structures.
 
 ## Human AFDB PDB batch benchmark
 
@@ -94,7 +94,7 @@ These captions are manuscript-oriented drafts. They define the comparison, fixed
 
 ### [Thread overcommit performance and memory](batch_swissprot/png/swissprot_overcommit_performance_memory.png)
 
-**Caption.** Observed throughput–memory paths for zsasa 0.9.0 f32 and bitmask f32 over 10, 20, and 40 threads on 550,122 SwissProt AFDB structures. The Lahuta bitmask marker shows its 10-thread result. All calculations used 128 sphere points on a system with 10 logical CPUs, and every command ran under the passive disk I/O policy of macOS (`taskpolicy -d passive`), because the test machine scans files on access and the default policy throttles that scan; the default-policy runs are in the summary tables under `SwissProt AFDB` and are discussed in `investigations/swissprot-open-latency/`. Each configuration was measured once, so the figure is a descriptive large-scale observation without uncertainty estimates.
+**Caption.** Observed throughput–memory paths for zsasa f32 and bitmask f32 over 10, 20, and 40 threads on 550,122 SwissProt AFDB structures. The Lahuta bitmask marker shows its 10-thread result. All calculations used 128 sphere points on a system with 10 logical CPUs, and every command ran under the passive disk I/O policy of macOS (`taskpolicy -d passive`), because the test machine scans files on access and the default policy throttles that scan; the default-policy runs are in the summary tables under `SwissProt AFDB` and are discussed in `investigations/swissprot-open-latency/`. Each configuration was measured once, so the figure is a descriptive large-scale observation without uncertainty estimates.
 
 ## Single-file benchmark
 

@@ -26,7 +26,7 @@ from pathlib import Path
 import numpy as np
 
 ZSASA_OUTPUT = (
-    "results/full_rerun/v0_9_0_validation/validation/ecoli/zsasa/sr_f64_standard_128.jsonl"
+    "results/full_rerun/v0_12_1_validation/validation/ecoli/zsasa/sr_f64_standard_128.jsonl"
 )
 
 

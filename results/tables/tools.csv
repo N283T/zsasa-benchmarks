@@ -11,6 +11,7 @@ zig,zig,,,https://github.com/N283T/zsasa,derived full-rerun tool label,zsasa CLI
 zig_bitmask,zig_bitmask,,,https://github.com/N283T/zsasa,derived full-rerun tool label,zsasa CLI trajectory backend with bitmask mode
 zsasa,zsasa,v0.6.0,94fdc1ee0ba27063d7cfe69e915e8425474316e1,https://github.com/N283T/zsasa,rerun for manuscript evidence,
 zsasa_0_11_0,zsasa_0_11_0,0.11.0,0c572e587c5ce1b04947fbcd8066143f007221b6,https://github.com/N283T/zsasa,"later zsasa release, measured only on the SwissProt passive-I/O run for comparison with 0.9.0",
+zsasa_0_12_1,zsasa_0_12_1,0.12.1,7a029273c4425a06dcd5a6a4665eef31e3c8db70,https://github.com/N283T/zsasa,zsasa release for the manuscript benchmark rerun,
 zsasa_0_6_0,zsasa_0_6_0,0.6.0,94fdc1ee0ba27063d7cfe69e915e8425474316e1,https://github.com/N283T/zsasa,versioned zsasa baseline for release-refresh benchmarks,
 zsasa_0_7_0,zsasa_0_7_0,0.7.0,80d5f0c5f2ff102627d8f94fcc41882dc51dab7b,https://github.com/N283T/zsasa,superseded historical benchmark attempt,Retained for provenance; excluded from active benchmark manifests after adopting zsasa 0.9.0.
 zsasa_0_9_0,zsasa_0_9_0,0.9.0,f4c7ac6290c6bbc23dbcd8d6b39b3efd51554cc1,https://github.com/N283T/zsasa,current zsasa release for benchmark reruns,

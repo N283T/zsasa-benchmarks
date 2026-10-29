@@ -16,9 +16,9 @@ import numpy as np
 from matplotlib.patches import Patch
 
 try:
-    from scripts.benchlib.reporting import adopted_for_reporting, run_set
+    from scripts.benchlib.reporting import CURRENT_ZSASA, retained_for_reporting, run_set
 except ModuleNotFoundError:  # pragma: no cover - supports direct script execution
-    from benchlib.reporting import adopted_for_reporting, run_set
+    from benchlib.reporting import CURRENT_ZSASA, retained_for_reporting, run_set
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DB = ROOT.joinpath("results", "benchmark.duckdb")
@@ -129,7 +129,7 @@ def single_variant_name(run: dict[str, Any]) -> str:
     tool_id = str(run.get("tool_id") or "")
     precision = str(run.get("precision") or "")
     mode = str(run.get("mode") or "")
-    if tool_id in {"zsasa", "zsasa_0_9_0"}:
+    if tool_id in {"zsasa", CURRENT_ZSASA}:
         prefix = "zsasa_bitmask" if mode == "bitmask" else "zsasa"
         return f"{prefix}_{precision}"
     if tool_id == "freesasa":
@@ -207,13 +207,11 @@ def load_single_rows(db_path: Path) -> list[dict[str, Any]]:
         rows: list[dict[str, Any]] = []
         for raw in run_rows:
             run = dict(zip(run_cols, raw, strict=True))
-            if not adopted_for_reporting("single_file", run["source_path"], run["status"]):
+            if run["tool_id"] == "zsasa" or not retained_for_reporting(
+                "single_file", run["source_path"], run["status"], run["tool_id"], ""
+            ):
                 continue
             source = run_set(run["source_path"])
-            if run["tool_id"] == "zsasa":
-                continue
-            if source == "v0_6_0_full" and run["tool_id"] not in {"freesasa", "rustsasa"}:
-                continue
             stats = {
                 (metric, statistic): value
                 for metric, statistic, value in con.execute(

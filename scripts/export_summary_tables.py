@@ -14,9 +14,14 @@ from typing import Any
 import duckdb
 
 try:
-    from scripts.benchlib.reporting import adopted_for_reporting, run_set
+    from scripts.benchlib.reporting import (
+        CURRENT_ZSASA,
+        MD_RUN_SET,
+        retained_for_reporting,
+        run_set,
+    )
 except ModuleNotFoundError:  # pragma: no cover - supports direct script execution
-    from benchlib.reporting import adopted_for_reporting, run_set
+    from benchlib.reporting import CURRENT_ZSASA, MD_RUN_SET, retained_for_reporting, run_set
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DB = ROOT.joinpath("results", "benchmark.duckdb")
@@ -43,6 +48,14 @@ BATCH_VARIANT_ORDER = [
     "zsasa_0_11_0_generic_mmap",
     "zsasa_0_11_0_af_fast_read",
     "zsasa_0_11_0_af_fast_mmap",
+    "zsasa_0_12_1_f64",
+    "zsasa_0_12_1_f32",
+    "zsasa_0_12_1_bitmask_f64",
+    "zsasa_0_12_1_bitmask_f32",
+    "zsasa_0_12_1_generic_read",
+    "zsasa_0_12_1_generic_mmap",
+    "zsasa_0_12_1_af_fast_read",
+    "zsasa_0_12_1_af_fast_mmap",
     "freesasa_batch",
     "rustsasa",
     "lahuta",
@@ -87,6 +100,14 @@ DISPLAY_NAMES = {
     "zsasa_0_11_0_generic_mmap": "zsasa 0.11.0 generic/mmap",
     "zsasa_0_11_0_af_fast_read": "zsasa 0.11.0 AF fast/read",
     "zsasa_0_11_0_af_fast_mmap": "zsasa 0.11.0 AF fast/mmap",
+    "zsasa_0_12_1_f64": "zsasa 0.12.1 f64",
+    "zsasa_0_12_1_f32": "zsasa 0.12.1 f32",
+    "zsasa_0_12_1_bitmask_f64": "zsasa 0.12.1 bitmask f64",
+    "zsasa_0_12_1_bitmask_f32": "zsasa 0.12.1 bitmask f32",
+    "zsasa_0_12_1_generic_read": "zsasa 0.12.1 generic/read",
+    "zsasa_0_12_1_generic_mmap": "zsasa 0.12.1 generic/mmap",
+    "zsasa_0_12_1_af_fast_read": "zsasa 0.12.1 AF fast/read",
+    "zsasa_0_12_1_af_fast_mmap": "zsasa 0.12.1 AF fast/mmap",
     "freesasa": "FreeSASA",
     "freesasa_batch": "FreeSASA batch",
     "rustsasa": "RustSASA",
@@ -203,7 +224,7 @@ def single_variant_name(row: dict[str, Any]) -> str:
     tool_id = str(row.get("tool_id") or "")
     precision = str(row.get("precision") or "")
     mode = str(row.get("mode") or "")
-    if tool_id in {"zsasa", "zsasa_0_9_0"}:
+    if tool_id in {"zsasa", CURRENT_ZSASA}:
         prefix = "zsasa_bitmask" if mode == "bitmask" else "zsasa"
         return f"{prefix}_{precision}"
     if tool_id == "freesasa":
@@ -488,24 +509,18 @@ def write_csv(path: Path, rows: list[dict[str, Any]], columns: list[str] | None 
 
 
 def curate_report_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Remove historical duplicates while retaining the documented adopted matrix."""
-    curated: list[dict[str, Any]] = []
-    for row in rows:
-        source = row["run_set"]
-        kind = row["benchmark_kind"]
-        if kind == "batch" and row["dataset_id"] in {ECOLI_DATASET, HUMAN_DATASET}:
-            if source == "v0_6_0_full" and row["tool_id"] == "zsasa":
-                continue
-            if source == "v0_9_0_overcommit" and row["tool_id"] != "zsasa_0_9_0":
-                continue
-        elif kind == "single_file" and source == "v0_6_0_full":
-            if row["tool_id"] not in {"freesasa", "rustsasa"}:
-                continue
-        elif kind == "trajectory" and source == "v0_6_0_full":
-            if row["tool_id"] not in {"mdtraj", "mdsasa_bolt"}:
-                continue
-        curated.append(row)
-    return curated
+    """Keep the adopted runs and only the retained rows of earlier sessions."""
+    return [
+        row
+        for row in rows
+        if retained_for_reporting(
+            row["benchmark_kind"],
+            row["source_path"],
+            row["status"],
+            str(row["tool_id"] or ""),
+            str(row["dataset_id"] or ""),
+        )
+    ]
 
 
 def export_metadata(con: duckdb.DuckDBPyConnection, out_dir: Path) -> list[Path]:
@@ -704,8 +719,7 @@ def export_md_summary(rows: list[dict[str, Any]], out_dir: Path) -> list[Path]:
     md_rows = [
         row
         for row in all_md_rows
-        if row["run_set"] == "v0_9_0_md_128"
-        and row["threads"] in {None, 10}
+        if row["threads"] in {None, 10}
         and (row["tool_id"] != "zig_bitmask" or row["run_variant"] == "single_corrected")
     ]
     output: list[dict[str, Any]] = []
@@ -742,7 +756,7 @@ def export_md_summary(rows: list[dict[str, Any]], out_dir: Path) -> list[Path]:
     native = [
         row
         for row in all_md_rows
-        if row["run_set"] == "v0_9_0_md_128"
+        if row["run_set"] == MD_RUN_SET
         and row["tool_id"] in {"zig", "zig_bitmask"}
     ]
     baselines = {
@@ -1097,11 +1111,7 @@ def main() -> None:
     try:
         metric_map = load_metric_map(con)
         rows = enrich_runs(load_runs(con), metric_map)
-        active_rows = curate_report_rows([
-            row
-            for row in rows
-            if adopted_for_reporting(row["benchmark_kind"], row["source_path"], row["status"])
-        ])
+        active_rows = curate_report_rows(rows)
         outputs: list[Path] = []
         outputs.extend(export_metadata(con, out_dir))
         outputs.append(export_runs_long(rows, out_dir))

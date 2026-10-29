@@ -101,7 +101,7 @@ def test_native_overcommit_rows_keeps_endpoints_and_corrected_bitmask() -> None:
 def test_correction_runtime_rows_keeps_raw_and_corrected_single_f32() -> None:
     rows = [
         {
-            "run_set": "v0_9_0_md_128",
+            "run_set": "v0_12_1_md_128",
             "variant": "zsasa_cli_bitmask_f32",
             "threads": 10,
             "bitmask_variant": option,
