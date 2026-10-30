@@ -1,0 +1,13 @@
+zsasa_binary=/nix/store/rqddsvqfh1mn10pj67cwprw1xxx0nw7c-zsasa-0.12.1/bin/zsasa
+zsasa_version=zsasa 0.12.1
+zsasa_tag=v0.12.1 (commit 7a029273c4425a06dcd5a6a4665eef31e3c8db70)
+zsasa_build=zsasa-benchmarks flake input zsasa_0_12_1, zig build -Doptimize=ReleaseFast (zig 0.16.0)
+algorithm=sr precision=f32 n_points=128 use_bitmask=true bitmask_correction=false
+probe_radius_angstrom=1.4 classifier=ccd workers=20
+disk_io_policy=default
+input=dir = "/Users/nagaet/pdb/afdb/nvda/heterodimers-cif"
+input_count=531605
+hostname=TsubasanoMacBook-Pro.local
+cpu=Apple M4 logical_cpu=10 memory_bytes=34359738368
+os=macOS 26.6.2
+note=one run on an otherwise idle machine; order: SwissProt default, homo default, hetero default, homo passive, hetero passive
