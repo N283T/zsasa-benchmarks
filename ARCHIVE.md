@@ -1,11 +1,24 @@
 # Zenodo benchmark archive guide
 
-This repository is prepared for the Zenodo DOI record [10.5281/zenodo.23788710](https://doi.org/10.5281/zenodo.23788710),
-covering benchmark evidence and analysis artifacts for `zsasa` v0.12.1. It supersedes
-revision 2 of the v0.9.0 archive ([10.5281/zenodo.23306698](https://doi.org/10.5281/zenodo.23306698)),
+This repository is prepared for the Zenodo DOI record [10.5281/zenodo.23794793](https://doi.org/10.5281/zenodo.23794793),
+covering benchmark evidence and analysis artifacts for `zsasa` v0.12.1. It is revision 1
+of the v0.12.1 archive and supersedes the first v0.12.1 archive
+([10.5281/zenodo.23788710](https://doi.org/10.5281/zenodo.23788710)), revision 2 of the v0.9.0 archive ([10.5281/zenodo.23306698](https://doi.org/10.5281/zenodo.23306698)),
 revision 1 ([10.5281/zenodo.23184113](https://doi.org/10.5281/zenodo.23184113))
 and the first v0.9.0 archive ([10.5281/zenodo.23175149](https://doi.org/10.5281/zenodo.23175149));
 the `zsasa` v0.6.0 record is [10.5281/zenodo.20577561](https://doi.org/10.5281/zenodo.20577561).
+
+Changes in revision 1:
+
+- SwissProt under the default disk I/O policy was measured again with `zsasa`
+  0.12.1 and Lahuta (`v0_12_1_swissprot_default_io`), and the reports now take
+  it from that run set instead of the 0.9.0 session.
+- The AFDB dimer delta-SASA workflows were run again with the `zsasa` v0.12.1
+  release under the default and the passive policy
+  (`workflows/afdb-dimers/v0.12.1/`). The values differ from the earlier runs
+  by about one part in a million, because f32 totals are now accumulated in
+  f64; no model has a negative delta-SASA any more.
+  `docs/v0.12.1-rerun.md` and `workflows/afdb-dimers/README.md` describe both.
 
 Changes in the v0.12.1 archive:
 
@@ -14,7 +27,7 @@ Changes in the v0.12.1 archive:
   validation, the E. coli, Human and Human mmCIF batches, SwissProt under the
   passive disk I/O policy, and MDTraj and mdsasa-bolt on 5wvo and 6sup. The
   single-file comparators and mdsasa-bolt on 5vz0 keep their earlier rows, and
-  SwissProt under the default policy keeps the 0.9.0 session.
+  SwissProt under the default policy kept the 0.9.0 session until revision 1.
   `docs/v0.12.1-rerun.md` lists the scope and compares the session with 0.9.0.
 - The summary tables and figures report the 0.12.1 run sets
   (`scripts/benchlib/reporting.py`); the earlier run sets stay in the database.
@@ -50,8 +63,8 @@ Changes in revision 1:
 - **Resource type:** Dataset
 - **Title:** Benchmark dataset and analysis artifacts for zsasa v0.12.1
 - **Creators:** Tsubasa Nagae
-- **Version:** v0.12.1-benchmark-archive
-- **DOI:** [10.5281/zenodo.23788710](https://doi.org/10.5281/zenodo.23788710)
+- **Version:** v0.12.1-benchmark-archive-r1
+- **DOI:** [10.5281/zenodo.23794793](https://doi.org/10.5281/zenodo.23794793)
 - **Language:** English
 - **License:** Creative Commons Attribution 4.0 International (CC-BY-4.0)
 - **Keywords:** solvent accessible surface area; structural bioinformatics;
@@ -117,8 +130,8 @@ Upload the generated tarball and `SHA256SUMS` from `archives/zenodo/` to Zenodo.
 
 ## Published DOI
 
-The curated benchmark archive DOI for `zsasa` v0.12.1 is [10.5281/zenodo.23788710](https://doi.org/10.5281/zenodo.23788710).
-The v0.9.0 archive remains available as [10.5281/zenodo.23306698](https://doi.org/10.5281/zenodo.23306698) (revision 2), [10.5281/zenodo.23184113](https://doi.org/10.5281/zenodo.23184113) (revision 1) and [10.5281/zenodo.23175149](https://doi.org/10.5281/zenodo.23175149), and the `zsasa` v0.6.0 archive as [10.5281/zenodo.20577561](https://doi.org/10.5281/zenodo.20577561).
+The curated benchmark archive DOI for `zsasa` v0.12.1 is [10.5281/zenodo.23794793](https://doi.org/10.5281/zenodo.23794793) (revision 1).
+The first v0.12.1 archive remains available as [10.5281/zenodo.23788710](https://doi.org/10.5281/zenodo.23788710), the v0.9.0 archive remains available as [10.5281/zenodo.23306698](https://doi.org/10.5281/zenodo.23306698) (revision 2), [10.5281/zenodo.23184113](https://doi.org/10.5281/zenodo.23184113) (revision 1) and [10.5281/zenodo.23175149](https://doi.org/10.5281/zenodo.23175149), and the `zsasa` v0.6.0 archive as [10.5281/zenodo.20577561](https://doi.org/10.5281/zenodo.20577561).
 
 For future updates, create a new Zenodo version and rebuild the upload archive
 after updating DOI/version metadata in this repository.
