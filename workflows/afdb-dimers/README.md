@@ -40,7 +40,11 @@ and 1.4e-6 for the heterodimers, at most 2.1e-5; median `delta_sasa_total`
 2,828.66 against 2,828.65 Å² and 2,932.50 against 2,932.57 Å²). Both builds give
 the same values from run to run. Bisecting on 20 models places the change at
 zsasa commit `0e769ac` (#456), which accumulates f32 totals in f64; the results
-of that commit equal those of 0.12.1.
+of that commit equal those of 0.12.1. The earlier totals were rounded to f32,
+so their differences could fall below zero: delta-SASA was negative (down to
+-2.25 and -2.83 Å²) for 580 homo-dimers and 6,989 heterodimers. With 0.12.1 each
+of these models has a delta-SASA of exactly 0, and no model is negative
+(879 homo-dimers and 9,288 heterodimers have exactly 0).
 
 None of these runs is a controlled benchmark, and they are separate from the
 benchmark evidence in `results/`. They are not stored in
