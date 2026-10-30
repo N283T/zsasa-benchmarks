@@ -57,7 +57,7 @@ GENERATED_DIRECTORIES = {
 PROFILE_CHOICES = ("curated", "full")
 
 # zsasa release covered by the archive; used in the default tarball name.
-ARCHIVE_VERSION = "v0.12.1"
+ARCHIVE_VERSION = "v0.12.1-r1"
 
 
 @dataclass(frozen=True)
