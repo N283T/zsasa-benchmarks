@@ -1,0 +1,46 @@
+# E. coli batch throughput and thread scaling with zsasa 0.12.1.
+#
+# zsasa runs the full precision/mode grid up to 40 threads. The comparators run
+# at 1-10 threads in the same session, so the speedups reported for 0.12.1 come
+# from one session instead of from the 0.6.0 comparator runs.
+
+id = "batch-ecoli-zsasa-0-12"
+status = "ready"
+
+[dataset]
+id = "UP000000625_83333_ECOLI_v6_pdb"
+expected_count = 4370
+role = ["batch-throughput", "thread-scaling", "thread-overcommit"]
+
+[full_rerun]
+source_kind = "full_rerun"
+run_id_default = "v0_12_1_batch"
+n_points = 128
+threads = [1, 4, 8, 10, 20, 40]
+runs = 3
+warmup = 3
+precisions = ["f64", "f32"]
+modes = ["standard", "bitmask"]
+prepare = "sync"
+rerun_zsasa = true
+rerun_comparators = true
+output_base = "results/full_rerun/v0_12_1_batch/batch/ecoli"
+
+[[full_rerun.jobs]]
+tool = "zsasa_0_12_1"
+threads = [1, 4, 8, 10, 20, 40]
+precisions = ["f64", "f32"]
+modes = ["standard", "bitmask"]
+
+[[full_rerun.jobs]]
+tool = "freesasa_batch"
+threads = [1, 4, 8, 10]
+
+[[full_rerun.jobs]]
+tool = "rustsasa"
+threads = [1, 4, 8, 10]
+
+[[full_rerun.jobs]]
+tool = "lahuta"
+threads = [1, 4, 8, 10]
+modes = ["standard", "bitmask"]

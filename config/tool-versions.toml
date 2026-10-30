@@ -40,6 +40,16 @@ zig = "0.16.0"
 binary = "zsasa-0.11.0"
 check_args = ["--version"]
 
+[zsasa_0_12_1]
+policy = "zsasa release for the manuscript benchmark rerun"
+repository = "https://github.com/N283T/zsasa"
+version = "0.12.1"
+tag = "v0.12.1"
+commit = "7a029273c4425a06dcd5a6a4665eef31e3c8db70"
+zig = "0.16.0"
+binary = "zsasa-0.12.1"
+check_args = ["--version"]
+
 [freesasa]
 policy = "rerun from pinned Nix comparator build for manuscript benchmarks"
 repository = "https://github.com/N283T/freesasa"
