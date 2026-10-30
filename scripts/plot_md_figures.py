@@ -15,14 +15,23 @@ import numpy as np
 from matplotlib.patches import Patch
 
 try:
-    from scripts.benchlib.reporting import adopted_for_reporting, run_set
+    from scripts.benchlib.reporting import (
+        MD_RUN_SET,
+        adopted_for_reporting,
+        retained_for_reporting,
+        run_set,
+    )
 except ModuleNotFoundError:  # pragma: no cover - supports direct script execution
-    from benchlib.reporting import adopted_for_reporting, run_set
+    from benchlib.reporting import (
+        MD_RUN_SET,
+        adopted_for_reporting,
+        retained_for_reporting,
+        run_set,
+    )
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DB = ROOT.joinpath("results", "benchmark.duckdb")
 DEFAULT_OUT_DIR = ROOT.joinpath("results", "figures", "md")
-MD_RUN_SET = "v0_9_0_md_128"
 
 DATASET_ORDER = ["5wvo_C_analysis", "6sup_A_analysis", "5vz0_A_protein"]
 VARIANT_ORDER = [
@@ -305,11 +314,11 @@ def load_md_rows(db_path: Path, *, include_options: bool = False) -> list[dict[s
         rows: list[dict[str, Any]] = []
         for raw in run_rows:
             run = dict(zip(columns, raw, strict=True))
-            if not adopted_for_reporting("trajectory", run["source_path"], run["status"]):
+            if not retained_for_reporting(
+                "trajectory", run["source_path"], run["status"], run["tool_id"], run["dataset_id"]
+            ):
                 continue
             source = run_set(run["source_path"])
-            if source != MD_RUN_SET:
-                continue
             if not include_options:
                 if run["threads"] not in {None, 10}:
                     continue

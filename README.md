@@ -12,12 +12,14 @@ This repository is a clean benchmark workspace for the `zsasa` manuscript. It in
 - Treat FreeSASA comparator values as `freesasa_batch` wrapper outputs, because upstream FreeSASA has no native directory batch mode.
 - Include PDBTools.jl only for single-file PDB/mmCIF SASA comparisons through the repository Julia wrapper; do not treat it as a native batch CLI.
 - Capture RustSASA protein-level outputs as JSON. Do not use protein-level PDB B-factors for totals, because the PDB B-factor field cannot represent large total SASA values reliably.
-- Keep the compatibility `zsasa` tool pinned to `v0.6.0` as the last completed baseline, and use `zsasa_0_9_0` for current release-refresh benchmarks. The incomplete 0.7.0 benchmark attempt is retained only as superseded historical data in the database.
+- Keep the compatibility `zsasa` tool pinned to `v0.6.0` as the last completed baseline, and use `zsasa_0_12_1` for the current manuscript benchmarks (`zsasa_0_9_0` for the earlier refresh). The incomplete 0.7.0 benchmark attempt is retained only as superseded historical data in the database.
 - Keep generated results out of git; archive final outputs separately after review.
 - Store generated evidence in DuckDB when result import/export is needed.
 
-The adopted 0.9.0 refresh scope, completed measurements, scaling findings, and
-deliberately unadopted plans are recorded in
+The reported results come from the `zsasa` 0.12.1 rerun; its scope, the
+comparator rows kept from earlier sessions, and how it compares with 0.9.0 are
+recorded in [`docs/v0.12.1-rerun.md`](docs/v0.12.1-rerun.md). The earlier 0.9.0
+refresh scope, scaling findings, and deliberately unadopted plans are in
 [`docs/v0.9.0-refresh-summary.md`](docs/v0.9.0-refresh-summary.md).
 
 ## Benchmark system
