@@ -20,12 +20,9 @@ _ADOPTED = {
         "v0_12_1_single_mmcif",
     },
     "batch": {
-        # SwissProt under the default disk I/O policy, kept from the 0.9.0 session.
-        "version_refresh_20260630",
-        "v0_9_0_swissprot",
-        "v0_9_0_swissprot_read_t10",
         "v0_12_1_batch",
         "v0_12_1_human_cif",
+        "v0_12_1_swissprot_default_io",
         "v0_12_1_swissprot_passive_io",
     },
 }

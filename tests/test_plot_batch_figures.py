@@ -250,3 +250,6 @@ def test_retained_for_reporting_keeps_only_comparators_not_rerun() -> None:
     assert not keep("batch", "v0_9_0_overcommit", "zsasa_0_9_0")
     assert not keep("batch", "v0_9_0_swissprot_passive_io", "lahuta")
     assert keep("batch", "v0_12_1_swissprot_passive_io", "lahuta")
+    assert keep("batch", "v0_12_1_swissprot_default_io", "lahuta")
+    assert not keep("batch", "v0_9_0_swissprot", "zsasa_0_9_0")
+    assert not keep("batch", "version_refresh_20260630", "lahuta")

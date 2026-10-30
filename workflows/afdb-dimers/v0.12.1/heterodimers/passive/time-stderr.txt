@@ -1,0 +1,19 @@
+Workflow complete: 531605 successful, 0 failed
+     1404.58 real     12360.25 user       338.96 sys
+           362201088  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+           134787878  page reclaims
+                   1  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+             1228700  voluntary context switches
+            11255683  involuntary context switches
+     130181171119908  instructions retired
+      40753520334498  cycles elapsed
+           362023024  peak memory footprint
