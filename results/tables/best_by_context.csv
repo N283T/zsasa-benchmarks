@@ -2,9 +2,9 @@ context,metric,objective,winner_variant,winner_display_name,winner_value,dataset
 batch:UP000000625_83333_ECOLI_v6_pdb:t10,runtime_mean_s,min,zsasa_0_12_1_bitmask_f32,zsasa 0.12.1 bitmask f32,1.5260775718866668,UP000000625_83333_ECOLI_v6_pdb,E. coli AFDB,,10
 batch:UP000000625_83333_ECOLI_v6_pdb:t10,items_per_sec,max,zsasa_0_12_1_bitmask_f32,zsasa 0.12.1 bitmask f32,2863.55037286698,UP000000625_83333_ECOLI_v6_pdb,E. coli AFDB,,10
 batch:UP000000625_83333_ECOLI_v6_pdb:t10,peak_rss_mean_mib,min,zsasa_0_12_1_f32,zsasa 0.12.1 f32,52.078125,UP000000625_83333_ECOLI_v6_pdb,E. coli AFDB,,10
-batch:UP000005640_9606_HUMAN_v6_cif:t10,runtime_mean_s,min,zsasa_0_12_1_af_fast_read,zsasa 0.12.1 AF fast/read,16.11432612950667,UP000005640_9606_HUMAN_v6_cif,UP000005640_9606_HUMAN_v6_cif,,10
-batch:UP000005640_9606_HUMAN_v6_cif:t10,items_per_sec,max,zsasa_0_12_1_af_fast_read,zsasa 0.12.1 AF fast/read,1463.6665418364641,UP000005640_9606_HUMAN_v6_cif,UP000005640_9606_HUMAN_v6_cif,,10
-batch:UP000005640_9606_HUMAN_v6_cif:t10,peak_rss_mean_mib,min,zsasa_0_12_1_af_fast_mmap,zsasa 0.12.1 AF fast/mmap,84.33333333333333,UP000005640_9606_HUMAN_v6_cif,UP000005640_9606_HUMAN_v6_cif,,10
+batch:UP000005640_9606_HUMAN_v6_cif:t10,runtime_mean_s,min,zsasa_0_12_1_af_fast_mmap,zsasa 0.12.1 AF fast/mmap,14.99800483242,UP000005640_9606_HUMAN_v6_cif,UP000005640_9606_HUMAN_v6_cif,,10
+batch:UP000005640_9606_HUMAN_v6_cif:t10,items_per_sec,max,zsasa_0_12_1_af_fast_mmap,zsasa 0.12.1 AF fast/mmap,1572.60917458941,UP000005640_9606_HUMAN_v6_cif,UP000005640_9606_HUMAN_v6_cif,,10
+batch:UP000005640_9606_HUMAN_v6_cif:t10,peak_rss_mean_mib,min,zsasa_0_12_1_af_fast_mmap,zsasa 0.12.1 AF fast/mmap,83.828125,UP000005640_9606_HUMAN_v6_cif,UP000005640_9606_HUMAN_v6_cif,,10
 batch:UP000005640_9606_HUMAN_v6_pdb:t10,runtime_mean_s,min,zsasa_0_12_1_bitmask_f32,zsasa 0.12.1 bitmask f32,14.349205756286667,UP000005640_9606_HUMAN_v6_pdb,Human AFDB,,10
 batch:UP000005640_9606_HUMAN_v6_pdb:t10,items_per_sec,max,zsasa_0_12_1_bitmask_f32,zsasa 0.12.1 bitmask f32,1643.7146696894017,UP000005640_9606_HUMAN_v6_pdb,Human AFDB,,10
 batch:UP000005640_9606_HUMAN_v6_pdb:t10,peak_rss_mean_mib,min,zsasa_0_12_1_f32,zsasa 0.12.1 f32,91.296875,UP000005640_9606_HUMAN_v6_pdb,Human AFDB,,10
