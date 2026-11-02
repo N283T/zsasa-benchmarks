@@ -1,13 +1,28 @@
 # Zenodo benchmark archive guide
 
-This repository is prepared for the Zenodo DOI record [10.5281/zenodo.23893502](https://doi.org/10.5281/zenodo.23893502),
-covering benchmark evidence and analysis artifacts for `zsasa` v0.12.1. It is revision 2
-of the v0.12.1 archive and supersedes revision 1
+This repository is prepared for the Zenodo DOI record [10.5281/zenodo.23898582](https://doi.org/10.5281/zenodo.23898582),
+covering benchmark evidence and analysis artifacts for `zsasa` v0.12.1. It is revision 3
+of the v0.12.1 archive and supersedes revision 2
+([10.5281/zenodo.23893502](https://doi.org/10.5281/zenodo.23893502)), revision 1
 ([10.5281/zenodo.23794793](https://doi.org/10.5281/zenodo.23794793)), the first v0.12.1 archive
 ([10.5281/zenodo.23788710](https://doi.org/10.5281/zenodo.23788710)), revision 2 of the v0.9.0 archive ([10.5281/zenodo.23306698](https://doi.org/10.5281/zenodo.23306698)),
 revision 1 ([10.5281/zenodo.23184113](https://doi.org/10.5281/zenodo.23184113))
 and the first v0.9.0 archive ([10.5281/zenodo.23175149](https://doi.org/10.5281/zenodo.23175149));
 the `zsasa` v0.6.0 record is [10.5281/zenodo.20577561](https://doi.org/10.5281/zenodo.20577561).
+
+Changes in revision 3:
+
+- `workflows/sasa-explorer/` adds the polar/apolar SASA of the AFDB/NVIDIA human
+  homo- and heterodimers and of the SwissProt AFDB v6 models, computed with the
+  `zsasa` v0.13.0 release, with per-model metadata and the three Parquet tables
+  behind the SASA explorer on the `zsasa` website. The tables are also uploaded
+  as separate files (`afdb_heterodimers.parquet`, `afdb_homodimers.parquet`,
+  `swissprot.parquet`) so that the website can fetch them. The dimer totals
+  equal those of `workflows/afdb-dimers/v0.12.1/`; its README describes the runs
+  and the chain-entity order of the heterodimer input files.
+- The new part `zsasa-benchmarks-sasa-explorer.tar.gz` holds that directory. The
+  other parts are unchanged except `code-and-tables`.
+- No reported benchmark value changed.
 
 Changes in revision 2:
 
@@ -77,8 +92,8 @@ Changes in revision 1:
 - **Resource type:** Dataset
 - **Title:** Benchmark dataset and analysis artifacts for zsasa v0.12.1
 - **Creators:** Tsubasa Nagae
-- **Version:** v0.12.1-benchmark-archive-r2
-- **DOI:** [10.5281/zenodo.23893502](https://doi.org/10.5281/zenodo.23893502)
+- **Version:** v0.12.1-benchmark-archive-r3
+- **DOI:** [10.5281/zenodo.23898582](https://doi.org/10.5281/zenodo.23898582)
 - **Language:** English
 - **License:** Creative Commons Attribution 4.0 International (CC-BY-4.0)
 - **Keywords:** solvent accessible surface area; structural bioinformatics;
@@ -95,8 +110,9 @@ Suggested description:
 > area analysis engine for structural bioinformatics workflows. The archive
 > includes the DuckDB benchmark evidence database, generated summary tables,
 > rendered manuscript figures, benchmark manifests, scripts, schemas, pinned
-> environment metadata used to reproduce the reported analyses, and the workflow
-> files and per-model delta-SASA results of the AFDB dimer workflow demonstration.
+> environment metadata used to reproduce the reported analyses, the workflow
+> files and per-model delta-SASA results of the AFDB dimer workflow demonstration,
+> and the polar/apolar SASA tables of the zsasa website's SASA explorer.
 
 ## Archive profiles
 
@@ -138,6 +154,7 @@ The archive is written as one tarball per part, each rooted at `zsasa-benchmarks
 | `zsasa-benchmarks-figures.tar.gz` | `results/figures/` |
 | `zsasa-benchmarks-database.tar.gz` | `results/benchmark.duckdb` |
 | `zsasa-benchmarks-afdb-dimers.tar.gz` | `workflows/afdb-dimers/` |
+| `zsasa-benchmarks-sasa-explorer.tar.gz` | `workflows/sasa-explorer/` |
 | `zsasa-benchmarks-raw-runs.tar.gz` | `results/full_rerun/` (full profile only) |
 | `zsasa-benchmarks-code-and-tables.tar.gz` | everything else |
 
@@ -171,8 +188,8 @@ The token is read from `ZENODO_TOKEN` or from the terminal and needs the
 
 ## Published DOI
 
-The curated benchmark archive DOI for `zsasa` v0.12.1 is [10.5281/zenodo.23893502](https://doi.org/10.5281/zenodo.23893502) (revision 2).
-Revision 1 remains available as [10.5281/zenodo.23794793](https://doi.org/10.5281/zenodo.23794793), the first v0.12.1 archive remains available as [10.5281/zenodo.23788710](https://doi.org/10.5281/zenodo.23788710), the v0.9.0 archive remains available as [10.5281/zenodo.23306698](https://doi.org/10.5281/zenodo.23306698) (revision 2), [10.5281/zenodo.23184113](https://doi.org/10.5281/zenodo.23184113) (revision 1) and [10.5281/zenodo.23175149](https://doi.org/10.5281/zenodo.23175149), and the `zsasa` v0.6.0 archive as [10.5281/zenodo.20577561](https://doi.org/10.5281/zenodo.20577561).
+The curated benchmark archive DOI for `zsasa` v0.12.1 is [10.5281/zenodo.23898582](https://doi.org/10.5281/zenodo.23898582) (revision 3).
+Revision 2 remains available as [10.5281/zenodo.23893502](https://doi.org/10.5281/zenodo.23893502), revision 1 remains available as [10.5281/zenodo.23794793](https://doi.org/10.5281/zenodo.23794793), the first v0.12.1 archive remains available as [10.5281/zenodo.23788710](https://doi.org/10.5281/zenodo.23788710), the v0.9.0 archive remains available as [10.5281/zenodo.23306698](https://doi.org/10.5281/zenodo.23306698) (revision 2), [10.5281/zenodo.23184113](https://doi.org/10.5281/zenodo.23184113) (revision 1) and [10.5281/zenodo.23175149](https://doi.org/10.5281/zenodo.23175149), and the `zsasa` v0.6.0 archive as [10.5281/zenodo.20577561](https://doi.org/10.5281/zenodo.20577561).
 
 For future updates, update the DOI and version metadata in this repository,
 rebuild the parts, and upload them to a new Zenodo version as described above.
