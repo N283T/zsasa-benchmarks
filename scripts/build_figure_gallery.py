@@ -86,27 +86,17 @@ def figure_cards(
         ).lower()
         svg_path = counterpart(relative_png, "svg")
         pdf_path = counterpart(relative_png, "pdf")
-        links = [
-            f'<a href="{html.escape(relative_png.as_posix())}" target="_blank">PNG</a>'
-        ]
+        links = [f'<a href="{html.escape(relative_png.as_posix())}" target="_blank">PNG</a>']
         if figures_dir.joinpath(svg_path).exists():
-            links.append(
-                f'<a href="{html.escape(svg_path.as_posix())}" target="_blank">SVG</a>'
-            )
+            links.append(f'<a href="{html.escape(svg_path.as_posix())}" target="_blank">SVG</a>')
         if figures_dir.joinpath(pdf_path).exists():
-            links.append(
-                f'<a href="{html.escape(pdf_path.as_posix())}" target="_blank">PDF</a>'
-            )
+            links.append(f'<a href="{html.escape(pdf_path.as_posix())}" target="_blank">PDF</a>')
 
         context_html = (
-            f'\n          <span class="context">{html.escape(context)}</span>'
-            if context
-            else ""
+            f'\n          <span class="context">{html.escape(context)}</span>' if context else ""
         )
         story_badge = '<span class="story-badge">STORY</span>' if is_story else ""
-        working_badge = (
-            '<span class="working-badge">WORKING</span>' if is_working else ""
-        )
+        working_badge = '<span class="working-badge">WORKING</span>' if is_working else ""
         cards.append(
             f"""
       <article class="figure-card"
@@ -122,7 +112,7 @@ def figure_cards(
         </button>
         <div class="metadata"><div class="badges">{working_badge}{story_badge}</div>{context_html}
           <strong>{html.escape(label)}</strong>
-          <span class="formats">{' · '.join(links)}</span>
+          <span class="formats">{" · ".join(links)}</span>
         </div>
       </article>"""
         )
@@ -130,9 +120,7 @@ def figure_cards(
     return cards, counts
 
 
-def build_html(
-    figures_dir: Path, story_paths: set[str], working_paths: set[str]
-) -> str:
+def build_html(figures_dir: Path, story_paths: set[str], working_paths: set[str]) -> str:
     cards, counts = figure_cards(figures_dir, story_paths, working_paths)
     story_count = len(story_paths)
     working_count = len(working_paths)
@@ -288,13 +276,13 @@ def build_html(
         <button type="button" data-group="all" aria-pressed="true">all ({len(cards)})</button>
         <button type="button" data-group="working">working ({working_count})</button>
         <button type="button" data-group="story">story ({story_count})</button>
-        {' '.join(group_buttons)}
+        {" ".join(group_buttons)}
       </div>
     </div>
     <p id="status">Showing {len(cards)} figures</p>
   </header>
   <main id="gallery">
-    {''.join(cards)}
+    {"".join(cards)}
   </main>
   <dialog id="viewer">
     <div class="dialog-head">
@@ -388,9 +376,7 @@ def main() -> None:
     figures_dir = args.figures_dir.resolve()
     output = args.output.resolve()
     story_file = (
-        args.story_file.resolve()
-        if args.story_file
-        else figures_dir.joinpath(STORY_FILE_NAME)
+        args.story_file.resolve() if args.story_file else figures_dir.joinpath(STORY_FILE_NAME)
     )
     working_file = (
         args.working_file.resolve()

@@ -132,9 +132,7 @@ def command_variants(*, tool: str, n_points: int, settings: dict[str, Any]) -> l
                 corrected = str(bitmask_variant).endswith("_corrected")
                 variants.append(
                     {
-                        "name": (
-                            f"{tool}_{precision}_{bitmask_variant}_{threads}t_{n_points}p"
-                        ),
+                        "name": (f"{tool}_{precision}_{bitmask_variant}_{threads}t_{n_points}p"),
                         "tool": tool,
                         "precision": str(precision),
                         "threads": threads,
@@ -242,9 +240,7 @@ def main() -> None:
             "stride": int(settings["stride"]),
             "threads": int(settings["threads"]),
             "cli_precisions": [str(value) for value in settings["cli_precisions"]],
-            "cli_bitmask_variants": [
-                str(value) for value in settings["cli_bitmask_variants"]
-            ],
+            "cli_bitmask_variants": [str(value) for value in settings["cli_bitmask_variants"]],
             "classifier": str(settings["classifier"]),
             "include_hydrogens": bool(settings["include_hydrogens"]),
             "zsasa_binary": str(zsasa_binary),

@@ -75,6 +75,18 @@ def test_freesasa_batch_command() -> None:
     ]
 
 
+def test_freesasa_batch_command_lee_richards() -> None:
+    cmd = freesasa_batch_command(
+        binary=Path("/bin/freesasa_batch"),
+        input_dir=Path("pdbs"),
+        output_dir=Path("out"),
+        n_points=20,
+        threads=10,
+        lee_richards=True,
+    )
+    assert cmd[-2:] == ["--n-points=20", "--algorithm=lr"]
+
+
 def test_freesasa_single_command_with_timing() -> None:
     cmd = freesasa_single_command(
         binary=Path("/bin/freesasa"),

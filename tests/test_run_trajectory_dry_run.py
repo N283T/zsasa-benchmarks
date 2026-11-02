@@ -120,9 +120,7 @@ def test_run_trajectory_dry_run_outputs_native_hyperfine_commands() -> None:
     ]
     assert output_base.joinpath("hyperfine").is_dir()
     assert output_base.joinpath("raw", "5vz0_A_protein", "zig").is_dir()
-    assert output_base.joinpath(
-        "raw", "5vz0_A_protein", "zig_bitmask", "f64", "per_frame"
-    ).is_dir()
+    assert output_base.joinpath("raw", "5vz0_A_protein", "zig_bitmask", "f64", "per_frame").is_dir()
 
 
 def test_run_trajectory_rejects_disabled_full_rerun_flags(tmp_path: Path) -> None:
@@ -248,6 +246,4 @@ def test_trajectory_tools_module_help_is_available() -> None:
 
 def test_explicit_zsasa_binary_takes_precedence_over_environment() -> None:
     with patch.dict(os.environ, {"ZSASA_CLI": "/tmp/zsasa-0.6.0"}):
-        assert resolve_zsasa_binary(Path("/tmp/zsasa-0.9.0")) == Path(
-            "/tmp/zsasa-0.9.0"
-        )
+        assert resolve_zsasa_binary(Path("/tmp/zsasa-0.9.0")) == Path("/tmp/zsasa-0.9.0")

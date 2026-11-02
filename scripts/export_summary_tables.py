@@ -161,6 +161,10 @@ CSV_DESCRIPTIONS = {
     "validation_pairwise_summary.csv": (
         "Pairwise SASA agreement against FreeSASA/MDTraj references."
     ),
+    "validation_lr_totals.csv": (
+        "Per-structure Lee-Richards totals of zsasa and the FreeSASA reference "
+        "(written by scripts/export_lr_totals.py)."
+    ),
     "comparator_ratios.csv": (
         "Long-format runtime and RSS ratios used by the comparator-ratio figures."
     ),
@@ -756,8 +760,7 @@ def export_md_summary(rows: list[dict[str, Any]], out_dir: Path) -> list[Path]:
     native = [
         row
         for row in all_md_rows
-        if row["run_set"] == MD_RUN_SET
-        and row["tool_id"] in {"zig", "zig_bitmask"}
+        if row["run_set"] == MD_RUN_SET and row["tool_id"] in {"zig", "zig_bitmask"}
     ]
     baselines = {
         (row["dataset_id"], row["variant"], row["run_variant"]): row
@@ -1073,6 +1076,10 @@ def export_comparator_ratios(rows: list[dict[str, Any]], out_dir: Path) -> list[
 
 def write_index(out_dir: Path, outputs: list[Path]) -> Path:
     rows = []
+    # validation_lr_totals.csv is written by scripts/export_lr_totals.py, not from the database.
+    lr_totals = out_dir.joinpath("validation_lr_totals.csv")
+    if lr_totals.is_file() and lr_totals not in outputs:
+        outputs = [*outputs, lr_totals]
     for path in sorted(outputs):
         with path.open(newline="", encoding="utf-8") as handle:
             row_count = max(sum(1 for _line in handle) - 1, 0)

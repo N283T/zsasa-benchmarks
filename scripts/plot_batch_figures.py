@@ -584,9 +584,7 @@ def ecoli_story_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [row for row in ecoli_comparison_rows(rows) if row["variant"] in selected]
 
 
-def plot_ecoli_throughput_scaling_story(
-    rows: list[dict[str, Any]], out_dir: Path
-) -> list[Path]:
+def plot_ecoli_throughput_scaling_story(rows: list[dict[str, Any]], out_dir: Path) -> list[Path]:
     """Show throughput scaling for the E. coli story variants."""
     selected = ecoli_story_rows(rows)
     grouped = group_by_variant(selected)
@@ -627,9 +625,7 @@ def ecoli_story_label_style(variant: str) -> dict[str, Any]:
     return {"xytext": (8, 0), "ha": "left", "va": "center"}
 
 
-def plot_ecoli_performance_memory_story(
-    rows: list[dict[str, Any]], out_dir: Path
-) -> list[Path]:
+def plot_ecoli_performance_memory_story(rows: list[dict[str, Any]], out_dir: Path) -> list[Path]:
     """Show the E. coli 10-thread throughput-memory trade-off."""
     return plot_selected_t10_performance_memory(
         rows,
@@ -676,9 +672,7 @@ def plot_selected_t10_performance_memory(
     return save_figure(fig, out_dir, name)
 
 
-def plot_human_performance_memory_map(
-    rows: list[dict[str, Any]], out_dir: Path
-) -> list[Path]:
+def plot_human_performance_memory_map(rows: list[dict[str, Any]], out_dir: Path) -> list[Path]:
     """Show the Human PDB 10-thread throughput-memory map."""
     return plot_selected_t10_performance_memory(
         rows,
@@ -748,11 +742,7 @@ def plot_swissprot_overcommit_performance_memory(
                 fontsize=8,
                 fontweight="bold",
             )
-        label_row = (
-            variant_rows[1]
-            if variant == "zsasa_0_12_1_bitmask_f32"
-            else variant_rows[-1]
-        )
+        label_row = variant_rows[1] if variant == "zsasa_0_12_1_bitmask_f32" else variant_rows[-1]
         ax.annotate(
             labels[variant],
             (label_row["memory_mean_mb"], label_row["throughput"]),
@@ -799,8 +789,7 @@ def plot_swissprot_overcommit_performance_memory(
         fontsize=8,
     )
     ax.set_title(
-        "SwissProt AFDB throughput and memory under thread overcommit\n"
-        "(passive disk I/O policy)"
+        "SwissProt AFDB throughput and memory under thread overcommit\n(passive disk I/O policy)"
     )
     ax.set_xlabel("Peak RSS (MiB)")
     ax.set_ylabel(r"Throughput (structures s$^{-1}$)")
@@ -921,9 +910,7 @@ def human_cif_t20_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 def row_for(rows: list[dict[str, Any]], variant: str, threads: int) -> dict[str, Any]:
     """Return one reporting row for a variant and worker count."""
-    return next(
-        row for row in rows if row["variant"] == variant and row["threads"] == threads
-    )
+    return next(row for row in rows if row["variant"] == variant and row["threads"] == threads)
 
 
 def plot_human_format_ranking(
@@ -1009,9 +996,7 @@ def plot_human_cif_recovery(rows: list[dict[str, Any]], out_dir: Path) -> list[P
     fig, ax = plt.subplots(figsize=(7.6, 4.6), layout="constrained")
     ax.axhspan(1.5, 3.5, color="#f6c85f", alpha=0.07, zorder=0)
     ax.axhspan(-0.5, 1.5, color="#e67e22", alpha=0.05, zorder=0)
-    for y, (_label, variant, color, marker) in zip(
-        y_positions, configurations, strict=True
-    ):
+    for y, (_label, variant, color, marker) in zip(y_positions, configurations, strict=True):
         row = row_for(rows, variant, 10)
         ax.errorbar(
             row["throughput"],
@@ -1404,9 +1389,7 @@ def plot_human_cif_parser_io_metric(
         "read": ["zsasa_0_12_1_generic_read", "zsasa_0_12_1_af_fast_read"],
         "mmap": ["zsasa_0_12_1_generic_mmap", "zsasa_0_12_1_af_fast_mmap"],
     }
-    expected_variants = {
-        variant for variants in parser_variants.values() for variant in variants
-    }
+    expected_variants = {variant for variants in parser_variants.values() for variant in variants}
     if not expected_variants.issubset(selected):
         return []
 
@@ -1473,9 +1456,7 @@ def human_cif_t20_matrix(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]
     return {row["variant"]: row for row in human_cif_t20_rows(rows)}
 
 
-def plot_human_cif_performance_memory_map(
-    rows: list[dict[str, Any]], out_dir: Path
-) -> list[Path]:
+def plot_human_cif_performance_memory_map(rows: list[dict[str, Any]], out_dir: Path) -> list[Path]:
     """Show parser and input-I/O effects in performance-memory space."""
     selected = human_cif_t20_matrix(rows)
     paths = {
@@ -1688,8 +1669,7 @@ def plot_human_cif_parser_effect(rows: list[dict[str, Any]], out_dir: Path) -> l
     ax.set_yticks([0, 1], ["Peak RSS", "Throughput"])
     ax.set_xlabel("Change with AF-model fast path relative to generic parser (%)")
     ax.set_title(
-        "Human AFDB mmCIF AF-model fast-path effect\n"
-        "(23,586 structures, 128 points, 20 workers)"
+        "Human AFDB mmCIF AF-model fast-path effect\n(23,586 structures, 128 points, 20 workers)"
     )
     ax.grid(axis="y", visible=False)
     ax.legend(loc="center right", frameon=False)
@@ -1984,11 +1964,7 @@ def plot_t10_comparator_ratio_for_dataset(
             "label": "vs Lahuta bitmask",
         },
     }
-    comparators = [
-        comparator
-        for comparator in BATCH_COMPARATOR_VARIANTS
-        if comparator in selected
-    ]
+    comparators = [comparator for comparator in BATCH_COMPARATOR_VARIANTS if comparator in selected]
     height = 0.22 if len(comparators) > 2 else 0.28
     offsets = np.linspace(0.25, -0.25, len(comparators))
     sd_key = "stddev_s" if metric == "mean_s" else "memory_stddev_mb"
@@ -2031,9 +2007,7 @@ def plot_t10_comparator_ratio_for_dataset(
             edgecolor=comparator_styles[comparator]["edgecolor"],
             hatch=comparator_styles[comparator]["hatch"],
         )
-        for bar, value, uncertainty in zip(
-            bars, values, uncertainties, strict=True
-        ):
+        for bar, value, uncertainty in zip(bars, values, uncertainties, strict=True):
             if not np.isfinite(value):
                 continue
             below_parity = value < 1.0
@@ -2057,9 +2031,7 @@ def plot_t10_comparator_ratio_for_dataset(
     ]
     if name_metric == "runtime_speedup":
         ax.set_xlim(0.0, max(endpoints) * 1.14)
-        ratio_ticks = [
-            tick for tick in ax.get_xticks() if 0 <= tick <= ax.get_xlim()[1]
-        ]
+        ratio_ticks = [tick for tick in ax.get_xticks() if 0 <= tick <= ax.get_xlim()[1]]
         ax.set_xticks(sorted({*ratio_ticks, 1.0}))
     else:
         ax.set_xlim(0.8, max(endpoints) * 1.16)
@@ -2326,9 +2298,7 @@ def main() -> None:
             generate_human_cif(
                 human_cif_rows, human_rows, args.out_dir.joinpath("batch_human_cif")
             ),
-            generate_swissprot(
-                swissprot_rows, args.out_dir.joinpath("batch_swissprot")
-            ),
+            generate_swissprot(swissprot_rows, args.out_dir.joinpath("batch_swissprot")),
             generate_t10_comparison(
                 ecoli_rows, human_rows, args.out_dir.joinpath("batch_t10_comparison")
             ),

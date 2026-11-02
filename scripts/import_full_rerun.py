@@ -98,9 +98,7 @@ def parse_zsasa_jsonl_total(line: str) -> tuple[str, float, int | None]:
 
 
 def parse_validation_zsasa_name(filename: str) -> dict[str, Any]:
-    sr = re.fullmatch(
-        r"sr_(f32|f64)_(standard|bitmask|bitmask_corrected)_(\d+)\.jsonl", filename
-    )
+    sr = re.fullmatch(r"sr_(f32|f64)_(standard|bitmask|bitmask_corrected)_(\d+)\.jsonl", filename)
     if sr:
         precision, variant_name, n_points = sr.groups()
         mode = "bitmask" if variant_name.startswith("bitmask") else "standard"

@@ -12,12 +12,8 @@ def test_command_variants_separate_multi_thread_raw_outputs() -> None:
     }
     dataset = {"id": "trajectory"}
 
-    native = command_variants(
-        tool="zig", dataset=dataset, n_points=128, settings=settings
-    )
-    bitmask = command_variants(
-        tool="zig_bitmask", dataset=dataset, n_points=128, settings=settings
-    )
+    native = command_variants(tool="zig", dataset=dataset, n_points=128, settings=settings)
+    bitmask = command_variants(tool="zig_bitmask", dataset=dataset, n_points=128, settings=settings)
     wrapper = command_variants(
         tool="zsasa_mdtraj", dataset=dataset, n_points=128, settings=settings
     )

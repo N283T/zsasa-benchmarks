@@ -61,9 +61,7 @@ def test_parse_trajectory_bitmask_variant() -> None:
 
 
 def test_parse_trajectory_benchmark_bitmask_variant() -> None:
-    assert parse_trajectory_record_name(
-        "5vz0_A_protein_zig_bitmask_f32_per_frame_10t_100p"
-    ) == {
+    assert parse_trajectory_record_name("5vz0_A_protein_zig_bitmask_f32_per_frame_10t_100p") == {
         "dataset_id": "5vz0_A_protein",
         "tool_id": "zig_bitmask",
         "algorithm": "sr",

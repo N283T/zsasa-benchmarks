@@ -266,10 +266,7 @@ def main() -> None:
 
     trajectory = read_toml(ROOT.joinpath("manifests/trajectory.toml"))
     trajectory_full = trajectory.get("full_rerun", {})
-    if any(
-        tool in trajectory_full.get("default_tools", [])
-        for tool in ["mdtraj", "mdsasa_bolt"]
-    ):
+    if any(tool in trajectory_full.get("default_tools", []) for tool in ["mdtraj", "mdsasa_bolt"]):
         fail("zsasa 0.9 trajectory refresh must reuse unchanged comparator results")
     if trajectory_full.get("zsasa_tool") != "zsasa_0_9_0":
         fail("trajectory full_rerun must use zsasa 0.9.0")
@@ -323,9 +320,7 @@ def main() -> None:
         if pdb_refresh.get("dataset", {}).get("id") != dataset_id:
             fail(f"{manifest_name} must use {dataset_id}")
         expected_threads = (
-            [1, 4, 8, 10, 20, 40]
-            if manifest_name == "batch-ecoli-zsasa-0.9.toml"
-            else [10, 20, 40]
+            [1, 4, 8, 10, 20, 40] if manifest_name == "batch-ecoli-zsasa-0.9.toml" else [10, 20, 40]
         )
         expected_pdb_jobs = [
             {

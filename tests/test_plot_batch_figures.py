@@ -205,7 +205,6 @@ def test_row_for_selects_variant_and_worker_count() -> None:
     assert row_for(rows, "zsasa_af_fast_read", 40)["value"] == "forty"
 
 
-
 def test_batch_comparison_label_style_places_selected_labels() -> None:
     from scripts.plot_batch_figures import batch_comparison_label_style
 

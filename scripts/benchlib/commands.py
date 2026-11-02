@@ -109,14 +109,19 @@ def freesasa_batch_command(
     output_dir: Path,
     n_points: int,
     threads: int,
+    lee_richards: bool = False,
 ) -> list[str]:
-    return [
+    cmd = [
         str(binary),
         str(input_dir),
         str(output_dir),
         f"--n-threads={threads}",
         f"--n-points={n_points}",
     ]
+    if lee_richards:
+        # The wrapper reads --n-points as the slice count for Lee-Richards.
+        cmd.append("--algorithm=lr")
+    return cmd
 
 
 def freesasa_single_command(

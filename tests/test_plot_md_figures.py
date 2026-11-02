@@ -156,14 +156,10 @@ def test_zsasa_detail_rows_keeps_only_5vz0_native_overcommit_paths() -> None:
             row["bitmask_variant"],
         )
         for row in selected
-    } == {
-        ("5vz0_A_protein", "zsasa_cli_f64", threads, None)
-        for threads in (10, 20, 40)
-    } | {
+    } == {("5vz0_A_protein", "zsasa_cli_f64", threads, None) for threads in (10, 20, 40)} | {
         ("5vz0_A_protein", "zsasa_cli_bitmask_f32", threads, "single_corrected")
         for threads in (10, 20, 40)
     }
-
 
 
 def test_marker_for_backend_families() -> None:
@@ -229,7 +225,6 @@ def test_md_display_names_omit_xtc_suffix() -> None:
     assert display_name("zsasa_mdanalysis_bitmask") == "zsasa + MDAnalysis bitmask"
 
 
-
 def test_plot_rss_grid_uses_legend_only_for_unlabeled_linear_plot(tmp_path) -> None:
     import matplotlib.pyplot as plt
     from scripts.plot_md_figures import plot_throughput_vs_rss_grid
@@ -257,7 +252,6 @@ def test_plot_rss_grid_uses_legend_only_for_unlabeled_linear_plot(tmp_path) -> N
         plt.Figure.legend = original_legend  # type: ignore[method-assign]
 
     assert len(legend_calls) == 1
-
 
 
 def test_log_rss_plot_has_plain_title(tmp_path) -> None:
@@ -316,9 +310,7 @@ def test_main_generates_only_log_rss_tradeoff(monkeypatch, tmp_path) -> None:
     monkeypatch.setattr(module, "load_md_correction_accuracy", lambda _db: [])
     monkeypatch.setattr(module, "plot_bar_grid", lambda *args, **kwargs: [])
     monkeypatch.setattr(module, "plot_cpu_utilization_grid", lambda *_args, **_kwargs: [])
-    monkeypatch.setattr(
-        module, "plot_md_performance_memory_story", lambda *_args, **_kwargs: []
-    )
+    monkeypatch.setattr(module, "plot_md_performance_memory_story", lambda *_args, **_kwargs: [])
     monkeypatch.setattr(
         module, "plot_md_zsasa_performance_memory_detail", lambda *_args, **_kwargs: []
     )
@@ -329,9 +321,7 @@ def test_main_generates_only_log_rss_tradeoff(monkeypatch, tmp_path) -> None:
         module, "plot_md_comparator_ratios_by_trajectory", lambda *_args, **_kwargs: []
     )
     monkeypatch.setattr(module, "plot_md_overcommit_tradeoff", lambda *_args, **_kwargs: [])
-    monkeypatch.setattr(
-        module, "plot_md_correction_runtime_effect", lambda *_args, **_kwargs: []
-    )
+    monkeypatch.setattr(module, "plot_md_correction_runtime_effect", lambda *_args, **_kwargs: [])
     monkeypatch.setattr(module, "write_index", lambda out_dir, outputs: out_dir / "index.md")
 
     def recording_rss_grid(_rows, _out_dir, *, log_x=False):  # type: ignore[no-untyped-def]

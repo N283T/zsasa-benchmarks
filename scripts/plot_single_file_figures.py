@@ -279,9 +279,7 @@ def t10_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [row for row in rows if row["threads"] == 10]
 
 
-def single_story_rows(
-    rows: list[dict[str, Any]], format_label: str
-) -> list[dict[str, Any]]:
+def single_story_rows(rows: list[dict[str, Any]], format_label: str) -> list[dict[str, Any]]:
     """Select zsasa f64 and external tools at 10 threads for one format."""
     return [
         row
@@ -319,9 +317,7 @@ def legend_handles(variants: list[str]) -> list[plt.Line2D]:
     ]
 
 
-def plot_single_runtime_vs_atoms_story(
-    rows: list[dict[str, Any]], out_dir: Path
-) -> list[Path]:
+def plot_single_runtime_vs_atoms_story(rows: list[dict[str, Any]], out_dir: Path) -> list[Path]:
     """Plot PDB and mmCIF runtime scaling as separate figures."""
     styles = {
         "zsasa_f64": {"marker": "o"},
@@ -382,9 +378,7 @@ def plot_single_runtime_vs_atoms_story(
         )
         ax.grid(linewidth=0.7, alpha=0.3)
         suffix = "story" if format_label == "PDB" else "si"
-        outputs.extend(
-            save_figure(fig, out_dir, f"single_{slug}_runtime_vs_atoms_{suffix}")
-        )
+        outputs.extend(save_figure(fig, out_dir, f"single_{slug}_runtime_vs_atoms_{suffix}"))
     return outputs
 
 
@@ -437,9 +431,7 @@ def plot_case_studies(
             zorder=3,
         )
         chain_instances = max(
-            int(row["expected_chains"])
-            for row in rows
-            if row["structure_name"] == structure_name
+            int(row["expected_chains"]) for row in rows if row["structure_name"] == structure_name
         )
         chain_label = "chain" if chain_instances == 1 else "chain instances"
         ax.set_title(
@@ -487,9 +479,7 @@ def plot_case_studies(
     return save_figure(fig, out_dir, output_name)
 
 
-def plot_pdb_case_studies_story(
-    rows: list[dict[str, Any]], out_dir: Path
-) -> list[Path]:
+def plot_pdb_case_studies_story(rows: list[dict[str, Any]], out_dir: Path) -> list[Path]:
     """Show component timing for the selected PDB cases."""
     return plot_case_studies(
         rows,
@@ -500,9 +490,7 @@ def plot_pdb_case_studies_story(
     )
 
 
-def plot_mmcif_case_studies_si(
-    rows: list[dict[str, Any]], out_dir: Path
-) -> list[Path]:
+def plot_mmcif_case_studies_si(rows: list[dict[str, Any]], out_dir: Path) -> list[Path]:
     """Show an mmCIF counterpart to the selected PDB cases for SI."""
     return plot_case_studies(
         rows,
@@ -637,11 +625,7 @@ def plot_comparator_ratio_grid(
     for ax, structure_id in zip(flat_axes, structures, strict=False):
         items = grouped[structure_id]
         by_variant = {row["variant"]: row for row in items}
-        zsasa_items = [
-            by_variant[variant]
-            for variant in ZSASA_VARIANTS
-            if variant in by_variant
-        ]
+        zsasa_items = [by_variant[variant] for variant in ZSASA_VARIANTS if variant in by_variant]
         x = np.arange(len(zsasa_items))
         width = 0.36
         all_values: list[float] = []
@@ -650,10 +634,7 @@ def plot_comparator_ratio_grid(
             if baseline is None:
                 continue
             values = [
-                baseline[metric] / row[metric]
-                if row[metric] > 0
-                else np.nan
-                for row in zsasa_items
+                baseline[metric] / row[metric] if row[metric] > 0 else np.nan for row in zsasa_items
             ]
             all_values.extend(value for value in values if value > 0)
             positions = x + (index - (len(COMPARATOR_VARIANTS) - 1) / 2) * width
