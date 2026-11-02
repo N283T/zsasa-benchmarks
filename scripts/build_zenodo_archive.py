@@ -62,7 +62,7 @@ GENERATED_DIRECTORIES = {
 PROFILE_CHOICES = ("curated", "full")
 
 # zsasa release and archive revision; recorded in the manifest.
-ARCHIVE_VERSION = "v0.12.1-r2"
+ARCHIVE_VERSION = "v0.12.1-r3"
 
 # Archive parts, matched on leading path components in order. Large parts that rarely
 # change are kept apart from the small, frequently changing code and tables.
