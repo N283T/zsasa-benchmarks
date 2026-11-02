@@ -224,7 +224,8 @@ def clean_structure_to_cif(
                 f"but structure cleaning selected {n_atoms}"
             )
         cleaned_atom_site = {
-            tag: [values[index] for index in keep_indices] for tag, values in atom_site.items()
+            tag: [values[index] for index in keep_indices]
+            for tag, values in atom_site.items()
         }
         block.set_mmcif_category("_atom_site.", cleaned_atom_site, raw=True)
     else:
@@ -232,7 +233,9 @@ def clean_structure_to_cif(
         block = document.add_new_block(structure_id)
         block.set_pair("_entry.id", structure_id)
         generated = structure.make_mmcif_document().sole_block()
-        block.set_mmcif_category("_atom_site.", generated.get_mmcif_category("_atom_site."))
+        block.set_mmcif_category(
+            "_atom_site.", generated.get_mmcif_category("_atom_site.")
+        )
     assembly_gen = block.find_mmcif_category("_pdbx_struct_assembly_gen.")
     if assembly_gen:
         assembly_gen.erase()

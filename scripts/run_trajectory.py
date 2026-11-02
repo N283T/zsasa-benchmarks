@@ -154,7 +154,9 @@ def threads_for_dataset(dataset: dict[str, Any], settings: dict[str, Any]) -> li
     return [int(value) for value in raw_threads]
 
 
-def threads_for_tool(tool: str, dataset: dict[str, Any], settings: dict[str, Any]) -> list[int]:
+def threads_for_tool(
+    tool: str, dataset: dict[str, Any], settings: dict[str, Any]
+) -> list[int]:
     """Return the configured thread matrix, with an optional wrapper subset."""
     threads = threads_for_dataset(dataset, settings)
     if tool.startswith("zsasa_") and "wrapper_threads" in settings:
@@ -192,7 +194,9 @@ def command_variants(
         for thread in threads:
             for precision in settings["cli_precisions"]:
                 for bitmask_variant in settings["cli_bitmask_variants"]:
-                    lut_mode = str(bitmask_variant).removesuffix("_corrected").replace("_", "-")
+                    lut_mode = str(bitmask_variant).removesuffix("_corrected").replace(
+                        "_", "-"
+                    )
                     corrected = str(bitmask_variant).endswith("_corrected")
                     variants.append(
                         {
@@ -346,9 +350,13 @@ def main() -> None:
             "n_points": int(settings["n_points"]),
             "stride": int(settings["stride"]),
             "threads": [int(value) for value in settings["threads"]],
-            "wrapper_threads": [int(value) for value in settings.get("wrapper_threads", [])],
+            "wrapper_threads": [
+                int(value) for value in settings.get("wrapper_threads", [])
+            ],
             "cli_precisions": [str(value) for value in settings["cli_precisions"]],
-            "cli_bitmask_variants": [str(value) for value in settings["cli_bitmask_variants"]],
+            "cli_bitmask_variants": [
+                str(value) for value in settings["cli_bitmask_variants"]
+            ],
             "classifier": str(settings["classifier"]),
             "include_hydrogens": bool(settings["include_hydrogens"]),
             "runs": int(settings["runs"]),

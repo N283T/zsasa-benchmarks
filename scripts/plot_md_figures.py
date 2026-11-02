@@ -543,7 +543,9 @@ def md_performance_story_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]
     return [row for row in rows if row["variant"] in selected]
 
 
-def plot_md_performance_memory_story(rows: list[dict[str, Any]], out_dir: Path) -> list[Path]:
+def plot_md_performance_memory_story(
+    rows: list[dict[str, Any]], out_dir: Path
+) -> list[Path]:
     """Show trajectory throughput and memory with native and wrapper paths."""
     selected = md_performance_story_rows(rows)
     grouped = group_by_dataset(selected)
@@ -625,7 +627,9 @@ def zsasa_detail_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if row["dataset_id"] != "5vz0_A_protein":
             continue
         variant = row["variant"]
-        keep_native_f64 = variant == "zsasa_cli_f64" and row["threads"] in {10, 20, 40}
+        keep_native_f64 = (
+            variant == "zsasa_cli_f64" and row["threads"] in {10, 20, 40}
+        )
         keep_corrected_bitmask = (
             variant == "zsasa_cli_bitmask_f32"
             and row["threads"] in {10, 20, 40}
@@ -800,7 +804,9 @@ def plot_md_correction_accuracy_throughput(
             yerr=row["fps_stddev"],
             color=style["color"],
             marker=style["marker"],
-            markerfacecolor=("none" if row["accuracy_key"] == "single" else style["color"]),
+            markerfacecolor=(
+                "none" if row["accuracy_key"] == "single" else style["color"]
+            ),
             markeredgewidth=1.6,
             markersize=8,
             capsize=3,
@@ -829,7 +835,8 @@ def plot_md_correction_accuracy_throughput(
         arrowprops={"arrowstyle": "->", "color": "0.35", "lw": 1.2},
     )
     ax.text(
-        (raw["mean_abs_relative_difference"] + corrected["mean_abs_relative_difference"]) / 2,
+        (raw["mean_abs_relative_difference"] + corrected["mean_abs_relative_difference"])
+        / 2,
         arrow_y + 25,
         "Correction",
         ha="center",
@@ -871,7 +878,9 @@ def _plot_md_trajectory_comparator_ratios(
         if row["dataset_id"] == dataset_id
         and row["variant"] in {*zsasa_variants, *comparator_styles}
     }
-    comparators = [comparator for comparator in comparator_styles if comparator in selected]
+    comparators = [
+        comparator for comparator in comparator_styles if comparator in selected
+    ]
     if not comparators or any(variant not in selected for variant in zsasa_variants):
         return []
 
@@ -935,7 +944,9 @@ def _plot_md_trajectory_comparator_ratios(
                 alpha=0.86,
                 zorder=3,
             )
-            for bar, ratio, uncertainty in zip(bars, ratios, uncertainties, strict=True):
+            for bar, ratio, uncertainty in zip(
+                bars, ratios, uncertainties, strict=True
+            ):
                 ax.annotate(
                     f"{ratio:.1f}×",
                     (ratio + uncertainty, bar.get_y() + bar.get_height() / 2),
@@ -950,7 +961,11 @@ def _plot_md_trajectory_comparator_ratios(
         ax.axvline(1.0, color="0.35", linestyle=":", linewidth=1.0, zorder=0)
         ax.set_xscale("log")
         ax.set_xlim(0.9, max_ratio * 1.45)
-        ticks = [tick for tick in (1.0, 10.0, 100.0, 1000.0) if tick <= max_ratio * 1.45]
+        ticks = [
+            tick
+            for tick in (1.0, 10.0, 100.0, 1000.0)
+            if tick <= max_ratio * 1.45
+        ]
         ax.set_xticks(ticks, [f"{tick:g}×" for tick in ticks])
         ax.set_yticks(y_centers, zsasa_labels)
         ax.set_xlabel(metric["xlabel"])
@@ -996,7 +1011,9 @@ def plot_md_comparator_ratios_by_trajectory(
         ("6sup_A_analysis", "md_6sup_comparator_ratios_story"),
         ("5vz0_A_protein", "md_5vz0_comparator_ratios_story"),
     ):
-        outputs.extend(_plot_md_trajectory_comparator_ratios(rows, out_dir, dataset_id, name))
+        outputs.extend(
+            _plot_md_trajectory_comparator_ratios(rows, out_dir, dataset_id, name)
+        )
     return outputs
 
 
@@ -1018,7 +1035,9 @@ def native_overcommit_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 def plot_md_overcommit_tradeoff(rows: list[dict[str, Any]], out_dir: Path) -> list[Path]:
     """Show the 40-thread response relative to the 10-thread baseline."""
     selected = native_overcommit_rows(rows)
-    by_key = {(row["dataset_id"], row["variant"], row["threads"]): row for row in selected}
+    by_key = {
+        (row["dataset_id"], row["variant"], row["threads"]): row for row in selected
+    }
     datasets = [
         dataset_id
         for dataset_id in DATASET_ORDER
@@ -1160,14 +1179,17 @@ def correction_runtime_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     ]
 
 
-def plot_md_correction_runtime_effect(rows: list[dict[str, Any]], out_dir: Path) -> list[Path]:
+def plot_md_correction_runtime_effect(
+    rows: list[dict[str, Any]], out_dir: Path
+) -> list[Path]:
     """Show the runtime effect of enabling bitmask quantization correction."""
     selected = correction_runtime_rows(rows)
     by_key = {(row["dataset_id"], row["bitmask_variant"]): row for row in selected}
     datasets = [
         dataset_id
         for dataset_id in DATASET_ORDER
-        if (dataset_id, "single") in by_key and (dataset_id, "single_corrected") in by_key
+        if (dataset_id, "single") in by_key
+        and (dataset_id, "single_corrected") in by_key
     ]
     if not datasets:
         return []
@@ -1250,11 +1272,17 @@ def plot_comparator_ratio_grid(
     }
     for ax, dataset_id in zip(axes[0], datasets, strict=True):
         by_variant = {row["variant"]: row for row in grouped[dataset_id]}
-        candidates = [variant for variant in ZSASA_MD_VARIANTS if variant in by_variant]
+        candidates = [
+            variant
+            for variant in ZSASA_MD_VARIANTS
+            if variant in by_variant
+        ]
         if "mdtraj" in by_variant and "mdsasa_bolt" in by_variant:
             candidates.append("mdsasa_bolt")
         comparators = [
-            comparator for comparator in MD_COMPARATOR_VARIANTS if comparator in by_variant
+            comparator
+            for comparator in MD_COMPARATOR_VARIANTS
+            if comparator in by_variant
         ]
         x = np.arange(len(candidates))
         width = 0.36 if len(comparators) > 1 else 0.48
@@ -1399,11 +1427,14 @@ def native_condition_label(row: dict[str, Any]) -> str:
     return f"{labels.get(option, option)} {precision}"
 
 
-def plot_native_worker_speedup_grid(rows: list[dict[str, Any]], out_dir: Path) -> list[Path]:
+def plot_native_worker_speedup_grid(
+    rows: list[dict[str, Any]], out_dir: Path
+) -> list[Path]:
     native = [
         row
         for row in rows
-        if row["run_set"] == MD_RUN_SET and row["variant"].startswith("zsasa_cli")
+        if row["run_set"] == MD_RUN_SET
+        and row["variant"].startswith("zsasa_cli")
     ]
     grouped = group_by_dataset(native)
     datasets = sorted(grouped, key=dataset_sort_key)
@@ -1415,7 +1446,9 @@ def plot_native_worker_speedup_grid(rows: list[dict[str, Any]], out_dir: Path) -
         layout="constrained",
     )
     fig.suptitle("Native trajectory worker scaling vs 10 workers")
-    for dataset_index, (ax, dataset_id) in enumerate(zip(axes[0], datasets, strict=True)):
+    for dataset_index, (ax, dataset_id) in enumerate(
+        zip(axes[0], datasets, strict=True)
+    ):
         items = grouped[dataset_id]
         by_condition: dict[tuple[str, str | None], dict[int, dict[str, Any]]] = defaultdict(dict)
         for row in items:
@@ -1528,7 +1561,11 @@ def main() -> None:
     outputs: list[Path] = []
     outputs.extend(plot_md_performance_memory_story(rows, args.out_dir))
     outputs.extend(plot_md_zsasa_performance_memory_detail(option_rows, args.out_dir))
-    outputs.extend(plot_md_correction_accuracy_throughput(option_rows, accuracy_rows, args.out_dir))
+    outputs.extend(
+        plot_md_correction_accuracy_throughput(
+            option_rows, accuracy_rows, args.out_dir
+        )
+    )
     outputs.extend(plot_md_comparator_ratios_by_trajectory(rows, args.out_dir))
     if getattr(args, "story_only", False):
         index = write_index(args.out_dir, outputs)

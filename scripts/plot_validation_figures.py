@@ -235,8 +235,8 @@ def load_validation_tables_from_db(
         }
         query = f"""
             SELECT run_id, benchmark_kind, dataset_id, tool_id, algorithm, precision, mode,
-                   {optional_columns["variant"]}, n_points, n_slices, threads, source_kind,
-                   {optional_columns["source_path"]}, {optional_columns["status"]}
+                   {optional_columns['variant']}, n_points, n_slices, threads, source_kind,
+                   {optional_columns['source_path']}, {optional_columns['status']}
             FROM benchmark_runs
             WHERE benchmark_kind = ?
               AND (? IS NULL OR algorithm = ?)
@@ -388,7 +388,9 @@ def display_name(name: str) -> str:
     match = re.fullmatch(r"zsasa_cli_bitmask_(f32|f64)_(.+)", name)
     if match:
         precision, variant = match.groups()
-        option = variant.replace("per_frame", "per-frame").replace("_corrected", " + corrected")
+        option = variant.replace("per_frame", "per-frame").replace(
+            "_corrected", " + corrected"
+        )
         return f"zsasa CLI bitmask {precision} ({option})"
     return DISPLAY_NAMES.get(name, name)
 
@@ -834,7 +836,9 @@ def plot_static_standard_and_bitmask_comparison(
     for ax, candidate, panel_title, panel_letter in zip(
         axes, candidates, panel_titles, "ab", strict=True
     ):
-        reference_values, candidate_values = paired_values(table.rows, "freesasa", candidate)
+        reference_values, candidate_values = paired_values(
+            table.rows, "freesasa", candidate
+        )
         ref = np.asarray(reference_values, dtype=float)
         obs = np.asarray(candidate_values, dtype=float)
         high = max(float(ref.max()), float(obs.max())) * 1.02
@@ -949,7 +953,9 @@ def plot_static_bitmask_error_vs_points(
     return save_figure(fig, out_dir, "static_sr_bitmask_f32_error_vs_points")
 
 
-def plot_static_bitmask_correction_vs_points(csvs: list[ResultCsv], out_dir: Path) -> list[Path]:
+def plot_static_bitmask_correction_vs_points(
+    csvs: list[ResultCsv], out_dir: Path
+) -> list[Path]:
     series = [
         ("zsasa_bitmask_f32", "Raw bitmask", "o", "-"),
         ("zsasa_bitmask_corrected_f32", "Corrected bitmask", "s", "--"),
