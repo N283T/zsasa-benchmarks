@@ -6,13 +6,18 @@ paper: source code, manifests, reproducibility configuration, DuckDB evidence,
 summary tables, and rendered figures. The `full` profile additionally includes
 selected raw full-rerun directories that are large enough to make the archive
 slow to build and upload.
+
+The archive is split into parts (see `PARTS`) that are extracted into the same
+directory. The tarballs are reproducible: an unchanged part gives a byte-identical
+file with the same name, so a new Zenodo version can import the previous files and
+replace only the parts whose checksum changed (`scripts/upload_zenodo_archive.py`).
 """
 
 from __future__ import annotations
 
 import argparse
+import gzip
 import hashlib
-import io
 import tarfile
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
@@ -56,8 +61,20 @@ GENERATED_DIRECTORIES = {
 
 PROFILE_CHOICES = ("curated", "full")
 
-# zsasa release covered by the archive; used in the default tarball name.
-ARCHIVE_VERSION = "v0.12.1-r1"
+# zsasa release and archive revision; recorded in the manifest.
+ARCHIVE_VERSION = "v0.12.1-r2"
+
+# Archive parts, matched on leading path components in order. Large parts that rarely
+# change are kept apart from the small, frequently changing code and tables.
+PARTS: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("inputs", ("datasets", "single-file-large-structure-sources")),
+    ("figures", ("results", "figures")),
+    ("database", ("results", "benchmark.duckdb")),
+    ("afdb-dimers", ("workflows", "afdb-dimers")),
+    ("raw-runs", ("results", "full_rerun")),
+)
+DEFAULT_PART = "code-and-tables"
+PART_NAMES = (*(name for name, _ in PARTS), DEFAULT_PART)
 
 
 @dataclass(frozen=True)
@@ -67,6 +84,21 @@ class ArchiveItem:
     path: Path
     relative_path: str
     size_bytes: int
+
+
+def part_of(relative_path: str) -> str:
+    """Return the archive part that holds a repository-relative path."""
+    parts = Path(relative_path).parts
+    for name, prefix in PARTS:
+        if parts[: len(prefix)] == prefix:
+            return name
+    return DEFAULT_PART
+
+
+def part_archive_name(part: str, compression: str = "gzip") -> str:
+    """Archive filename of a part; it carries no version so unchanged parts keep their name."""
+    suffix = ".tar" if compression == "none" else ".tar.gz"
+    return f"zsasa-benchmarks-{part}{suffix}"
 
 
 def _normalise_relative(path: Path, root: Path) -> str:
@@ -169,19 +201,39 @@ def format_manifest(repo_root: Path, files: Sequence[ArchiveItem], profile: str)
         "# zsasa-benchmarks Zenodo archive manifest",
         "",
         f"Generated at: {generated_at}",
+        f"Archive version: {ARCHIVE_VERSION}",
         f"Profile: {profile}",
         f"Repository root: {repo_root.resolve()}",
         f"Total files: {len(files)}",
         f"Total size: {total_size} bytes ({_human_size(total_size)})",
         "",
+        "Extract every part into the same directory to rebuild the repository layout.",
+        "",
+        "## Parts",
+        "",
+        "| Part | Archive | Files | Size |",
+        "| --- | --- | ---: | ---: |",
+    ]
+    for part in PART_NAMES:
+        members = [item for item in files if part_of(item.relative_path) == part]
+        if members:
+            size = sum(item.size_bytes for item in members)
+            lines.append(
+                f"| {part} | `{part_archive_name(part)}` | {len(members)} | {_human_size(size)} |"
+            )
+    lines += [
+        "",
         "## Files",
         "",
-        "| Path | Size bytes | SHA-256 |",
-        "| --- | ---: | --- |",
+        "| Path | Part | Size bytes | SHA-256 |",
+        "| --- | --- | ---: | --- |",
     ]
     for item in files:
         digest = sha256_file(item.path)
-        lines.append(f"| `{item.relative_path}` | {item.size_bytes} | sha256:{digest} |")
+        lines.append(
+            f"| `{item.relative_path}` | {part_of(item.relative_path)} | "
+            f"{item.size_bytes} | sha256:{digest} |"
+        )
     lines.append("")
     return "\n".join(lines)
 
@@ -204,37 +256,47 @@ def write_checksums(out_dir: Path, generated_files: Iterable[Path]) -> Path:
     return checksum_path
 
 
-def create_tarball(
-    repo_root: Path,
-    archive_path: Path,
-    files: Sequence[ArchiveItem],
-    manifest_text: str,
-    compression: str,
-) -> Path:
-    mode_by_compression = {
-        "none": "w",
-        "gzip": "w:gz",
-    }
-    mode = mode_by_compression[compression]
+def create_tarball(archive_path: Path, files: Sequence[ArchiveItem], compression: str) -> Path:
+    """Write a reproducible tarball: sorted members, fixed metadata, no gzip timestamp."""
     archive_path.parent.mkdir(parents=True, exist_ok=True)
-    with tarfile.open(archive_path, mode) as archive:
-        manifest_bytes = manifest_text.encode("utf-8")
-        manifest_info = tarfile.TarInfo("ZENODO_ARCHIVE_MANIFEST.md")
-        manifest_info.size = len(manifest_bytes)
-        manifest_info.mtime = int(datetime.now(UTC).timestamp())
-        archive.addfile(manifest_info, io.BytesIO(manifest_bytes))
-        for item in files:
-            archive.add(
-                item.path,
-                arcname=f"zsasa-benchmarks/{item.relative_path}",
-                recursive=False,
-            )
+    with archive_path.open("wb") as raw:
+        stream = (
+            gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0, compresslevel=6)
+            if compression == "gzip"
+            else raw
+        )
+        try:
+            with tarfile.open(fileobj=stream, mode="w", format=tarfile.GNU_FORMAT) as archive:
+                for item in sorted(files, key=lambda entry: entry.relative_path):
+                    info = archive.gettarinfo(
+                        item.path, arcname=f"zsasa-benchmarks/{item.relative_path}"
+                    )
+                    info.mtime = 0
+                    info.uid = info.gid = 0
+                    info.uname = info.gname = ""
+                    info.mode = 0o755 if info.mode & 0o111 else 0o644
+                    with item.path.open("rb") as handle:
+                        archive.addfile(info, handle)
+        finally:
+            if stream is not raw:
+                stream.close()
     return archive_path
 
 
-def default_archive_name(profile: str, compression: str) -> str:
-    suffix = ".tar" if compression == "none" else ".tar.gz"
-    return f"zsasa-benchmarks-{ARCHIVE_VERSION}-{profile}-zenodo{suffix}"
+def create_part_tarballs(
+    out_dir: Path, files: Sequence[ArchiveItem], compression: str
+) -> list[Path]:
+    """Write one tarball per non-empty part and return their paths."""
+    paths = []
+    for part in PART_NAMES:
+        members = [item for item in files if part_of(item.relative_path) == part]
+        if members:
+            paths.append(
+                create_tarball(
+                    out_dir.joinpath(part_archive_name(part, compression)), members, compression
+                )
+            )
+    return paths
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
@@ -264,13 +326,9 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         help="Tarball compression when --make-archive is used.",
     )
     parser.add_argument(
-        "--archive-name",
-        help=f"Archive filename. Defaults to a profile-specific {ARCHIVE_VERSION} name.",
-    )
-    parser.add_argument(
         "--make-archive",
         action="store_true",
-        help="Create the tarball in addition to the manifest and checksums.",
+        help="Create the part tarballs in addition to the manifest and checksums.",
     )
     parser.add_argument(
         "--list-files",
@@ -296,15 +354,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     generated = [manifest_path]
 
     if args.make_archive:
-        archive_name = args.archive_name or default_archive_name(args.profile, args.compression)
-        archive_path = create_tarball(
-            repo_root,
-            out_dir.joinpath(archive_name),
-            files,
-            manifest_text,
-            args.compression,
-        )
-        generated.append(archive_path)
+        generated.extend(create_part_tarballs(out_dir, files, args.compression))
 
     checksum_path = write_checksums(out_dir, generated)
     total_size = sum(item.size_bytes for item in files)
@@ -312,8 +362,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     print(f"Selected files: {len(files)}")
     print(f"Selected size: {total_size} bytes ({_human_size(total_size)})")
     print(f"Manifest: {manifest_path}")
-    if args.make_archive:
-        print(f"Archive: {generated[-1]}")
+    for path in generated[1:]:
+        print(f"Archive: {path} ({_human_size(path.stat().st_size)})")
     print(f"Checksums: {checksum_path}")
     return 0
 

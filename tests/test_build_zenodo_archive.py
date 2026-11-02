@@ -1,8 +1,14 @@
 from __future__ import annotations
 
+import tarfile
 from pathlib import Path
 
-from scripts.build_zenodo_archive import collect_archive_files, format_manifest
+from scripts.build_zenodo_archive import (
+    collect_archive_files,
+    create_part_tarballs,
+    format_manifest,
+    part_of,
+)
 
 
 def touch(path: Path, data: bytes = b"x") -> None:
@@ -81,3 +87,50 @@ def test_format_manifest_records_profile_size_and_checksums(tmp_path: Path) -> N
     assert "Total files: 1" in manifest
     assert "README.md" in manifest
     assert "sha256:" in manifest
+
+
+def test_part_of_assigns_large_stable_paths_to_their_own_parts() -> None:
+    assert part_of("datasets/single-file-large-structure-sources/3jc8.cif.gz") == "inputs"
+    assert part_of("results/figures/overview/plot.png") == "figures"
+    assert part_of("results/benchmark.duckdb") == "database"
+    assert part_of("workflows/afdb-dimers/v0.12.1/homodimers/default/results.parquet") == (
+        "afdb-dimers"
+    )
+    assert part_of("results/full_rerun/v0_6_0_full/raw.json") == "raw-runs"
+    assert part_of("results/tables/summary.csv") == "code-and-tables"
+    assert part_of("scripts/run_validation.py") == "code-and-tables"
+
+
+def test_part_tarballs_are_reproducible_and_cover_every_file(tmp_path: Path) -> None:
+    repo = tmp_path.joinpath("repo")
+    touch(repo.joinpath("README.md"), b"readme\n")
+    touch(repo.joinpath("results", "benchmark.duckdb"), b"db")
+    touch(repo.joinpath("results", "figures", "a.png"), b"png")
+    files = collect_archive_files(repo, profile="curated")
+
+    first = create_part_tarballs(tmp_path.joinpath("one"), files, "gzip")
+    for path in repo.rglob("*"):
+        path.touch()  # newer mtimes must not change the archives
+    second = create_part_tarballs(tmp_path.joinpath("two"), files, "gzip")
+
+    assert [path.name for path in first] == [
+        "zsasa-benchmarks-figures.tar.gz",
+        "zsasa-benchmarks-database.tar.gz",
+        "zsasa-benchmarks-code-and-tables.tar.gz",
+    ]
+    for a, b in zip(first, second, strict=True):
+        assert a.read_bytes() == b.read_bytes()
+    members = set()
+    for path in first:
+        with tarfile.open(path) as archive:
+            members |= set(archive.getnames())
+    assert members == {f"zsasa-benchmarks/{item.relative_path}" for item in files}
+
+
+def test_format_manifest_lists_parts(tmp_path: Path) -> None:
+    touch(tmp_path.joinpath("README.md"))
+    touch(tmp_path.joinpath("results", "benchmark.duckdb"))
+    manifest = format_manifest(tmp_path, collect_archive_files(tmp_path), profile="curated")
+
+    assert "| database | `zsasa-benchmarks-database.tar.gz` | 1 |" in manifest
+    assert "| `results/benchmark.duckdb` | database |" in manifest

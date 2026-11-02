@@ -1,12 +1,26 @@
 # Zenodo benchmark archive guide
 
-This repository is prepared for the Zenodo DOI record [10.5281/zenodo.23794793](https://doi.org/10.5281/zenodo.23794793),
-covering benchmark evidence and analysis artifacts for `zsasa` v0.12.1. It is revision 1
-of the v0.12.1 archive and supersedes the first v0.12.1 archive
+This repository is prepared for the Zenodo DOI record [10.5281/zenodo.23893502](https://doi.org/10.5281/zenodo.23893502),
+covering benchmark evidence and analysis artifacts for `zsasa` v0.12.1. It is revision 2
+of the v0.12.1 archive and supersedes revision 1
+([10.5281/zenodo.23794793](https://doi.org/10.5281/zenodo.23794793)), the first v0.12.1 archive
 ([10.5281/zenodo.23788710](https://doi.org/10.5281/zenodo.23788710)), revision 2 of the v0.9.0 archive ([10.5281/zenodo.23306698](https://doi.org/10.5281/zenodo.23306698)),
 revision 1 ([10.5281/zenodo.23184113](https://doi.org/10.5281/zenodo.23184113))
 and the first v0.9.0 archive ([10.5281/zenodo.23175149](https://doi.org/10.5281/zenodo.23175149));
 the `zsasa` v0.6.0 record is [10.5281/zenodo.20577561](https://doi.org/10.5281/zenodo.20577561).
+
+Changes in revision 2:
+
+- The archive is split into parts that are extracted into the same directory
+  (see "Build upload artifacts"), so later versions replace only the parts that
+  changed.
+- The FreeSASA 20-slice Lee-Richards reference was run again (the original
+  outputs were lost) and is kept, with the `zsasa` totals, in
+  `results/tables/validation_lr_totals.csv`. `scripts/run_validation.py` now
+  runs it with the `zsasa` Lee-Richards runs.
+- The per-atom and per-residue agreement with FreeSASA was checked again and is
+  recorded in `results/tables/validation_atom_residue_agreement.csv`.
+- No reported benchmark value changed.
 
 Changes in revision 1:
 
@@ -63,8 +77,8 @@ Changes in revision 1:
 - **Resource type:** Dataset
 - **Title:** Benchmark dataset and analysis artifacts for zsasa v0.12.1
 - **Creators:** Tsubasa Nagae
-- **Version:** v0.12.1-benchmark-archive-r1
-- **DOI:** [10.5281/zenodo.23794793](https://doi.org/10.5281/zenodo.23794793)
+- **Version:** v0.12.1-benchmark-archive-r2
+- **DOI:** [10.5281/zenodo.23893502](https://doi.org/10.5281/zenodo.23893502)
 - **Language:** English
 - **License:** Creative Commons Attribution 4.0 International (CC-BY-4.0)
 - **Keywords:** solvent accessible surface area; structural bioinformatics;
@@ -110,11 +124,26 @@ Create a manifest and checksum file for the curated profile:
 uv run python scripts/build_zenodo_archive.py --profile curated
 ```
 
-Create the curated upload tarball:
+Create the curated upload tarballs:
 
 ```bash
 uv run python scripts/build_zenodo_archive.py --profile curated --make-archive
 ```
+
+The archive is written as one tarball per part, each rooted at `zsasa-benchmarks/`:
+
+| Part | Contents |
+| --- | --- |
+| `zsasa-benchmarks-inputs.tar.gz` | `datasets/single-file-large-structure-sources/` |
+| `zsasa-benchmarks-figures.tar.gz` | `results/figures/` |
+| `zsasa-benchmarks-database.tar.gz` | `results/benchmark.duckdb` |
+| `zsasa-benchmarks-afdb-dimers.tar.gz` | `workflows/afdb-dimers/` |
+| `zsasa-benchmarks-raw-runs.tar.gz` | `results/full_rerun/` (full profile only) |
+| `zsasa-benchmarks-code-and-tables.tar.gz` | everything else |
+
+The manifest lists the part of every file. The tarballs are reproducible (sorted
+members, fixed timestamps and owners, no gzip timestamp), so a part whose files did
+not change keeps its name and checksum from one version to the next.
 
 Create a large full-profile upload tarball without gzip compression:
 
@@ -125,13 +154,25 @@ uv run python scripts/build_zenodo_archive.py \
   --make-archive
 ```
 
-Upload the generated tarball and `SHA256SUMS` from `archives/zenodo/` to Zenodo.
 `archives/` is intentionally ignored by git.
+
+To publish a new version, choose "New version" on the Zenodo record and "Import
+files" to copy the files of the previous version into the draft. Then upload from
+`archives/zenodo/`, which keeps every file whose checksum matches, replaces the
+changed ones and removes draft files that are no longer part of the archive:
+
+```bash
+uv run python scripts/upload_zenodo_archive.py <draft-id> --dry-run
+uv run python scripts/upload_zenodo_archive.py <draft-id>
+```
+
+The token is read from `ZENODO_TOKEN` or from the terminal and needs the
+`deposit:write` scope.
 
 ## Published DOI
 
-The curated benchmark archive DOI for `zsasa` v0.12.1 is [10.5281/zenodo.23794793](https://doi.org/10.5281/zenodo.23794793) (revision 1).
-The first v0.12.1 archive remains available as [10.5281/zenodo.23788710](https://doi.org/10.5281/zenodo.23788710), the v0.9.0 archive remains available as [10.5281/zenodo.23306698](https://doi.org/10.5281/zenodo.23306698) (revision 2), [10.5281/zenodo.23184113](https://doi.org/10.5281/zenodo.23184113) (revision 1) and [10.5281/zenodo.23175149](https://doi.org/10.5281/zenodo.23175149), and the `zsasa` v0.6.0 archive as [10.5281/zenodo.20577561](https://doi.org/10.5281/zenodo.20577561).
+The curated benchmark archive DOI for `zsasa` v0.12.1 is [10.5281/zenodo.23893502](https://doi.org/10.5281/zenodo.23893502) (revision 2).
+Revision 1 remains available as [10.5281/zenodo.23794793](https://doi.org/10.5281/zenodo.23794793), the first v0.12.1 archive remains available as [10.5281/zenodo.23788710](https://doi.org/10.5281/zenodo.23788710), the v0.9.0 archive remains available as [10.5281/zenodo.23306698](https://doi.org/10.5281/zenodo.23306698) (revision 2), [10.5281/zenodo.23184113](https://doi.org/10.5281/zenodo.23184113) (revision 1) and [10.5281/zenodo.23175149](https://doi.org/10.5281/zenodo.23175149), and the `zsasa` v0.6.0 archive as [10.5281/zenodo.20577561](https://doi.org/10.5281/zenodo.20577561).
 
-For future updates, create a new Zenodo version and rebuild the upload archive
-after updating DOI/version metadata in this repository.
+For future updates, update the DOI and version metadata in this repository,
+rebuild the parts, and upload them to a new Zenodo version as described above.
