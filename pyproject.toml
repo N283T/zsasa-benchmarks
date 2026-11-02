@@ -13,6 +13,7 @@ dependencies = [
   "pytest>=8.0",
   "zsasa==0.12.1",
   "gemmi>=0.7.4",
+  "zstandard>=0.25.0",
 ]
 
 [tool.ruff]

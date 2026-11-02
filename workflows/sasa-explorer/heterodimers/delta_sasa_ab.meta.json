@@ -1,0 +1,20 @@
+{
+  "name": "delta_sasa_ab",
+  "job": "delta_sasa_ab",
+  "format": "jsonl",
+  "metadata": "sidecar",
+  "jsonl": {
+    "atom_areas": false,
+    "atom_identity": false,
+    "total_area": true,
+    "decimals": 6
+  },
+  "calculation": {
+    "algorithm": "sr",
+    "n_points": 128,
+    "n_slices": 20,
+    "probe_radius": 1.4,
+    "precision": "f32",
+    "classifier": "ccd"
+  }
+}
