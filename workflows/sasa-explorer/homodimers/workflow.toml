@@ -1,0 +1,35 @@
+version = 1
+kind = "workflow"
+
+[input]
+dir = "/Users/nagaet/pdb/afdb/nvda/homodimers/9606_HUMAN/structure"
+
+[output]
+dir = "/Users/nagaet/pdb/afdb/sasa-explorer-v0.13.0/homodimers"
+format = "jsonl"
+
+[output.jsonl]
+decimals = 6
+atom_areas = false
+total_area = true
+metadata = "sidecar"
+
+[calculation]
+algorithm = "sr"
+precision = "f32"
+n_points = 128
+probe_radius = 1.4
+threads = 10
+use_bitmask = true
+polar = true
+quiet = true
+
+[classifier]
+type = "ccd"
+
+[analysis]
+type = "bsa"
+name = "delta_sasa_ab"
+partner_a = ["A"]
+partner_b = ["B"]
+level = "total"

@@ -96,6 +96,7 @@ def test_part_of_assigns_large_stable_paths_to_their_own_parts() -> None:
     assert part_of("workflows/afdb-dimers/v0.12.1/homodimers/default/results.parquet") == (
         "afdb-dimers"
     )
+    assert part_of("workflows/sasa-explorer/tables/swissprot.parquet") == "sasa-explorer"
     assert part_of("results/full_rerun/v0_6_0_full/raw.json") == "raw-runs"
     assert part_of("results/tables/summary.csv") == "code-and-tables"
     assert part_of("scripts/run_validation.py") == "code-and-tables"

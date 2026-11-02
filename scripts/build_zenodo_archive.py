@@ -71,6 +71,7 @@ PARTS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("figures", ("results", "figures")),
     ("database", ("results", "benchmark.duckdb")),
     ("afdb-dimers", ("workflows", "afdb-dimers")),
+    ("sasa-explorer", ("workflows", "sasa-explorer")),
     ("raw-runs", ("results", "full_rerun")),
 )
 DEFAULT_PART = "code-and-tables"
