@@ -15,6 +15,7 @@ CSV tables generated from `results/benchmark.duckdb` for reporting and manuscrip
 | `single_file_t10_summary.csv` | 110 | 10-thread single-file performance by structure and variant. |
 | `single_file_thread_scaling.csv` | 440 | Single-file runtime, RSS, speedup, and efficiency across thread counts. |
 | `tools.csv` | 20 | Tool metadata copied from the benchmark database. |
+| `validation_lr_totals.csv` | 4370 | Per-structure Lee-Richards totals of zsasa and the FreeSASA reference (written by scripts/export_lr_totals.py). |
 | `validation_pairwise_summary.csv` | 115 | Pairwise SASA agreement against FreeSASA/MDTraj references. |
 
 Notes:

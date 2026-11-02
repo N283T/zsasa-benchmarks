@@ -258,6 +258,7 @@ def sr_records(
 def lr_records(
     *,
     zsasa: Path,
+    freesasa_batch: Path,
     input_dir: Path,
     output_base: Path,
     slices: list[int],
@@ -282,6 +283,20 @@ def lr_records(
                     ),
                 )
             )
+        records.append(
+            CommandRecord(
+                name=f"freesasa_batch_lr_{n_slices}",
+                outputs=[output_base.joinpath("freesasa_batch", f"lr_{n_slices}")],
+                argv=freesasa_batch_command(
+                    binary=freesasa_batch,
+                    input_dir=input_dir,
+                    output_dir=output_base.joinpath("freesasa_batch", f"lr_{n_slices}"),
+                    n_points=n_slices,
+                    threads=threads,
+                    lee_richards=True,
+                ),
+            )
+        )
     return records
 
 
@@ -318,8 +333,7 @@ def build_records(
                     output_base=output_base,
                     points=[int(point) for point in run.get("points", [])],
                     variants=[
-                        str(value)
-                        for value in run.get("zsasa_variants", ["standard", "bitmask"])
+                        str(value) for value in run.get("zsasa_variants", ["standard", "bitmask"])
                     ],
                     threads=threads,
                 )
@@ -328,6 +342,7 @@ def build_records(
             records.extend(
                 lr_records(
                     zsasa=zsasa,
+                    freesasa_batch=freesasa_batch,
                     input_dir=input_dir,
                     output_base=output_base,
                     slices=[int(point) for point in run.get("points", [])],
@@ -345,6 +360,12 @@ def prepare_output_directories(*, manifest: dict[str, Any], output_base: Path) -
         if not isinstance(run, dict):
             continue
         algorithm = str(run.get("algorithm", ""))
+        if algorithm == "lr":
+            directories.extend(
+                output_base.joinpath("freesasa_batch", f"lr_{int(n_slices)}")
+                for n_slices in run.get("points", [])
+            )
+            continue
         if algorithm != "sr":
             continue
         for n_points in [int(point) for point in run.get("points", [])]:
