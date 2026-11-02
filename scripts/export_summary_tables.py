@@ -161,6 +161,10 @@ CSV_DESCRIPTIONS = {
     "validation_pairwise_summary.csv": (
         "Pairwise SASA agreement against FreeSASA/MDTraj references."
     ),
+    "validation_atom_residue_agreement.csv": (
+        "Per-atom and per-residue agreement of zsasa f64 with FreeSASA at 128 points "
+        "(written by scripts/check_residue_agreement.py)."
+    ),
     "validation_lr_totals.csv": (
         "Per-structure Lee-Richards totals of zsasa and the FreeSASA reference "
         "(written by scripts/export_lr_totals.py)."
@@ -1076,10 +1080,12 @@ def export_comparator_ratios(rows: list[dict[str, Any]], out_dir: Path) -> list[
 
 def write_index(out_dir: Path, outputs: list[Path]) -> Path:
     rows = []
-    # validation_lr_totals.csv is written by scripts/export_lr_totals.py, not from the database.
-    lr_totals = out_dir.joinpath("validation_lr_totals.csv")
-    if lr_totals.is_file() and lr_totals not in outputs:
-        outputs = [*outputs, lr_totals]
+    # These tables are written by scripts/export_lr_totals.py and
+    # scripts/check_residue_agreement.py, not from the database.
+    for name in ("validation_lr_totals.csv", "validation_atom_residue_agreement.csv"):
+        extra = out_dir.joinpath(name)
+        if extra.is_file() and extra not in outputs:
+            outputs = [*outputs, extra]
     for path in sorted(outputs):
         with path.open(newline="", encoding="utf-8") as handle:
             row_count = max(sum(1 for _line in handle) - 1, 0)

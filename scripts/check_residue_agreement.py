@@ -13,11 +13,14 @@ rounding to that precision.
 
 Usage:
     uv run scripts/check_residue_agreement.py --pdb-dir /path/to/ecoli/pdb
+
+The summary is printed and written to `results/tables/validation_atom_residue_agreement.csv`.
 """
 
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import subprocess
 from concurrent.futures import ThreadPoolExecutor
@@ -62,6 +65,9 @@ def main() -> None:
     parser.add_argument("--benchmarks-dir", type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument("--pdb-dir", type=Path, required=True)
     parser.add_argument("--workers", type=int, default=8)
+    parser.add_argument(
+        "--out", type=Path, default=Path("results/tables/validation_atom_residue_agreement.csv")
+    )
     args = parser.parse_args()
     binary = args.benchmarks_dir / "external/bin/freesasa"
 
@@ -86,15 +92,30 @@ def main() -> None:
         z_res.append(np.add.reduceat(z, starts))
         f_res.append(np.array(residues))
     print(f"structures compared: {len(rows) - skipped:,} of {len(rows):,}")
+    summary = []
     for label, z, f in (
         ("atom", np.concatenate(z_atom), np.concatenate(f_atom)),
         ("residue", np.concatenate(z_res), np.concatenate(f_res)),
     ):
         differ = int((np.round(z, 2) != np.round(f, 2)).sum())
+        max_abs = float(np.abs(z - f).max())
         print(
             f"{label}: n={len(z):,} differing at two decimals={differ:,} "
-            f"max abs difference={np.abs(z - f).max():.4f} A^2"
+            f"max abs difference={max_abs:.4f} A^2"
         )
+        summary.append(
+            {
+                "level": label,
+                "structures": len(rows) - skipped,
+                "n": len(z),
+                "differing_at_two_decimals": differ,
+                "max_abs_difference_a2": f"{max_abs:.4f}",
+            }
+        )
+    with args.out.open("w", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(summary[0]))
+        writer.writeheader()
+        writer.writerows(summary)
 
 
 if __name__ == "__main__":
