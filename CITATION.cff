@@ -30,7 +30,7 @@ references:
         given-names: Tsubasa
     repository-code: "https://github.com/N283T/zsasa"
   - type: article
-    title: "zsasa: high-throughput solvent accessible surface area analysis for structural bioinformatics"
+    title: "zsasa: a Zig-based engine for high-throughput solvent accessible surface area at proteome scale"
     authors:
       - family-names: Nagae
         given-names: Tsubasa
